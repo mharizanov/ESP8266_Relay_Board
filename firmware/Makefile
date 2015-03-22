@@ -125,7 +125,7 @@ endef
 
 .PHONY: all checkdirs clean
 
-all: checkdirs $(TARGET_OUT) $(FW_FILE_1) $(FW_FILE_2)
+all: checkdirs $(TARGET_OUT) $(FW_FILE_1) $(FW_FILE_2) $(FW_FILE_3)
 
 $(FW_FILE_1): $(TARGET_OUT) firmware
 	$(vecho) "FW $@"
@@ -135,6 +135,19 @@ $(FW_FILE_2): $(TARGET_OUT) firmware
 	$(vecho) "FW $@"
 	$(Q) $(ESPTOOL) -eo $(TARGET_OUT) $(FW_FILE_2_ARGS)
 
+$(FW_FILE_3): html/ html/config/ html/config/wifi/ html/control/ mkespfsimage/mkespfsimage
+	$(vecho) "MKEFSIMAGE $@"
+	$(vecho) "hello!"
+ifeq ($(GZIP_COMPRESSION),"yes")
+	$(Q) rm -rf html_compressed;
+		$(Q) cp -r html html_compressed;
+		$(Q) cd html_compressed; find . -type f -regex ".*/.*\.\(html\|css\|js\)" -exec sh -c "gzip -n {}; mv {}.gz {}" \;; cd ..;	
+		$(Q) cd html_compressed; find  | ../mkespfsimage/mkespfsimage > ../$(FW_FILE_3); cd ..;
+else
+		$(Q) cd html; find | ../mkespfsimage/mkespfsimage > ../$(FW_FILE_3); cd ..
+endif
+		$(Q) if [ $$(stat -c '%s' $(FW_FILE_3)) -gt $$(( 0x2E000 )) ]; then echo $(FW_FILE_3)" too big!"; false; fi
+
 $(TARGET_OUT): $(APP_AR)
 	$(vecho) "LD $@"
 	$(Q) $(LD) -L$(SDK_LIBDIR) $(LD_SCRIPT) $(LDFLAGS) -Wl,--start-group $(LIBS) $(APP_AR) -Wl,--end-group -o $@
@@ -143,18 +156,6 @@ $(APP_AR): $(OBJ)
 	$(vecho) "AR $@"
 	$(Q) $(AR) cru $@ $^
 
-ifeq ($(GZIP_COMPRESSION),"yes")
-	$(Q) rm -rf html_compressed;
-	$(Q) cp -r html html_compressed;
-	$(Q) cd html_compressed; find . -type f -regex ".*/.*\.\(html\|css\|js\)" -exec sh -c "gzip -n {}; mv {}.gz {}" \;; cd ..;
-	$(Q) cd html_compressed; find  | ../mkespfsimage/mkespfsimage > ../webpages.espfs; cd ..;
-else
-	$(Q) cd html; find | ../mkespfsimage/mkespfsimage > ../webpages.espfs; cd ..
-endif
-
-	if [ $$(stat -c '%s' webpages.espfs) -gt $$(( 0x2E000 )) ]; then echo "webpages.espfs too big!"; false; fi
-	$(ESPTOOL) -cp $(ESPPORT) -cb $(ESPBAUD) -ca 0x12000 -cf webpages.espfs -v
-	
 checkdirs: $(BUILD_DIR) $(FW_BASE)
 
 $(BUILD_DIR):
@@ -169,22 +170,12 @@ flash: $(FW_FILE_1) $(FW_FILE_2)
 	$(Q) sleep $(ESPDELAY) || true
 	$(Q) $(ESPTOOL) -cp $(ESPPORT) -cb $(ESPBAUD) -ca 0x40000 -cf firmware/0x40000.bin -v
 
-webpages.espfs: html/ html/wifi/ mkespfsimage/mkespfsimage
-ifeq ($(GZIP_COMPRESSION),"yes")
-	$(Q) rm -rf html_compressed;
-	$(Q) cp -r html html_compressed;
-	$(Q) cd html_compressed; find . -type f -regex ".*/.*\.\(html\|css\|js\)" -exec sh -c "gzip -n {}; mv {}.gz {}" \;; cd ..;
-	$(Q) cd html_compressed; find  | ../mkespfsimage/mkespfsimage > ../webpages.espfs; cd ..;
-else
-	$(Q) cd html; find | ../mkespfsimage/mkespfsimage > ../webpages.espfs; cd ..
-endif
-
 mkespfsimage/mkespfsimage: mkespfsimage/
 	make -C mkespfsimage
 
-htmlflash: webpages.espfs
-	if [ $$(stat -c '%s' webpages.espfs) -gt $$(( 0x2E000 )) ]; then echo "webpages.espfs too big!"; false; fi
-	$(ESPTOOL) -cp $(ESPPORT) -cb $(ESPBAUD) -ca 0x12000 -cf webpages.espfs -v
+htmlflash: $(FW_FILE_3)
+	if [ $$(stat -c '%s' $(FW_FILE_3)) -gt $$(( 0x2E000 )) ]; then echo $(FW_FILE_3)" too big!"; false; fi
+	$(ESPTOOL) -cp $(ESPPORT) -cb $(ESPBAUD) -ca 0x12000 -cf $(FW_FILE_3) -v
 
 clean:
 	$(Q) rm -f $(APP_AR)
@@ -201,5 +192,7 @@ endif
 
 	$(Q) rm -rf $(FW_BASE)
 
+distclean: clean
+	$(Q) make -C mkespfsimage clean
 
 $(foreach bdir,$(BUILD_DIR),$(eval $(call compile-objects,$(bdir))))

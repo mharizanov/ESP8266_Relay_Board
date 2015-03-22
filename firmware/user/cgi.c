@@ -591,6 +591,7 @@ int ICACHE_FLASH_ATTR cgiNTP(HttpdConnData *connData) {
 	len=httpdFindArg(connData->postBuff, "ntp-tz", buff, sizeof(buff));
 	if (len>0) {
 		sysCfg.ntp_tz=atoi(buff);		
+		sntp_tz=sysCfg.ntp_tz;
 	}	
 	
 	CFG_Save();

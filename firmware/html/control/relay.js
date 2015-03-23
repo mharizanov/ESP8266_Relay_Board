@@ -151,7 +151,7 @@ function server_get() {
 			url: "relay.cgi",
 			dataType: 'json',
 			async: true,
-			timeout: 3000,
+			timeout: 5000,
 			success: function (data) {
 				if (data.length !== 0) {
 					statusMsg = false;

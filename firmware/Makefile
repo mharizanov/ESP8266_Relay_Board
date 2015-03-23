@@ -137,7 +137,6 @@ $(FW_FILE_2): $(TARGET_OUT) firmware
 
 $(FW_FILE_3): html/ html/config/ html/config/wifi/ html/control/ mkespfsimage/mkespfsimage
 	$(vecho) "MKEFSIMAGE $@"
-	$(vecho) "hello!"
 ifeq ($(GZIP_COMPRESSION),"yes")
 	$(Q) rm -rf html_compressed;
 		$(Q) cp -r html html_compressed;

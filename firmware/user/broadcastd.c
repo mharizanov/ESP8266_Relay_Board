@@ -66,8 +66,8 @@ static void ICACHE_FLASH_ATTR networkConnectedCb(void *arg) {
 	
 	if(sysCfg.sensor_ds18b20_enable)  { // If DS18b20 daemon is enabled, then send up to 3 sensor's data instead
 		ds_str(t1,0);
-		ds_str(t2,1); //reuse to save space
-		ds_str(t3,2); //reuse to save space
+		if(numds>1) ds_str(t2,1); //reuse to save space
+		if(numds>2)  ds_str(t3,2); //reuse to save space
 		os_sprintf(buf,buf2,currGPIO12State,currGPIO13State,currGPIO15State,t1,t2,t3);
 	}
 	

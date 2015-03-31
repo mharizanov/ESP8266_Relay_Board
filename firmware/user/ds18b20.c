@@ -40,7 +40,7 @@ void ds_init(uint32_t polltime);
 static uint8_t reset(void);
 static uint8_t read();
 static uint8_t crc8(const uint8_t *addr, uint8_t len);
-int ds_str(char *buff, int sensornum);
+boolean ds_str(char *buff, int sensornum);
 
 uint8_t addr[4][8]; //DS18b20 addresses found, max 4
 uint8_t numds;  //number of DS18B20s found
@@ -283,7 +283,10 @@ static  void ICACHE_FLASH_ATTR pollDSCb(void * arg)
 }
 
 
-int ICACHE_FLASH_ATTR ds_str(char *buff,int sensornum) {
+boolean ICACHE_FLASH_ATTR ds_str(char *buff,int sensornum) {
+
+	if(sensornum>numds) return false;
+	
 	int Treading,Whole,Fract,SignBit;
 	Treading = dsreading[sensornum].temperature;
 	SignBit = Treading & 0x8000;  // test most sig bit
@@ -295,8 +298,9 @@ int ICACHE_FLASH_ATTR ds_str(char *buff,int sensornum) {
 
 	if (SignBit) // negative
 		Whole*=-1;
-		
-	return os_sprintf( buff,"%d.%d", Whole, Fract < 10 ? 0 : Fract);
+	
+	os_sprintf( buff,"%d.%d", Whole, Fract < 10 ? 0 : Fract);	
+	return  true;
 }
 
 // global search state

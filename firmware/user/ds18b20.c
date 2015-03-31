@@ -40,7 +40,7 @@ void ds_init(uint32_t polltime);
 static uint8_t reset(void);
 static uint8_t read();
 static uint8_t crc8(const uint8_t *addr, uint8_t len);
-boolean ds_str(char *buff, int sensornum);
+bool ds_str(char *buff, int sensornum);
 
 uint8_t addr[4][8]; //DS18b20 addresses found, max 4
 uint8_t numds;  //number of DS18B20s found
@@ -283,8 +283,9 @@ static  void ICACHE_FLASH_ATTR pollDSCb(void * arg)
 }
 
 
-boolean ICACHE_FLASH_ATTR ds_str(char *buff,int sensornum) {
-
+bool ICACHE_FLASH_ATTR ds_str(char *buff,int sensornum) {
+	
+	os_sprintf( buff,"N/A");	
 	if(sensornum>numds) return false;
 	
 	int Treading,Whole,Fract,SignBit;

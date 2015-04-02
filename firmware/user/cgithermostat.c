@@ -25,7 +25,7 @@ Some random cgi routines.
 #include "ds18b20.h"
 #include "time_utils.h"
 #include "config.h"
-
+#include "stdout.h"
 
 #include "jsmn.h"
 
@@ -78,6 +78,10 @@ int ICACHE_FLASH_ATTR cgiThermostat(HttpdConnData *connData) {
 			}
 			else if (sysCfg.sensor_ds18b20_enable && sysCfg.thermostat1_input == 0) { 			
 				ds_str(temp,0);
+			}
+
+			else if (sysCfg.thermostat1_input == 4) { 		//Serial
+				os_sprintf(temp,"%d.%d",(int)serialTreading/100,serialTreading-((int)serialTreading/100)*100);
 			}
 
 			else if (sysCfg.thermostat1_input == 5) { 		//Fixed value

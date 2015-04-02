@@ -11,6 +11,7 @@
 #include "time_utils.h"
 #include "dht22.h"
 #include "ds18b20.h"
+#include "stdout.h"
 
 static int ICACHE_FLASH_ATTR wd(int year, int month, int day) {
   size_t JND =                                                     \
@@ -103,6 +104,7 @@ static  void ICACHE_FLASH_ATTR pollThermostatCb(void * arg)
 		}
 		
 		if(sysCfg.thermostat1_input==4) { //Serial input to thermostat
+			Treading=serialTreading;
 		}
 		
 		if(sysCfg.thermostat1_input==5) { //Fixed value to thermostat

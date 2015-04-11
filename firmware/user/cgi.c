@@ -434,58 +434,58 @@ int ICACHE_FLASH_ATTR cgiMQTT(HttpdConnData *connData) {
 	}
 
 
-	len=httpdFindArg(connData->postBuff, "mqtt-enable", buff, sizeof(buff));
+	len=httpdFindArg(connData->post->buff, "mqtt-enable", buff, sizeof(buff));
 	sysCfg.mqtt_enable = (len > 0) ? 1:0;
 	
-	len=httpdFindArg(connData->postBuff, "mqtt-use-ssl", buff, sizeof(buff));
+	len=httpdFindArg(connData->post->buff, "mqtt-use-ssl", buff, sizeof(buff));
 	sysCfg.mqtt_use_ssl = (len > 0) ? 1:0;
 	
-	len=httpdFindArg(connData->postBuff, "mqtt-host", buff, sizeof(buff));
+	len=httpdFindArg(connData->post->buff, "mqtt-host", buff, sizeof(buff));
 	if (len>0) {
 		os_sprintf((char *)sysCfg.mqtt_host,buff);
 	}
 
-	len=httpdFindArg(connData->postBuff, "mqtt-port", buff, sizeof(buff));
+	len=httpdFindArg(connData->post->buff, "mqtt-port", buff, sizeof(buff));
 	if (len>0) {
 		sysCfg.mqtt_port=atoi(buff);
 	}
 	
-	len=httpdFindArg(connData->postBuff, "mqtt-keepalive", buff, sizeof(buff));
+	len=httpdFindArg(connData->post->buff, "mqtt-keepalive", buff, sizeof(buff));
 	if (len>0) {
 		sysCfg.mqtt_keepalive=atoi(buff);
 	}
 	
-		len=httpdFindArg(connData->postBuff, "mqtt-devid", buff, sizeof(buff));
+		len=httpdFindArg(connData->post->buff, "mqtt-devid", buff, sizeof(buff));
 	if (len>0) {
 		os_sprintf((char *)sysCfg.mqtt_devid,buff);
 	}
 	
-		len=httpdFindArg(connData->postBuff, "mqtt-user", buff, sizeof(buff));
+		len=httpdFindArg(connData->post->buff, "mqtt-user", buff, sizeof(buff));
 	if (len>0) {
 		os_sprintf((char *)sysCfg.mqtt_user,buff);
 	}
 	
-		len=httpdFindArg(connData->postBuff, "mqtt-pass", buff, sizeof(buff));
+		len=httpdFindArg(connData->post->buff, "mqtt-pass", buff, sizeof(buff));
 	if (len>0) {
 		os_sprintf((char *)sysCfg.mqtt_pass,buff);
 	}
 	
-		len=httpdFindArg(connData->postBuff, "mqtt-relay-subs-topic", buff, sizeof(buff));
+		len=httpdFindArg(connData->post->buff, "mqtt-relay-subs-topic", buff, sizeof(buff));
 	if (len>0) {
 		os_sprintf((char *)sysCfg.mqtt_relay_subs_topic,buff);
 	}
 	
-		len=httpdFindArg(connData->postBuff, "mqtt-dht22-temp-pub-topic", buff, sizeof(buff));
+		len=httpdFindArg(connData->post->buff, "mqtt-dht22-temp-pub-topic", buff, sizeof(buff));
 	if (len>0) {
 		os_sprintf((char *)sysCfg.mqtt_dht22_temp_pub_topic,buff);
 	}
 	
-		len=httpdFindArg(connData->postBuff, "mqtt-dht22-humi-pub-topic", buff, sizeof(buff));
+		len=httpdFindArg(connData->post->buff, "mqtt-dht22-humi-pub-topic", buff, sizeof(buff));
 	if (len>0) {
 		os_sprintf((char *)sysCfg.mqtt_dht22_humi_pub_topic,buff);
 	}
 
-		len=httpdFindArg(connData->postBuff, "mqtt-ds18b20-temp-pub-topic", buff, sizeof(buff));
+		len=httpdFindArg(connData->post->buff, "mqtt-ds18b20-temp-pub-topic", buff, sizeof(buff));
 	if (len>0) {
 		os_sprintf((char *)sysCfg.mqtt_ds18b20_temp_pub_topic,buff);
 	}
@@ -540,20 +540,20 @@ int ICACHE_FLASH_ATTR cgiHTTPD(HttpdConnData *connData) {
 	}
 
 
-	len=httpdFindArg(connData->postBuff, "httpd-auth", buff, sizeof(buff));
+	len=httpdFindArg(connData->post->buff, "httpd-auth", buff, sizeof(buff));
 	sysCfg.httpd_auth = (len > 0) ? 1:0;
 		
-	len=httpdFindArg(connData->postBuff, "httpd-port", buff, sizeof(buff));
+	len=httpdFindArg(connData->post->buff, "httpd-port", buff, sizeof(buff));
 	if (len>0) {
 		sysCfg.httpd_port=atoi(buff);
 	}
 
-	len=httpdFindArg(connData->postBuff, "httpd-user", buff, sizeof(buff));
+	len=httpdFindArg(connData->post->buff, "httpd-user", buff, sizeof(buff));
 	if (len>0) {
 		os_strcpy((char *)sysCfg.httpd_user,buff);
 	}
 
-	len=httpdFindArg(connData->postBuff, "httpd-pass", buff, sizeof(buff));
+	len=httpdFindArg(connData->post->buff, "httpd-pass", buff, sizeof(buff));
 	if (len>0) {
 		os_strcpy((char *)sysCfg.httpd_pass,buff);
 	}
@@ -598,10 +598,10 @@ int ICACHE_FLASH_ATTR cgiNTP(HttpdConnData *connData) {
 		return HTTPD_CGI_DONE;
 	}
 	
-	len=httpdFindArg(connData->postBuff, "ntp-enable", buff, sizeof(buff));
+	len=httpdFindArg(connData->post->buff, "ntp-enable", buff, sizeof(buff));
 	sysCfg.ntp_enable = len > 0 ? 1:0;
 	
-	len=httpdFindArg(connData->postBuff, "ntp-tz", buff, sizeof(buff));
+	len=httpdFindArg(connData->post->buff, "ntp-tz", buff, sizeof(buff));
 	if (len>0) {
 		sysCfg.ntp_tz=atoi(buff);		
 		sntp_tz=sysCfg.ntp_tz;
@@ -645,21 +645,21 @@ int ICACHE_FLASH_ATTR cgiRLYSettings(HttpdConnData *connData) {
 		return HTTPD_CGI_DONE;
 	}
 	
-	len=httpdFindArg(connData->postBuff, "relay-latching-enable", buff, sizeof(buff));
+	len=httpdFindArg(connData->post->buff, "relay-latching-enable", buff, sizeof(buff));
 	sysCfg.relay_latching_enable = (len > 0) ? 1:0;
 		
 
-	len=httpdFindArg(connData->postBuff, "relay1name", buff, sizeof(buff));
+	len=httpdFindArg(connData->post->buff, "relay1name", buff, sizeof(buff));
 	if (len>0) {
 		os_strcpy((char *)sysCfg.relay1name,buff);
 	}
 	
-	len=httpdFindArg(connData->postBuff, "relay2name", buff, sizeof(buff));
+	len=httpdFindArg(connData->post->buff, "relay2name", buff, sizeof(buff));
 	if (len>0) {
 		os_strcpy((char *)sysCfg.relay2name,buff);
 	}
 
-	len=httpdFindArg(connData->postBuff, "relay3name", buff, sizeof(buff));
+	len=httpdFindArg(connData->post->buff, "relay3name", buff, sizeof(buff));
 	if (len>0) {
 		os_strcpy((char *)sysCfg.relay3name,buff);
 	}
@@ -713,29 +713,29 @@ int ICACHE_FLASH_ATTR cgiSensorSettings(HttpdConnData *connData) {
 		return HTTPD_CGI_DONE;
 	}
 	
-	len=httpdFindArg(connData->postBuff, "sensor-ds18b20-enable", buff, sizeof(buff));
+	len=httpdFindArg(connData->post->buff, "sensor-ds18b20-enable", buff, sizeof(buff));
 	sysCfg.sensor_ds18b20_enable = (len > 0) ? 1:0;
 		
-	len=httpdFindArg(connData->postBuff, "sensor-dht22-enable", buff, sizeof(buff));
+	len=httpdFindArg(connData->post->buff, "sensor-dht22-enable", buff, sizeof(buff));
 	sysCfg.sensor_dht22_enable = (len > 0) ? 1:0;
 
 
-	len=httpdFindArg(connData->postBuff, "thermostat1-input", buff, sizeof(buff));
+	len=httpdFindArg(connData->post->buff, "thermostat1-input", buff, sizeof(buff));
 	if (len>0) {
 		sysCfg.thermostat1_input=atoi(buff);
 	}
 
-	len=httpdFindArg(connData->postBuff, "thermostat1-input", buff, sizeof(buff));
+	len=httpdFindArg(connData->post->buff, "thermostat1-input", buff, sizeof(buff));
 	if (len>0) {
 		sysCfg.thermostat1_input=atoi(buff);
 	}
 
-	len=httpdFindArg(connData->postBuff, "thermostat1hysteresishigh", buff, sizeof(buff));
+	len=httpdFindArg(connData->post->buff, "thermostat1hysteresishigh", buff, sizeof(buff));
 	if (len>0) {
 		sysCfg.thermostat1hysteresishigh=atoi(buff);
 	}
 
-	len=httpdFindArg(connData->postBuff, "thermostat1hysteresislow", buff, sizeof(buff));
+	len=httpdFindArg(connData->post->buff, "thermostat1hysteresislow", buff, sizeof(buff));
 	if (len>0) {
 		sysCfg.thermostat1hysteresislow=atoi(buff);
 	}
@@ -861,30 +861,30 @@ int ICACHE_FLASH_ATTR cgiBroadcastD(HttpdConnData *connData) {
 	}
 
 
-	len=httpdFindArg(connData->postBuff, "broadcastd-enable", buff, sizeof(buff));
+	len=httpdFindArg(connData->post->buff, "broadcastd-enable", buff, sizeof(buff));
 	sysCfg.broadcastd_enable = (len > 0) ? 1:0;
 		
-	len=httpdFindArg(connData->postBuff, "broadcastd-port", buff, sizeof(buff));
+	len=httpdFindArg(connData->post->buff, "broadcastd-port", buff, sizeof(buff));
 	if (len>0) {
 		sysCfg.broadcastd_port=atoi(buff);
 	}
 
-	len=httpdFindArg(connData->postBuff, "broadcastd-host", buff, sizeof(buff));
+	len=httpdFindArg(connData->post->buff, "broadcastd-host", buff, sizeof(buff));
 	if (len>0) {
 		os_strcpy((char *)sysCfg.broadcastd_host,buff);
 	}
 
-	len=httpdFindArg(connData->postBuff, "broadcastd-URL", buff, sizeof(buff));
+	len=httpdFindArg(connData->post->buff, "broadcastd-URL", buff, sizeof(buff));
 	if (len>0) {
 		os_strcpy((char *)sysCfg.broadcastd_url,buff);
 	}
 
-	len=httpdFindArg(connData->postBuff, "broadcastd-thingspeak-channel", buff, sizeof(buff));
+	len=httpdFindArg(connData->post->buff, "broadcastd-thingspeak-channel", buff, sizeof(buff));
 	if (len>0) {
 		sysCfg.broadcastd_thingspeak_channel=atoi(buff);
 	}
 	
-	len=httpdFindArg(connData->postBuff, "broadcastd-ro-apikey", buff, sizeof(buff));
+	len=httpdFindArg(connData->post->buff, "broadcastd-ro-apikey", buff, sizeof(buff));
 	if (len>0) {
 		os_strcpy((char *)sysCfg.broadcastd_ro_apikey,buff);
 	}

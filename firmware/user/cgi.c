@@ -725,6 +725,21 @@ int ICACHE_FLASH_ATTR cgiSensorSettings(HttpdConnData *connData) {
 		sysCfg.thermostat1_input=atoi(buff);
 	}
 
+	len=httpdFindArg(connData->postBuff, "thermostat1-input", buff, sizeof(buff));
+	if (len>0) {
+		sysCfg.thermostat1_input=atoi(buff);
+	}
+
+	len=httpdFindArg(connData->postBuff, "thermostat1hysteresishigh", buff, sizeof(buff));
+	if (len>0) {
+		sysCfg.thermostat1hysteresishigh=atoi(buff);
+	}
+
+	len=httpdFindArg(connData->postBuff, "thermostat1hysteresislow", buff, sizeof(buff));
+	if (len>0) {
+		sysCfg.thermostat1hysteresislow=atoi(buff);
+	}
+	
 	CFG_Save();
 	httpdRedirect(connData, "/");
 	return HTTPD_CGI_DONE;
@@ -767,6 +782,14 @@ void ICACHE_FLASH_ATTR tplSensorSettings(HttpdConnData *connData, char *token, v
 
 	if (os_strcmp(token, "selectedfixed")==0) {
 			os_strcpy(buff, sysCfg.thermostat1_input == 5 ? "selected" : "" );
+	}
+	
+	if (os_strcmp(token, "thermostat1hysteresishigh")==0) {
+			os_sprintf(buff,"%d", (int)sysCfg.thermostat1hysteresishigh);
+	}
+
+	if (os_strcmp(token, "thermostat1hysteresislow")==0) {
+			os_sprintf(buff,"%d", (int)sysCfg.thermostat1hysteresislow);
 	}
 	
 	httpdSend(connData, buff, -1);

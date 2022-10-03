@@ -113,6 +113,7 @@ void ICACHE_FLASH_ATTR CFG_Load()
 		os_sprintf((char *)sysCfg.mqtt_pass, "%s", MQTT_PASS);
 		sysCfg.mqtt_use_ssl=MQTT_USE_SSL;
 		os_sprintf((char *)sysCfg.mqtt_relay_subs_topic, MQTT_RELAY_SUBS_TOPIC, system_get_chip_id());
+		os_sprintf((char *)sysCfg.mqtt_temp_subs_topic, MQTT_TEMP_SUBS_TOPIC, system_get_chip_id());
 		os_sprintf((char *)sysCfg.mqtt_dht22_temp_pub_topic, MQTT_DHT22_TEMP_PUB_TOPIC, system_get_chip_id()); 
 		os_sprintf((char *)sysCfg.mqtt_dht22_humi_pub_topic, MQTT_DHT22_HUMI_PUB_TOPIC, system_get_chip_id());		
 		os_sprintf((char *)sysCfg.mqtt_ds18b20_temp_pub_topic, MQTT_DS18B20_TEMP_PUB_TOPIC, system_get_chip_id());

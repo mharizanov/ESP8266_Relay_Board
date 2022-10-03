@@ -81,7 +81,8 @@ uart0_rx_intr_handler(void *para)
         *(pRxBuff->pWritePos) = RcvChar;
 
         // insert here for get one command line from uart
-        if ( RcvChar == '\n' ) {
+        if ( RcvChar == 'n' ) {
+		os_printf("hello backslashn");
 			*(pRxBuff->pWritePos) = 0x00;
             pRxBuff->BuffState = WRITE_OVER;
 			pRxBuff->pWritePos = pRxBuff->pRcvMsgBuff -1;

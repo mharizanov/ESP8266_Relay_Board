@@ -26,6 +26,7 @@ sd('mqtt-user',v);
 sd('mqtt-pass',v);
 sd('mqtt-use-ssl',v);
 sd('mqtt-relay-subs-topic',v);
+sd('mqtt-temp-subs-topic',v);
 sd('mqtt-dht22-temp-pub-topic',v);
 sd('mqtt-dht22-humi-pub-topic',v);
 sd('mqtt-ds18b20-temp-pub-topic',v);
@@ -52,6 +53,7 @@ sd('mqtt-ds18b20-temp-pub-topic',v);
 <tr><td>Password:</td><td><input type="password" name="mqtt-pass" id="mqtt-pass" value="%mqtt-pass%"/>     </td></tr>
 <tr><td>Use SSL?:</td><td><input type="checkbox" name="mqtt-use-ssl" id="mqtt-use-ssl" /> (max 1024 bit key size)  </td></tr>
 <tr><td>Relays subs topic:</td><td><input type="text" name="mqtt-relay-subs-topic" id="mqtt-relay-subs-topic" value="%mqtt-relay-subs-topic%">     </td></tr>
+<tr><td>Temp subs topic:</td><td><input type="text" name="mqtt-temp-subs-topic" id="mqtt-temp-subs-topic" value="%mqtt-temp-subs-topic%">     </td></tr>
 <tr><td>DHT22 temp pub topic:</td><td><input type="text" name="mqtt-dht22-temp-pub-topic" id="mqtt-dht22-temp-pub-topic" value="%mqtt-dht22-temp-pub-topic%">     </td></tr>
 <tr><td>DHT22 humi pub topic:</td><td><input type="text" name="mqtt-dht22-humi-pub-topic" id="mqtt-dht22-humi-pub-topic" value="%mqtt-dht22-humi-pub-topic%">     </td></tr>
 <tr><td>DS18B20 temp pub topic:</td><td><input type="text" name="mqtt-ds18b20-temp-pub-topic" id="mqtt-ds18b20-temp-pub-topic" value="%mqtt-ds18b20-temp-pub-topic%">     </td></tr>

@@ -31,8 +31,16 @@
 #define USER_AT_MQTT_H_
 #include "mqtt_msg.h"
 #include "user_interface.h"
+#include <time.h>
 
 #include "mqueue.h"
+
+//Temperature reading recieved via MQTT (used for thermostat if configured)
+extern int mqttTreading;
+//Timestamp when reading was received
+extern time_t mqttTreadingTS;
+
+
 typedef struct mqtt_event_data_t
 {
   uint8_t type;
@@ -133,5 +141,9 @@ BOOL ICACHE_FLASH_ATTR MQTT_Subscribe(MQTT_Client *client, char* topic, uint8_t 
 void ICACHE_FLASH_ATTR MQTT_Connect(MQTT_Client *mqttClient);
 void ICACHE_FLASH_ATTR MQTT_Disconnect(MQTT_Client *mqttClient);
 BOOL ICACHE_FLASH_ATTR MQTT_Publish(MQTT_Client *client, const char* topic, const char* data, int data_length, int qos, int retain);
+
+
+
+
 
 #endif /* USER_AT_MQTT_H_ */

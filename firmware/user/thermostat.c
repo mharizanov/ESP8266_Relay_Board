@@ -12,6 +12,7 @@
 #include "dht22.h"
 #include "ds18b20.h"
 #include "stdout.h"
+#include "mqtt.h"
 
 static int ICACHE_FLASH_ATTR wd(int year, int month, int day) {
   size_t JND =                                                     \
@@ -99,19 +100,30 @@ static  void ICACHE_FLASH_ATTR pollThermostatCb(void * arg)
 		}
 		
 		if(sysCfg.thermostat1_input==3) { //MQTT input to thermostat
-		// not yet implemented
+
+			if ((sntp_time+(sntp_tz*3600))  - mqttTreadingTS  > 360) {
+				//mqttTreading too old
+				os_printf("MQTT thermostat reading is stale (older than 5 minutes) \n") ;
+				Treading = -9999 ;
+			} else {
+				Treading=mqttTreading *10;	//Treading is tenth of a degree, eg 24.5 = 2450
+			}
 		}
 		
 		if(sysCfg.thermostat1_input==4) { //Serial input to thermostat
-			Treading=serialTreading;
+			Treading=serialTreading;	//Treading is tenth of a degree, eg 24.5 = 2450
 		}
 		
 		if(sysCfg.thermostat1_input==5) { //Fixed value to thermostat
 			Treading=1000;
 		}
 
-		if(Treading ==-9999 || Treading >12000 || Treading <-3000) { // Check for valid reading
-			os_printf("Could not get valid temperature reading\n");
+		if(Treading ==-9999 || Treading > 4000 || Treading <-300) { // Check for valid reading
+			//if reading is > 40C, or < -3C or -9999 (invalid read) treat as invalid
+			os_printf("%d is not in range -3C to 40C (-300 - 4000). Invalid temperature reading - THERM OFF!\n", (int)Treading);
+			//turn heating off - do not act on bad data !
+		      	currGPIO12State=0;
+			ioGPIO(currGPIO12State,12);
 			return;
 		} 
 

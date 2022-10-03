@@ -22,7 +22,7 @@ SDK_EXTRA_LIBS ?= /opt/xtensa-lx106-elf/lib/gcc/xtensa-lx106-elf/4.8.2/
 SDK_BASE	?= /opt/Espressif/ESP8266_SDK
 
 #Esptool.py path and port
-ESPTOOL		?= esptool
+ESPTOOL		?= /home/apearson/esptool/esptool
 ESPPORT		?= /dev/ttyUSB0
 #ESPDELAY indicates seconds to wait between flashing the two binary images
 ESPDELAY	?= 3
@@ -48,7 +48,7 @@ LIBS		= c hal gcc phy pp net80211 wpa main lwip
 GZIP_COMPRESSION = "yes"
 
 # compiler flags using during compilation of source files
-CFLAGS		= -Os -ggdb -std=c99 -Werror -Wpointer-arith -Wundef -Wall -Wl,-EL -fno-inline-functions \
+CFLAGS		= -Os -ggdb -std=c99  -Wpointer-arith -Wundef -Wall -Wl,-EL -fno-inline-functions \
 		-nostdlib -mlongcalls -mtext-section-literals  -D__ets__ -DICACHE_FLASH \
 		-Wno-address -Wno-unused-function -Wno-unused-but-set-variable
 

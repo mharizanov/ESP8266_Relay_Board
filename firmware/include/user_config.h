@@ -13,12 +13,14 @@
 
 /*DEFAULT CONFIGURATIONS*/
 
-#define STA_MODE     "static"
+#define STA_MODE     "dhcp"
 #define STA_IP       "192.168.1.17"
 #define STA_MASK     "255.255.255.0"
 #define STA_GW       "192.168.1.1"
-#define STA_SSID     "dd-wrt" 
-#define STA_PASS     "a1b2c3d4e5"
+//#define STA_SSID     "dd-wrt" 
+//#define STA_PASS     "a1b2c3d4e5"
+#define STA_SSID     "pearson.uk" 
+#define STA_PASS     "spectrum"
 #define STA_TYPE AUTH_WPA2_PSK
 
 #define AP_IP        "192.168.4.1"
@@ -40,15 +42,17 @@
 #define NTP_ENABLE    1
 #define NTP_TZ  	  2
 
-#define MQTT_ENABLE			0
-#define MQTT_HOST			"192.168.1.6" //host name or IP "192.168.11.1"
+#define MQTT_ENABLE			1
+#define MQTT_HOST			"192.168.10.3" //host name or IP "192.168.11.1"
 #define MQTT_PORT			1883
 #define MQTT_KEEPALIVE		120	 /*seconds*/
 #define MQTT_DEVID			"ESP_%08X"
-#define MQTT_USER			""
-#define MQTT_PASS			""
+#define MQTT_USER			"tasmota"
+#define MQTT_PASS			"tasmota"
 #define MQTT_USE_SSL		0
 #define MQTT_RELAY_SUBS_TOPIC 		"esp_%08X/out/relay/#"
+//#define MQTT_TEMP_SUBS_TOPIC 		"test/in/temperature"
+#define MQTT_TEMP_SUBS_TOPIC 		"esp_%08X/in/temperature"
 #define MQTT_DHT22_TEMP_PUB_TOPIC  	"esp_%08X/in/dht22/temperature" 
 #define MQTT_DHT22_HUMI_PUB_TOPIC   "esp_%08X/in/dht22/humidity" 		
 #define MQTT_DS18B20_TEMP_PUB_TOPIC "esp_%08X/in/ds18b20/temperature"

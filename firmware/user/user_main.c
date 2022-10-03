@@ -146,6 +146,7 @@ void ICACHE_FLASH_ATTR mqttConnectedCb(uint32_t *args)
 	MQTT_Client* client = (MQTT_Client*)args;
 	os_printf("MQTT: Connected\r\n");
 	MQTT_Subscribe(client, (char *)sysCfg.mqtt_relay_subs_topic,0);
+	MQTT_Subscribe(client, (char *)sysCfg.mqtt_temp_subs_topic,0);
 }
 
 void ICACHE_FLASH_ATTR mqttDisconnectedCb(uint32_t *args)
@@ -164,37 +165,48 @@ void ICACHE_FLASH_ATTR mqttDataCb(uint32_t *args, const char* topic, uint32_t to
 	os_memcpy(strData, data, lengh);
 	strData[lengh] = '\0';
 
-	char relayNum=strTopic[topic_len-1];
-	char strSubsTopic[strlen((char *)sysCfg.mqtt_relay_subs_topic)];
-	os_strcpy(strSubsTopic,(char *)sysCfg.mqtt_relay_subs_topic);
-	strSubsTopic[(strlen((char *)sysCfg.mqtt_relay_subs_topic)-1)]=relayNum;
+	char strTempSubsTopic[strlen((char *)sysCfg.mqtt_temp_subs_topic)];
+	os_strcpy(strTempSubsTopic,(char *)sysCfg.mqtt_temp_subs_topic);
 
-	os_printf("MQTT strSubsTopic: %s, strTopic: %s \r\n", strSubsTopic, strTopic);
+	if (os_strcmp(strTempSubsTopic, strTopic) == 0) {
+		os_printf("Recieved thermostat temperature of %s via MQTT\n", strData) ;
+		mqttTreading = atoi(strData) ;
+		mqttTreadingTS = sntp_time+(sntp_tz*3600); ;		//timestamp of the reading
+		os_printf("mqttTreading:%d", mqttTreading) ;
+	} else { 
+		char relayNum=strTopic[topic_len-1];
+		char strSubsTopic[strlen((char *)sysCfg.mqtt_relay_subs_topic)];
+		os_strcpy(strSubsTopic,(char *)sysCfg.mqtt_relay_subs_topic);
+		strSubsTopic[(strlen((char *)sysCfg.mqtt_relay_subs_topic)-1)]=relayNum;
 
-	if (os_strcmp(strSubsTopic,strTopic) == 0 ) {
-		os_printf("Relay %d is now: %s \r\n", relayNum-'0', strData);
-		
-		if(relayNum=='1') {
-			currGPIO12State=atoi(strData);
-			ioGPIO(currGPIO12State,12);
+		os_printf("MQTT strSubsTopic: %s, strTopic: %s \r\n", strSubsTopic, strTopic);
+
+		if (os_strcmp(strSubsTopic,strTopic) == 0 ) {
+			os_printf("Relay %d is now: %s \r\n", relayNum-'0', strData);
+			
+			if(relayNum=='1') {
+				currGPIO12State=atoi(strData);
+				ioGPIO(currGPIO12State,12);
+			}
+
+			if(relayNum=='2') {
+				currGPIO13State=atoi(strData);
+				ioGPIO(currGPIO13State,13);
+			}
+
+			if(relayNum=='3') {
+				currGPIO15State=atoi(strData);
+				ioGPIO(currGPIO15State,15);
+			}
+			
+			if( sysCfg.relay_latching_enable) {		
+				sysCfg.relay_1_state=currGPIO12State;					
+				sysCfg.relay_2_state=currGPIO13State;
+				sysCfg.relay_3_state=currGPIO15State;
+				CFG_Save();
+			}	
 		}
 
-		if(relayNum=='2') {
-			currGPIO13State=atoi(strData);
-			ioGPIO(currGPIO13State,13);
-		}
-
-		if(relayNum=='3') {
-			currGPIO15State=atoi(strData);
-			ioGPIO(currGPIO15State,15);
-		}
-		
-		if( sysCfg.relay_latching_enable) {		
-			sysCfg.relay_1_state=currGPIO12State;					
-			sysCfg.relay_2_state=currGPIO13State;
-			sysCfg.relay_3_state=currGPIO15State;
-			CFG_Save();
-		}	
 	}
 	os_printf("MQTT topic: %s, data: %s \r\n", strTopic, strData);
 }

@@ -41,6 +41,7 @@
 #include "mqtt.h"
 #include "mqueue.h"
 #include "utils.h"
+#include <time.h>
 
 
 #define MQTT_TASK_PRIO        		0
@@ -55,6 +56,10 @@ unsigned char *default_certificate;
 unsigned int default_certificate_len = 0;
 unsigned char *default_private_key;
 unsigned int default_private_key_len = 0;
+
+//Temperature reading recieved via MQTT (used for thermostat if configured)
+int mqttTreading;
+time_t mqttTreadingTS ;		//timestamp for the reading
 
 os_event_t mqtt_procTaskQueue[MQTT_TASK_QUEUE_SIZE];
 

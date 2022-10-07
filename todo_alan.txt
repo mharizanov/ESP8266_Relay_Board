@@ -1,9 +1,0 @@
-Avoid thermostat cycling - timestamp relay activations and set limit 
-	(possibly make dedicated function for relay on/off with TS and check on the ON.. should always be able to turn it off)
-
-Config items for MQTT timeout & thermostat cycling
-
-Display of a bad or stale temperature should update on thermostat.html page  and not keep last reading
-
-
- 

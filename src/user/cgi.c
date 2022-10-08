@@ -609,13 +609,12 @@ int ICACHE_FLASH_ATTR cgiNTP(HttpdConnData *connData) {
   len = httpdFindArg(connData->post->buff, "ntp-enable", buff, sizeof(buff));
   sysCfg.ntp_enable = len > 0 ? 1 : 0;
 
-  /*
-    len = httpdFindArg(connData->post->buff, "ntp-tz", buff, sizeof(buff));
-    if (len > 0) {
-      sysCfg.ntp_tz = atoi(buff);
-      sntp_tz = sysCfg.ntp_tz;
-    }
-  */
+  len = httpdFindArg(connData->post->buff, "ntp-tz", buff, sizeof(buff));
+  if (len > 0) {
+    sysCfg.ntp_tz = atoi(buff);
+    sntp_set_timezone(sysCfg.ntp_tz);
+  }
+
   CFG_Save();
 
   httpdRedirect(connData, "/");

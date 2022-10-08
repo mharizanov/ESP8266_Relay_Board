@@ -32,7 +32,7 @@ sd('ntp-tz',v);
 
 <table>
 <tr><td>NTP client enabled?:</td><td><input type="checkbox" name="ntp-enable" id="ntp-enable" onclick="di();"/></td></tr>
-<tr><td>GMT offset:</td><td><input type="text" name="ntp-tz" id="ntp-tz" value="%ntp-tz%"/>     </td></tr>
+<tr><td>GMT offset:</td><td><input type="text" name="ntp-tz" id="ntp-tz" value="%ntp-tz%"/>     </td><td>Restart system after changing to take effect</td></tr>
 <tr><td><button type="button" onClick="parent.location='/'">Back</button><input type="submit" name="save" value="Save"></td></tr>
 </table>
 

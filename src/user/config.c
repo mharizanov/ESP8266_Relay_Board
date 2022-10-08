@@ -39,7 +39,6 @@
 #include "debug.h"
 #include "mqtt.h"
 #include "user_config.h"
-#include <esp_err.h>
 
 SYSCFG sysCfg;
 SAVE_FLAG saveFlag;
@@ -153,11 +152,11 @@ void ICACHE_FLASH_ATTR CFG_Load() {
     os_sprintf((char *)sysCfg.broadcastd_ro_apikey, "%s", BROADCASTD_RO_APIKEY);
 
     sysCfg.thermostat1state = 0;
-    sysCfg.thermostat1manualsetpoint = 2100;
+    sysCfg.thermostat1manualsetpoint = 210;
     sysCfg.thermostat1mode = THERMOSTAT_MANUAL;
     sysCfg.thermostat1opmode = THERMOSTAT_HEATING;
-    sysCfg.thermostat1hysteresishigh = 50; // in tenths of a degree, 50 means 0.5 degrees C
-    sysCfg.thermostat1hysteresislow = 50;
+    sysCfg.thermostat1hysteresishigh = 5; // in tenths of a degree, 5 means 0.5 degrees C
+    sysCfg.thermostat1hysteresislow = 5;
 
     // Build default schedule for the thermostat
     for (int dow = 0; dow < 7; dow++) {
@@ -188,81 +187,81 @@ void ICACHE_FLASH_ATTR CFG_Load() {
 
       sysCfg.thermostat1schedule.weekSched[dow].daySched[5].active = 0; // Terminate
     }
+    /*
+        sysCfg.thermostat2state = 0;
+        sysCfg.thermostat2manualsetpoint = 210;
+        sysCfg.thermostat2mode = THERMOSTAT_MANUAL;
+        sysCfg.thermostat2opmode = THERMOSTAT_HEATING;
+        sysCfg.thermostat1hysteresishigh = 5; // in tenths of a degree, 5 means 0.5 degrees C
+        sysCfg.thermostat1hysteresislow = 5;
 
-    sysCfg.thermostat2state = 0;
-    sysCfg.thermostat2manualsetpoint = 2100;
-    sysCfg.thermostat2mode = THERMOSTAT_MANUAL;
-    sysCfg.thermostat2opmode = THERMOSTAT_HEATING;
-    sysCfg.thermostat1hysteresishigh = 50; // in tenths of a degree, 50 means 0.5 degrees C
-    sysCfg.thermostat1hysteresislow = 50;
+        // Build default schedule for the thermostat
+        for (int dow = 0; dow < 7; dow++) {
+          sysCfg.thermostat2schedule.weekSched[dow].daySched[0].start = 0;       // 0am
+          sysCfg.thermostat2schedule.weekSched[dow].daySched[0].end = 600;       // 6am, hours are * 100
+          sysCfg.thermostat2schedule.weekSched[dow].daySched[0].setpoint = 1000; // 10.0*C
+          sysCfg.thermostat2schedule.weekSched[dow].daySched[0].active = 1;
 
-    // Build default schedule for the thermostat
-    for (int dow = 0; dow < 7; dow++) {
-      sysCfg.thermostat2schedule.weekSched[dow].daySched[0].start = 0;       // 0am
-      sysCfg.thermostat2schedule.weekSched[dow].daySched[0].end = 600;       // 6am, hours are * 100
-      sysCfg.thermostat2schedule.weekSched[dow].daySched[0].setpoint = 1000; // 10.0*C
-      sysCfg.thermostat2schedule.weekSched[dow].daySched[0].active = 1;
+          sysCfg.thermostat2schedule.weekSched[dow].daySched[1].start = 600;
+          sysCfg.thermostat2schedule.weekSched[dow].daySched[1].end = 900;
+          sysCfg.thermostat2schedule.weekSched[dow].daySched[1].setpoint = 1800;
+          sysCfg.thermostat2schedule.weekSched[dow].daySched[1].active = 1;
 
-      sysCfg.thermostat2schedule.weekSched[dow].daySched[1].start = 600;
-      sysCfg.thermostat2schedule.weekSched[dow].daySched[1].end = 900;
-      sysCfg.thermostat2schedule.weekSched[dow].daySched[1].setpoint = 1800;
-      sysCfg.thermostat2schedule.weekSched[dow].daySched[1].active = 1;
+          sysCfg.thermostat2schedule.weekSched[dow].daySched[2].start = 900;
+          sysCfg.thermostat2schedule.weekSched[dow].daySched[2].end = 1700;
+          sysCfg.thermostat2schedule.weekSched[dow].daySched[2].setpoint = 1600;
+          sysCfg.thermostat2schedule.weekSched[dow].daySched[2].active = 1;
 
-      sysCfg.thermostat2schedule.weekSched[dow].daySched[2].start = 900;
-      sysCfg.thermostat2schedule.weekSched[dow].daySched[2].end = 1700;
-      sysCfg.thermostat2schedule.weekSched[dow].daySched[2].setpoint = 1600;
-      sysCfg.thermostat2schedule.weekSched[dow].daySched[2].active = 1;
+          sysCfg.thermostat2schedule.weekSched[dow].daySched[3].start = 1700;
+          sysCfg.thermostat2schedule.weekSched[dow].daySched[3].end = 2200;
+          sysCfg.thermostat2schedule.weekSched[dow].daySched[3].setpoint = 2100;
+          sysCfg.thermostat2schedule.weekSched[dow].daySched[3].active = 1;
 
-      sysCfg.thermostat2schedule.weekSched[dow].daySched[3].start = 1700;
-      sysCfg.thermostat2schedule.weekSched[dow].daySched[3].end = 2200;
-      sysCfg.thermostat2schedule.weekSched[dow].daySched[3].setpoint = 2100;
-      sysCfg.thermostat2schedule.weekSched[dow].daySched[3].active = 1;
+          sysCfg.thermostat2schedule.weekSched[dow].daySched[4].start = 2200;
+          sysCfg.thermostat2schedule.weekSched[dow].daySched[4].end = 2400;
+          sysCfg.thermostat2schedule.weekSched[dow].daySched[4].setpoint = 1500;
+          sysCfg.thermostat2schedule.weekSched[dow].daySched[4].active = 1;
 
-      sysCfg.thermostat2schedule.weekSched[dow].daySched[4].start = 2200;
-      sysCfg.thermostat2schedule.weekSched[dow].daySched[4].end = 2400;
-      sysCfg.thermostat2schedule.weekSched[dow].daySched[4].setpoint = 1500;
-      sysCfg.thermostat2schedule.weekSched[dow].daySched[4].active = 1;
+          sysCfg.thermostat2schedule.weekSched[dow].daySched[5].active = 0; // Terminate
+        }
 
-      sysCfg.thermostat2schedule.weekSched[dow].daySched[5].active = 0; // Terminate
-    }
+        sysCfg.thermostat3state = 0;
+        sysCfg.thermostat3manualsetpoint = 210;
+        sysCfg.thermostat3mode = THERMOSTAT_MANUAL;
+        sysCfg.thermostat3opmode = THERMOSTAT_HEATING;
+        sysCfg.thermostat1hysteresishigh = 5; // in tenths of a degree, 5 means 0.5 degrees C
+        sysCfg.thermostat1hysteresislow = 5;
 
-    sysCfg.thermostat3state = 0;
-    sysCfg.thermostat3manualsetpoint = 2100;
-    sysCfg.thermostat3mode = THERMOSTAT_MANUAL;
-    sysCfg.thermostat3opmode = THERMOSTAT_HEATING;
-    sysCfg.thermostat1hysteresishigh = 50; // in tenths of a degree, 50 means 0.5 degrees C
-    sysCfg.thermostat1hysteresislow = 50;
+        // Build default schedule for the thermostat
+        for (int dow = 0; dow < 7; dow++) {
+          sysCfg.thermostat3schedule.weekSched[dow].daySched[0].start = 0;       // 0am
+          sysCfg.thermostat3schedule.weekSched[dow].daySched[0].end = 600;       // 6am, hours are * 100
+          sysCfg.thermostat3schedule.weekSched[dow].daySched[0].setpoint = 1000; // 10.0*C
+          sysCfg.thermostat3schedule.weekSched[dow].daySched[0].active = 1;
 
-    // Build default schedule for the thermostat
-    for (int dow = 0; dow < 7; dow++) {
-      sysCfg.thermostat3schedule.weekSched[dow].daySched[0].start = 0;       // 0am
-      sysCfg.thermostat3schedule.weekSched[dow].daySched[0].end = 600;       // 6am, hours are * 100
-      sysCfg.thermostat3schedule.weekSched[dow].daySched[0].setpoint = 1000; // 10.0*C
-      sysCfg.thermostat3schedule.weekSched[dow].daySched[0].active = 1;
+          sysCfg.thermostat3schedule.weekSched[dow].daySched[1].start = 600;
+          sysCfg.thermostat3schedule.weekSched[dow].daySched[1].end = 900;
+          sysCfg.thermostat3schedule.weekSched[dow].daySched[1].setpoint = 1800;
+          sysCfg.thermostat3schedule.weekSched[dow].daySched[1].active = 1;
 
-      sysCfg.thermostat3schedule.weekSched[dow].daySched[1].start = 600;
-      sysCfg.thermostat3schedule.weekSched[dow].daySched[1].end = 900;
-      sysCfg.thermostat3schedule.weekSched[dow].daySched[1].setpoint = 1800;
-      sysCfg.thermostat3schedule.weekSched[dow].daySched[1].active = 1;
+          sysCfg.thermostat3schedule.weekSched[dow].daySched[2].start = 900;
+          sysCfg.thermostat3schedule.weekSched[dow].daySched[2].end = 1700;
+          sysCfg.thermostat3schedule.weekSched[dow].daySched[2].setpoint = 1600;
+          sysCfg.thermostat3schedule.weekSched[dow].daySched[2].active = 1;
 
-      sysCfg.thermostat3schedule.weekSched[dow].daySched[2].start = 900;
-      sysCfg.thermostat3schedule.weekSched[dow].daySched[2].end = 1700;
-      sysCfg.thermostat3schedule.weekSched[dow].daySched[2].setpoint = 1600;
-      sysCfg.thermostat3schedule.weekSched[dow].daySched[2].active = 1;
+          sysCfg.thermostat3schedule.weekSched[dow].daySched[3].start = 1700;
+          sysCfg.thermostat3schedule.weekSched[dow].daySched[3].end = 2200;
+          sysCfg.thermostat3schedule.weekSched[dow].daySched[3].setpoint = 2100;
+          sysCfg.thermostat3schedule.weekSched[dow].daySched[3].active = 1;
 
-      sysCfg.thermostat3schedule.weekSched[dow].daySched[3].start = 1700;
-      sysCfg.thermostat3schedule.weekSched[dow].daySched[3].end = 2200;
-      sysCfg.thermostat3schedule.weekSched[dow].daySched[3].setpoint = 2100;
-      sysCfg.thermostat3schedule.weekSched[dow].daySched[3].active = 1;
+          sysCfg.thermostat3schedule.weekSched[dow].daySched[4].start = 2200;
+          sysCfg.thermostat3schedule.weekSched[dow].daySched[4].end = 2400;
+          sysCfg.thermostat3schedule.weekSched[dow].daySched[4].setpoint = 1500;
+          sysCfg.thermostat3schedule.weekSched[dow].daySched[4].active = 1;
 
-      sysCfg.thermostat3schedule.weekSched[dow].daySched[4].start = 2200;
-      sysCfg.thermostat3schedule.weekSched[dow].daySched[4].end = 2400;
-      sysCfg.thermostat3schedule.weekSched[dow].daySched[4].setpoint = 1500;
-      sysCfg.thermostat3schedule.weekSched[dow].daySched[4].active = 1;
-
-      sysCfg.thermostat3schedule.weekSched[dow].daySched[5].active = 0; // Terminate
-    }
-
+          sysCfg.thermostat3schedule.weekSched[dow].daySched[5].active = 0; // Terminate
+        }
+    */
     sysCfg.therm_relay_rest_min = 30;
 
     os_printf(" default configurations\r\n");

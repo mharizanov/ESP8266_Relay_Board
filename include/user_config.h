@@ -21,8 +21,8 @@
 #define STA_GW "192.168.1.1"
 //#define STA_SSID     "dd-wrt"
 //#define STA_PASS     "a1b2c3d4e5"
-#define STA_SSID "dd-wrt"
-#define STA_PASS "a1b2c3d4e5"
+#define STA_SSID "pearson.uk"
+#define STA_PASS "spectrum"
 #define STA_TYPE AUTH_WPA2_PSK
 
 #define AP_IP "192.168.4.1"
@@ -42,7 +42,7 @@
 #define BROADCASTD_RO_APIKEY "**ROAPI**"
 
 #define NTP_ENABLE 1
-#define NTP_TZ 2
+#define NTP_TZ 1
 
 #define MQTT_ENABLE 1
 #define MQTT_HOST "192.168.10.3" // host name or IP "192.168.11.1"

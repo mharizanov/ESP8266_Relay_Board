@@ -54,9 +54,12 @@ void ICACHE_FLASH_ATTR thermostatRelayOn() {
 }
 
 void ICACHE_FLASH_ATTR thermostatRelayOff() {
-  currGPIO12State = 0;
-  ioGPIO(currGPIO12State, 12);
-  thermostatRelayOffTime = sntp_get_current_timestamp();
+
+  if (currGPIO12State != 0) {
+    currGPIO12State = 0;
+    ioGPIO(currGPIO12State, 12);
+    thermostatRelayOffTime = sntp_get_current_timestamp();
+  }
 }
 
 static void ICACHE_FLASH_ATTR pollThermostatCb(void *arg) {
@@ -82,7 +85,7 @@ static void ICACHE_FLASH_ATTR pollThermostatCb(void *arg) {
   if (sysCfg.sensor_dht22_enable) {
     struct sensor_reading *result = readDHT();
     if (result->success) {
-      Treading = result->temperature * 100;
+      Treading = result->temperature * 10;
       if (sysCfg.thermostat1_input == 2) // Humidistat
         Treading = result->humidity * 100;
     }
@@ -98,11 +101,11 @@ static void ICACHE_FLASH_ATTR pollThermostatCb(void *arg) {
           Treading = (Treading ^ 0xffff) + 1; // 2's comp
 
         Whole = Treading >> 4; // separate off the whole and fractional portions
-        Fract = (Treading & 0xf) * 100 / 16;
+        Fract = (Treading & 0xf) * 10 / 16;
 
         if (SignBit) // negative
           Whole *= -1;
-        Treading = Whole * 100 + Fract;
+        Treading = Whole * 10 + Fract;
       }
     } // ds8b20 enabled
   }
@@ -115,7 +118,7 @@ static void ICACHE_FLASH_ATTR pollThermostatCb(void *arg) {
                 sysCfg.mqtt_temp_timeout_secs / 60);
       Treading = -9999;
     } else {
-      Treading = mqttTreading * 10; // Treading is tenth of a degree, eg 24.5 = 2450
+      Treading = mqttTreading ; // Treading is tenth of a degree, eg 24.5 = 245
     }
   }
 
@@ -124,10 +127,10 @@ static void ICACHE_FLASH_ATTR pollThermostatCb(void *arg) {
   }
 
   if (sysCfg.thermostat1_input == 5) { // Fixed value to thermostat
-    Treading = 1000;
+    Treading = 100;
   }
 
-  if (Treading == -9999 || Treading > 4000 || Treading < -2000) { // Check for valid reading
+  if (Treading == -9999 || Treading > 400 || Treading < -200) { // Check for valid reading
     // if reading is > 40C, or < -3C or -9999 (invalid read) treat as invalid
     os_printf("Thermostat: Invalid temperature reading (%d is not in range -20C to +40C) turning off relay.\n",
               (int)Treading);

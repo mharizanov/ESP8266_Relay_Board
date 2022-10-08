@@ -93,7 +93,7 @@ var slider_height = $(".slider").height();
 var changed = 0;
 
 thermostat = server_get2("state");
-thermostat.manualsetpoint/=100;
+thermostat.manualsetpoint/=10;
 		
 if(thermostat.humidistat) {
 	unit="%";
@@ -250,7 +250,7 @@ $("#zone-setpoint-dec").click(function () {
 
     //save("tx/heating",thermostat.state+","+parseInt(setpoint*100));
     save("thermostat_mode", thermostat.automode.toString());
-    save("thermostat_manualsetpoint", ((thermostat.manualsetpoint.toFixed(1)) * 100).toString());
+    save("thermostat_manualsetpoint", ((thermostat.manualsetpoint.toFixed(1)) * 10).toString());
 });
 
 $("#zone-setpoint-inc").click(function () {
@@ -263,7 +263,7 @@ $("#zone-setpoint-inc").click(function () {
 
     //save("tx/heating",thermostat.state+","+parseInt(setpoint*100));
     save("thermostat_mode", (thermostat.automode).toString());
-    save("thermostat_manualsetpoint", ((thermostat.manualsetpoint.toFixed(1)) * 100).toString());
+    save("thermostat_manualsetpoint", ((thermostat.manualsetpoint.toFixed(1)) * 10).toString());
 });
 
 // ============================================
@@ -655,7 +655,7 @@ function server_get() {
 					if(!doingsave) {
 						output = data;
 						thermostat=data;
-						thermostat.manualsetpoint/=100;
+						thermostat.manualsetpoint/=10;
 						update();
 					}
 				}

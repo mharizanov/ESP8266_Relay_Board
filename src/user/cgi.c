@@ -54,10 +54,12 @@ int ICACHE_FLASH_ATTR cgiGPIO(HttpdConnData *connData) {
     currGPIO13State = atoi(buff);
     ioGPIO(currGPIO13State, 13);
     gotcmd = 1;
+    /*
     // Manually switching relays means switching the thermostat off
     if (sysCfg.thermostat2state != 0) {
       sysCfg.thermostat2state = 0;
     }
+    */
   }
 
   len = httpdFindArg(connData->getArgs, "relay3", buff, sizeof(buff));
@@ -65,10 +67,12 @@ int ICACHE_FLASH_ATTR cgiGPIO(HttpdConnData *connData) {
     currGPIO15State = atoi(buff);
     ioGPIO(currGPIO15State, 15);
     gotcmd = 1;
+    /*
     // Manually switching relays means switching the thermostat off
     if (sysCfg.thermostat3state != 0) {
       sysCfg.thermostat3state = 0;
     }
+  */
   }
 
   if (gotcmd == 1) {

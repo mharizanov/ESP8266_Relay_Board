@@ -58,7 +58,7 @@ sd('mqtt-state-pub-topic',v);
 <tr><td>Relays subs topic:</td><td><input type="text" name="mqtt-relay-subs-topic" id="mqtt-relay-subs-topic" value="%mqtt-relay-subs-topic%">     </td></tr>
 <tr><td>Temp subs topic:</td><td><input type="text" name="mqtt-temp-subs-topic" id="mqtt-temp-subs-topic" value="%mqtt-temp-subs-topic%">     </td>
 <td>
-If thermostat is configured to use MQTT as temperature source use this topic. It should be temp * 10 in degC (eg. 24.5 = 245).
+If thermostat is configured to use MQTT as temperature source use this topic.
 </td> </tr>
 <tr><td>Mqtt Temperature timeout:</td><td><input type="text" name="mqtt-temp-timeout-secs" id="mqtt-temp-timeout-secs" value="%mqtt-temp-timeout-secs%">     </td>
 <td>Timeout for Temp subs topic reception. Temp subs topic should be published &lt; every timeout seconds or thermostat turns off</td></tr>

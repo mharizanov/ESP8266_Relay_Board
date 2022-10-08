@@ -19,8 +19,10 @@
 #define STA_IP "192.168.1.17"
 #define STA_MASK "255.255.255.0"
 #define STA_GW "192.168.1.1"
-#define STA_SSID "dd-wrt"
-#define STA_PASS "a1b2c3d4e5"
+//#define STA_SSID "dd-wrt"
+//#define STA_PASS "a1b2c3d4e5"
+#define STA_SSID "pearson.uk"
+#define STA_PASS "spectrum"
 
 #define STA_TYPE AUTH_WPA2_PSK
 

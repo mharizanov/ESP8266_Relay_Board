@@ -70,6 +70,7 @@ static ICACHE_FLASH_ATTR void MQTTbroadcastReading(void *arg) {
   char ds_temp[8];
   char therm_room_temp[8];
   char topic[64];
+  char currentThermSetPoint[8] = "-9999";
   char payload[240];
 
   if (sysCfg.mqtt_enable == 1) {
@@ -123,19 +124,29 @@ static ICACHE_FLASH_ATTR void MQTTbroadcastReading(void *arg) {
       os_strcpy(therm_room_temp, "N/A");
     }
 
+    if (sysCfg.thermostat1mode == 1) {
+      // thermostat in Schedule mode
+      os_sprintf(currentThermSetPoint, "%d.%d", (int)scheduleThermSetPoint / 10,
+                 scheduleThermSetPoint - ((int)scheduleThermSetPoint / 10) * 10);
+
+    } else {
+      // thermostat in Manual mode
+      os_sprintf(currentThermSetPoint, "%d.%d", (int)sysCfg.thermostat1manualsetpoint / 10,
+                 sysCfg.thermostat1manualsetpoint - ((int)sysCfg.thermostat1manualsetpoint / 10) * 10);
+    }
+
     os_sprintf(payload,
-               "{ \"ds18b20Temp\": \"%s\",\n\"dht22Temp\":\"%s\",\n\"dht22Humidity\":\"%s\",\n"
+               "{\n\"ds18b20Temp\": \"%s\",\n\"dht22Temp\":\"%s\",\n\"dht22Humidity\":\"%s\",\n"
                "\"humidiStat\":%d,\n"
-               "\"relay1\":%d,\n\""
-               "\"relay2\":%d,\n\""
-               "\"relay3\":%d,\n\""
-               "\"opMode\":%d,\n\"state\":%d,\n\"manualSetPoint\":%d,\n\"scheduleSetPoint\":%d,\n"
+               "\"relay1\":%d,\n"
+               "\"relay2\":%d,\n"
+               "\"relay3\":%d,\n"
+               "\"opMode\":%d,\n\"state\":%d,\n\"thermostatSetPoint\":\"%s\",\n"
                "\"roomTemp\":\"%s\",\n\"autoMode\": %d\n"
                "}\n",
                ds_temp, dht_temp, dht_humi, (int)sysCfg.thermostat1_input == 2 ? 1 : 0, currGPIO12State,
                currGPIO13State, currGPIO15State, (int)sysCfg.thermostat1opmode, (int)sysCfg.thermostat1state,
-               (int)sysCfg.thermostat1manualsetpoint, (int)currentThermSetPoint, (char *)therm_room_temp,
-               (int)sysCfg.thermostat1mode);
+               (int)currentThermSetPoint, (char *)therm_room_temp, (int)sysCfg.thermostat1mode);
 
     os_sprintf(topic, "%s", sysCfg.mqtt_state_pub_topic);
     os_printf("Broadcastd: Publishing state via MQTT to \"%s\", length %d\n", topic, os_strlen(payload));

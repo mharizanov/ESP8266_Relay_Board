@@ -18,7 +18,7 @@
 #include <stdlib.h>
 
 time_t thermostatRelayOffTime = 0;
-int currentThermSetPoint = -9999;
+int scheduleThermSetPoint = -9999;
 
 static int ICACHE_FLASH_ATTR wd(int year, int month, int day) {
   size_t JND = day + ((153 * (month + 12 * ((14 - month) / 12) - 3) + 2) / 5) +
@@ -29,7 +29,6 @@ static int ICACHE_FLASH_ATTR wd(int year, int month, int day) {
 
 void ICACHE_FLASH_ATTR thermostat(int current_t, int setpoint) {
 
-  currentThermSetPoint = setpoint;
   if (current_t < setpoint - sysCfg.thermostat1hysteresislow) {
     os_printf("Thermostat: Current temperature (%d) is below setpoint.\n", current_t);
     if (sysCfg.thermostat1opmode == THERMOSTAT_HEATING)
@@ -133,11 +132,25 @@ static void ICACHE_FLASH_ATTR pollThermostatCb(void *arg) {
     Treading = 100;
   }
 
+  // Update the thermostat setpoint if in AUTO mode as it is reported via MQTT
+  // Failing to do this here means it defaults to -9999 in auto mode if Treading is invalid.
+  if (sysCfg.thermostat1mode == THERMOSTAT_AUTO) {
+    for (int sched = 0; sched < 8 && sysCfg.thermostat1schedule.weekSched[dow].daySched[sched].active == 1; sched++) {
+      if (currtime >= sysCfg.thermostat1schedule.weekSched[dow].daySched[sched].start &&
+          currtime < sysCfg.thermostat1schedule.weekSched[dow].daySched[sched].end) {
+
+        scheduleThermSetPoint = sysCfg.thermostat1schedule.weekSched[dow].daySched[sched].setpoint;
+        os_printf("Thermostat: Current schedule (%d) setpoint is: %d\n", sched,
+                  sysCfg.thermostat1schedule.weekSched[dow].daySched[sched].setpoint);
+      }
+    }
+  }
+
   if (Treading == -9999 || Treading > 400 || Treading < -200) { // Check for valid reading
     // if reading is > 40C, or < -3C or -9999 (invalid read) treat as invalid
     os_printf("Thermostat: Invalid temperature reading (%d is not in range -20C to +40C) turning off relay.\n",
               (int)Treading);
-    // turn heating off - do not act on bad data !
+    // turn off - do not act on bad data !
     thermostatRelayOff();
     return;
   }
@@ -145,20 +158,17 @@ static void ICACHE_FLASH_ATTR pollThermostatCb(void *arg) {
   if (sysCfg.thermostat1mode == THERMOSTAT_MANUAL) {
     thermostat(Treading, (int)sysCfg.thermostat1manualsetpoint);
     return;
-  }
-
-  if (year < 2022) { // Something is wrong with the NTP time, maybe not enabled?
-    os_printf("Thermostat: NTP time seems incorrect - year is < 2022. \n");
-    return;
-  }
-
-  for (int sched = 0; sched < 8 && sysCfg.thermostat1schedule.weekSched[dow].daySched[sched].active == 1; sched++) {
-    if (currtime >= sysCfg.thermostat1schedule.weekSched[dow].daySched[sched].start &&
-        currtime < sysCfg.thermostat1schedule.weekSched[dow].daySched[sched].end) {
-      os_printf("Thermostat: Current schedule (%d) setpoint is: %d\n", sched,
-                sysCfg.thermostat1schedule.weekSched[dow].daySched[sched].setpoint);
-      thermostat(Treading, sysCfg.thermostat1schedule.weekSched[dow].daySched[sched].setpoint);
+  } else if (sysCfg.thermostat1mode == THERMOSTAT_AUTO) {
+    if (year < 2022) {
+      // Something is wrong with the NTP time, maybe not enabled?
+      os_printf("Thermostat: NTP time seems incorrect - year is < 2022. \n");
+      return;
+    } else {
+      thermostat(Treading, (int)scheduleThermSetPoint);
     }
+  } else {
+    os_printf("Thermostat: Unknown Thermostat mode. No action.");
+    return;
   }
 }
 

@@ -18,6 +18,7 @@
 #include <stdlib.h>
 
 time_t thermostatRelayOffTime = 0;
+int currentThermSetPoint = -9999;
 
 static int ICACHE_FLASH_ATTR wd(int year, int month, int day) {
   size_t JND = day + ((153 * (month + 12 * ((14 - month) / 12) - 3) + 2) / 5) +
@@ -27,6 +28,8 @@ static int ICACHE_FLASH_ATTR wd(int year, int month, int day) {
 }
 
 void ICACHE_FLASH_ATTR thermostat(int current_t, int setpoint) {
+
+  currentThermSetPoint = setpoint;
   if (current_t < setpoint - sysCfg.thermostat1hysteresislow) {
     os_printf("Thermostat: Current temperature (%d) is below setpoint.\n", current_t);
     if (sysCfg.thermostat1opmode == THERMOSTAT_HEATING)
@@ -34,7 +37,7 @@ void ICACHE_FLASH_ATTR thermostat(int current_t, int setpoint) {
     else
       thermostatRelayOff();
   } else if (current_t > setpoint + sysCfg.thermostat1hysteresishigh) {
-    os_printf("Thermostaat: Current temperature (%d) is above setpoint.\n", current_t);
+    os_printf("Thermostat: Current temperature (%d) is above setpoint.\n", current_t);
     if (sysCfg.thermostat1opmode == THERMOSTAT_HEATING)
       thermostatRelayOff();
     else
@@ -118,7 +121,7 @@ static void ICACHE_FLASH_ATTR pollThermostatCb(void *arg) {
                 sysCfg.mqtt_temp_timeout_secs / 60);
       Treading = -9999;
     } else {
-      Treading = mqttTreading ; // Treading is tenth of a degree, eg 24.5 = 245
+      Treading = mqttTreading; // Treading is tenth of a degree, eg 24.5 = 245
     }
   }
 

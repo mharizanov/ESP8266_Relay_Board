@@ -219,6 +219,7 @@ void ICACHE_FLASH_ATTR user_init(void) {
   stdoutInit();
   os_delay_us(65535);
   CFG_Load();
+
   ioInit();
 
   WIFI_Connect(wifiConnectCb);
@@ -317,4 +318,7 @@ uint32 ICACHE_FLASH_ATTR user_rf_cal_sector_set(void) {
   return rf_cal_sec;
 }
 
-void ICACHE_FLASH_ATTR user_rf_pre_init(void) { system_phy_freq_trace_enable(at_get_rf_auto_trace_from_flash()); }
+void ICACHE_FLASH_ATTR user_rf_pre_init(void) {
+  // system_phy_freq_trace_enable(at_get_rf_auto_trace_from_flash());
+  system_phy_freq_trace_enable(0);
+}

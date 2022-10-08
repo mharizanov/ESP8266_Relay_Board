@@ -429,6 +429,9 @@ void ICACHE_FLASH_ATTR tplMQTT(HttpdConnData *connData, char *token, void **arg)
     os_strcpy(buff, (char *)sysCfg.mqtt_ds18b20_temp_pub_topic);
   }
 
+  if (os_strcmp(token, "mqtt-state-pub-topic") == 0) {
+    os_strcpy(buff, (char *)sysCfg.mqtt_state_pub_topic);
+  }
   httpdSend(connData, buff, -1);
 }
 
@@ -505,6 +508,11 @@ int ICACHE_FLASH_ATTR cgiMQTT(HttpdConnData *connData) {
   len = httpdFindArg(connData->post->buff, "mqtt-ds18b20-temp-pub-topic", buff, sizeof(buff));
   if (len > 0) {
     os_sprintf((char *)sysCfg.mqtt_ds18b20_temp_pub_topic, buff);
+  }
+
+  len = httpdFindArg(connData->post->buff, "mqtt-state-pub-topic", buff, sizeof(buff));
+  if (len > 0) {
+    os_sprintf((char *)sysCfg.mqtt_state_pub_topic, buff);
   }
 
   CFG_Save();

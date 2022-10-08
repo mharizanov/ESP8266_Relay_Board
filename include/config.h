@@ -100,6 +100,7 @@ typedef struct {
   uint32_t mqtt_temp_timeout_secs;
   uint8_t mqtt_dht22_humi_pub_topic[64];
   uint8_t mqtt_ds18b20_temp_pub_topic[64];
+  uint8_t mqtt_state_pub_topic[64];
 
   uint32_t sensor_ds18b20_enable;
   uint32_t sensor_dht22_enable;

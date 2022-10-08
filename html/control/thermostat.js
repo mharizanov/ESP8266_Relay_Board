@@ -74,7 +74,7 @@ for (var d in schedule) {
     for (var z in schedule[d]) {
         schedule[d][z].s /= 100;
         schedule[d][z].e /= 100;
-        schedule[d][z].sp /= 100;
+        schedule[d][z].sp /= 10; //except setpoint, we only mult this x10 on both sides
     }
 }
 
@@ -587,7 +587,7 @@ function calc_schedule_esp(sched) {
     for (var d in fixsched) {
         fixsched[d].s *= 100;
         fixsched[d].e *= 100;
-        fixsched[d].sp *= 100;
+        fixsched[d].sp *= 10;
     }
     return fixsched;
 }

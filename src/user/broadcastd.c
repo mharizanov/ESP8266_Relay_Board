@@ -12,6 +12,8 @@
 #include "mem.h"
 #include "mqtt.h"
 #include "osapi.h"
+#include "stdout.h"
+#include "thermostat.h"
 #include "user_interface.h"
 #include "utils.h"
 
@@ -62,43 +64,82 @@ static void ICACHE_FLASH_ATTR broadcastReading(void *arg) {
 }
 
 static ICACHE_FLASH_ATTR void MQTTbroadcastReading(void *arg) {
+
+  char dht_temp[8];
+  char dht_humi[8];
+  char ds_temp[8];
+  char therm_room_temp[8];
+  char topic[64];
+  char payload[240];
+
   if (sysCfg.mqtt_enable == 1) {
     // os_printf("Sending MQTT\n");
-
-    if (sysCfg.sensor_dht22_enable) {
-      struct sensor_reading *result = readDHT();
-      if (result->success) {
-        char temp[32];
-        char topic[128];
-        int len;
-
-        dht_temp_str(temp);
-        len = os_strlen(temp);
-        os_sprintf(topic, "%s", sysCfg.mqtt_dht22_temp_pub_topic);
-        MQTT_Publish(&mqttClient, topic, temp, len, 0, 0);
-        os_printf("Published \"%s\" to topic \"%s\"\n", temp, topic);
-
-        dht_humi_str(temp);
-        len = os_strlen(temp);
-        os_sprintf(topic, "%s", sysCfg.mqtt_dht22_humi_pub_topic);
-        MQTT_Publish(&mqttClient, topic, temp, len, 0, 0);
-        os_printf("Published \"%s\" to topic \"%s\"\n", temp, topic);
-      }
-    }
 
     if (sysCfg.sensor_ds18b20_enable) {
       struct sensor_reading *result = read_ds18b20();
       if (result->success) {
         char temp[32];
-        char topic[128];
-        int len;
         ds_str(temp, 0);
-        len = os_strlen(temp);
-        os_sprintf(topic, "%s", sysCfg.mqtt_ds18b20_temp_pub_topic);
-        MQTT_Publish(&mqttClient, topic, temp, len, 0, 0);
-        os_printf("Published \"%s\" to topic \"%s\"\n", temp, topic);
       }
     }
+
+    // broadcast current state
+
+    if (sysCfg.sensor_dht22_enable) {
+      struct sensor_reading *result = readDHT();
+      if (result->success) {
+        dht_temp_str(dht_temp);
+        dht_humi_str(dht_humi);
+      } else {
+        os_strcpy(dht_temp, "N/A");
+        os_strcpy(dht_humi, "N/A");
+      }
+    } else {
+      os_strcpy(dht_temp, "N/A");
+      os_strcpy(dht_humi, "N/A");
+    }
+
+    if (sysCfg.sensor_ds18b20_enable) {
+      ds_str(ds_temp, 0);
+    } else {
+      os_strcpy(ds_temp, "N/A");
+    }
+
+    if (sysCfg.thermostat1_input == 0) {
+      os_strcpy(therm_room_temp, ds_temp);
+    } else if (sysCfg.thermostat1_input == 1 || sysCfg.thermostat1_input == 2) {
+      os_strcpy(therm_room_temp, dht_temp);
+    } else if (sysCfg.thermostat1_input == 3) { // Mqtt reading should be degC *10
+      if ((int)mqttTreading == -9999) {
+        os_strcpy(therm_room_temp, "-9999");
+      } else {
+        os_sprintf(therm_room_temp, "%d.%d", (int)mqttTreading / 10, mqttTreading - ((int)mqttTreading / 10) * 10);
+      }
+    } else if (sysCfg.thermostat1_input == 4) { // Serial reading should be degC *10
+      os_sprintf(therm_room_temp, "%d.%d", (int)serialTreading / 10, serialTreading - ((int)serialTreading / 10) * 10);
+    } else if (sysCfg.thermostat1_input == 5) { // Fixed value
+      os_strcpy(therm_room_temp, "10");
+    } else {
+      os_strcpy(therm_room_temp, "N/A");
+    }
+
+    os_sprintf(payload,
+               "{ \"ds18b20Temp\": \"%s\",\n\"dht22Temp\":\"%s\",\n\"dht22Humidity\":\"%s\",\n"
+               "\"humidiStat\":%d,\n"
+               "\"relay1\":%d,\n\""
+               "\"relay2\":%d,\n\""
+               "\"relay3\":%d,\n\""
+               "\"opMode\":%d,\n\"state\":%d,\n\"manualSetPoint\":%d,\n\"scheduleSetPoint\":%d,\n"
+               "\"roomTemp\":\"%s\",\n\"autoMode\": %d\n"
+               "}\n",
+               ds_temp, dht_temp, dht_humi, (int)sysCfg.thermostat1_input == 2 ? 1 : 0, currGPIO12State,
+               currGPIO13State, currGPIO15State, (int)sysCfg.thermostat1opmode, (int)sysCfg.thermostat1state,
+               (int)sysCfg.thermostat1manualsetpoint, (int)currentThermSetPoint, (char *)therm_room_temp,
+               (int)sysCfg.thermostat1mode);
+
+    os_sprintf(topic, "%s", sysCfg.mqtt_state_pub_topic);
+    os_printf("Broadcastd: Publishing state via MQTT to \"%s\", length %d\n", topic, os_strlen(payload));
+    MQTT_Publish(&mqttClient, topic, payload, os_strlen(payload), 0, 0);
   }
 }
 

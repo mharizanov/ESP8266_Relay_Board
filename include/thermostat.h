@@ -6,3 +6,4 @@ void thermostatRelayOn(void);
 void thermostatRelayOff(void);
 
 extern time_t thermostatRelayOffTime;
+extern int currentThermSetPoint;

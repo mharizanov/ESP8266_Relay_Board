@@ -112,7 +112,7 @@ static void ICACHE_FLASH_ATTR pollThermostatCb(void *arg) {
     if (sntp_get_current_timestamp() - mqttTreadingTS > sysCfg.mqtt_temp_timeout_secs) {
       // mqttTreading too old
       os_printf("Thermostat: MQTT temperature reading stale (older than %d minutes)\n",
-                sysCfg.mqtt_temp_timeout_secs * 60);
+                sysCfg.mqtt_temp_timeout_secs / 60);
       Treading = -9999;
     } else {
       Treading = mqttTreading * 10; // Treading is tenth of a degree, eg 24.5 = 2450

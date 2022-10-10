@@ -165,10 +165,23 @@ void ICACHE_FLASH_ATTR mqttDataCb(uint32_t *args, const char *topic, uint32_t to
   char strTempSubsTopic[strlen((char *)sysCfg.mqtt_temp_subs_topic)];
   os_strcpy(strTempSubsTopic, (char *)sysCfg.mqtt_temp_subs_topic);
 
+  // Did we get a temperature reading (tpoic: strTempSubsTopic )
   if (os_strcmp(strTempSubsTopic, strTopic) == 0) {
-    os_printf("Recieved thermostat temperature of %s via MQTT\n", strData);
+    os_printf("Received thermostat temperature of %s via MQTT\n", strData);
     mqttTreading = atoi(strData) * 10;
+    char *fractPart;
+    fractPart = strchr(strData, '.');
+
+    // deal with the decimal point
+    if (fractPart != NULL) {
+      char *firstChar = "0";
+      os_sprintf(firstChar, "%c", fractPart[1]);
+      int fp = atoi(firstChar);
+      mqttTreading += fp;
+    }
+
     mqttTreadingTS = sntp_get_current_timestamp(); // timestamp of the reading
+
   } else {
     char relayNum = strTopic[topic_len - 1];
     char strSubsTopic[strlen((char *)sysCfg.mqtt_relay_subs_topic)];

@@ -95,6 +95,14 @@ static ICACHE_FLASH_ATTR void MQTTbroadcastReading(void *arg) {
         os_strcpy(dht_temp, "N/A");
         os_strcpy(dht_humi, "N/A");
       }
+      os_sprintf(topic, "%s", sysCfg.mqtt_dht22_temp_pub_topic);
+      MQTT_Publish(&mqttClient, topic, dht_temp, os_strlen(dht_temp), 0, 0);
+      os_printf("Published \"%s\" to topic \"%s\"\n", dht_temp, topic);
+
+      os_sprintf(topic, "%s", sysCfg.mqtt_dht22_humi_pub_topic);
+      MQTT_Publish(&mqttClient, topic, dht_humi, os_strlen(dht_humi), 0, 0);
+      os_printf("Published \"%s\" to topic \"%s\"\n", dht_humi, topic);
+
     } else {
       os_strcpy(dht_temp, "N/A");
       os_strcpy(dht_humi, "N/A");
@@ -102,6 +110,10 @@ static ICACHE_FLASH_ATTR void MQTTbroadcastReading(void *arg) {
 
     if (sysCfg.sensor_ds18b20_enable) {
       ds_str(ds_temp, 0);
+
+      os_sprintf(topic, "%s", sysCfg.mqtt_ds18b20_temp_pub_topic);
+      MQTT_Publish(&mqttClient, topic, ds_temp, os_strlen(ds_temp), 0, 0);
+      os_printf("Published \"%s\" to topic \"%s\"\n", ds_temp, topic);
     } else {
       os_strcpy(ds_temp, "N/A");
     }
@@ -141,7 +153,7 @@ static ICACHE_FLASH_ATTR void MQTTbroadcastReading(void *arg) {
                "\"relay1\":%d,\n"
                "\"relay2\":%d,\n"
                "\"relay3\":%d,\n"
-               "\"opMode\":%d,\n\"state\":%d,\n\"thermostatSetPoint\":\"%s\",\n"
+               "\"opMode\":%d,\n\"thermostatEnabled\":%d,\n\"thermostatSetPoint\":\"%s\",\n"
                "\"roomTemp\":\"%s\",\n\"autoMode\": %d\n"
                "}\n",
                ds_temp, dht_temp, dht_humi, (int)sysCfg.thermostat1_input == 2 ? 1 : 0, currGPIO12State,

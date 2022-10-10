@@ -6,7 +6,7 @@
 #define ICACHE_RAM_ATTR __attribute__((section(".iram0.text")))
 #define ICACHE_RODATA_ATTR __attribute__((section(".irom.text")))
 
-#define CFG_HOLDER 0x00FF0004
+#define CFG_HOLDER 0x00FF0005
 //#define CFG_LOCATION 0x3C     //Working value on old SDK
 #define FG_LOCATION 0x62 // NONOS-SDK - circa around position 384K in flash
 

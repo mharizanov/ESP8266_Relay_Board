@@ -47,32 +47,29 @@ void ICACHE_FLASH_ATTR CFG_Save() {
   int ferror = 0;
 
   ferror = spi_flash_read((FG_LOCATION + 3) * SPI_FLASH_SEC_SIZE, (uint32 *)&saveFlag, sizeof(SAVE_FLAG));
-  if (saveFlag.flag == 0) {
-    os_printf("no save flag - save\r\n");
 
+  if (saveFlag.flag == 0) {
     ferror = spi_flash_erase_sector(FG_LOCATION + 1);
-    os_printf("ferror:%d\n", ferror);
+    // os_printf("ferror:%d\n", ferror);
     ferror = spi_flash_write((FG_LOCATION + 1) * SPI_FLASH_SEC_SIZE, (uint32 *)&sysCfg, sizeof(SYSCFG));
-    os_printf("ferror:%d\n", ferror);
+    // os_printf("ferror:%d\n", ferror);
 
     saveFlag.flag = 1;
     ferror = spi_flash_erase_sector(FG_LOCATION + 3);
-    os_printf("ferror:%d\n", ferror);
+    // os_printf("ferror:%d\n", ferror);
     ferror = spi_flash_write((FG_LOCATION + 3) * SPI_FLASH_SEC_SIZE, (uint32 *)&saveFlag, sizeof(SAVE_FLAG));
-    os_printf("ferror:%d\n", ferror);
+    // os_printf("ferror:%d\n", ferror);
 
   } else {
-    os_printf("save flag - save\r\n");
-
     ferror = spi_flash_erase_sector(FG_LOCATION + 0);
     spi_flash_write((FG_LOCATION + 0) * SPI_FLASH_SEC_SIZE, (uint32 *)&sysCfg, sizeof(SYSCFG));
-    os_printf("ferror:%d\n", ferror);
+    // os_printf("ferror:%d\n", ferror);
     saveFlag.flag = 0;
     ferror = spi_flash_erase_sector(FG_LOCATION + 3);
-    os_printf("ferror:%d\n", ferror);
+    // os_printf("ferror:%d\n", ferror);
 
     ferror = spi_flash_write((FG_LOCATION + 3) * SPI_FLASH_SEC_SIZE, (uint32 *)&saveFlag, sizeof(SAVE_FLAG));
-    os_printf("ferror:%d\n", ferror);
+    // os_printf("ferror:%d\n", ferror);
   }
 }
 
@@ -81,12 +78,8 @@ void ICACHE_FLASH_ATTR CFG_Load() {
   os_printf("\r\nload cfg...(%d bytes)\r\n", sizeof(SYSCFG));
   spi_flash_read((FG_LOCATION + 3) * SPI_FLASH_SEC_SIZE, (uint32 *)&saveFlag, sizeof(SAVE_FLAG));
   if (saveFlag.flag == 0) {
-    os_printf("no save flag - load\r\n");
-
     spi_flash_read((FG_LOCATION + 0) * SPI_FLASH_SEC_SIZE, (uint32 *)&sysCfg, sizeof(SYSCFG));
   } else {
-    os_printf("save flag - load\r\n");
-
     spi_flash_read((FG_LOCATION + 1) * SPI_FLASH_SEC_SIZE, (uint32 *)&sysCfg, sizeof(SYSCFG));
   }
 

@@ -273,9 +273,10 @@ void ICACHE_FLASH_ATTR tplDS18b20(HttpdConnData *connData, char *token, void **a
         if (SignBit) // negative
           Whole *= -1;
 
-        os_sprintf(buff + strlen(buff), "Sensor %d (%02x %02x %02x %02x %02x %02x %02x %02x) reading is %d.%d�C<br />",
-                   i + 1, addr[i][0], addr[i][1], addr[i][2], addr[i][3], addr[i][4], addr[i][5], addr[i][6],
-                   addr[i][7], Whole, Fract < 10 ? 0 : Fract);
+        os_sprintf(buff + strlen(buff),
+                   "Sensor %d (%02x %02x %02x %02x %02x %02x %02x %02x) reading is %d.%d&#8451;<br />", i + 1,
+                   addr[i][0], addr[i][1], addr[i][2], addr[i][3], addr[i][4], addr[i][5], addr[i][6], addr[i][7],
+                   Whole, Fract < 10 ? 0 : Fract);
       } else {
         os_sprintf(buff + strlen(buff), "Sensor %d (%02x %02x %02x %02x %02x %02x %02x %02x) reading is invalid<br />",
                    i + 1, addr[i][0], addr[i][1], addr[i][2], addr[i][3], addr[i][4], addr[i][5], addr[i][6],

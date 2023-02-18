@@ -27,6 +27,65 @@ static int ICACHE_FLASH_ATTR wd(int year, int month, int day) {
   return (int)JND % 7;
 }
 
+int ICACHE_FLASH_ATTR getRoomTemp() {
+  // return the roomTemp for the configured thermostat sensor
+
+  int roomTemp = -9999;
+
+  // report the correct room temp depending on which sensor
+  // is assigned to thermostat
+  if (sysCfg.sensor_dht22_enable && (sysCfg.thermostat1_input == 1 || sysCfg.thermostat1_input == 2)) {
+    struct sensor_reading *result = readDHT();
+    if (result->success) {
+
+      if (sysCfg.thermostat1_input == 2) { // Humidistat
+        roomTemp = result->humidity * 100;
+      } else {
+        roomTemp = (int)(result->temperature * 100);
+      }
+    } else {
+      roomTemp = -9999;
+    }
+  } else if (sysCfg.sensor_ds18b20_enable && sysCfg.thermostat1_input == 0) {
+    struct sensor_reading *result = read_ds18b20();
+    if (result->success) {
+      int SignBit, Whole, Fract;
+      roomTemp = result->temperature;
+
+      SignBit = roomTemp & 0x8000;          // test most sig bit
+      if (SignBit)                          // negative
+        roomTemp = (roomTemp ^ 0xffff) + 1; // 2's comp
+
+      Whole = roomTemp >> 4; // separate off the whole and fractional portions
+      Fract = (roomTemp & 0xf) * 10 / 16;
+
+      if (SignBit) // negative
+        Whole *= -1;
+
+      roomTemp = Whole * 10 + Fract;
+    } else {
+      roomTemp = -9999;
+    }
+  }
+
+  else if (sysCfg.thermostat1_input == 3) { // Mqtt reading should be degC *10
+    if (sntp_get_current_timestamp() - mqttTreadingTS > sysCfg.mqtt_temp_timeout_secs) {
+      // mqttTreading too old, invalidate it by setting to -9999
+      os_printf("Thermostat: MQTT temperature reading stale (older than %d minutes)\n",
+                sysCfg.mqtt_temp_timeout_secs / 60);
+      mqttTreading = -9999;
+    } else {
+      roomTemp = mqttTreading; // Treading is tenth of a degree, eg 24.5 = 245
+    }
+  } else if (sysCfg.thermostat1_input == 4) { // Serial reading should be degC *10
+    roomTemp = serialTreading * 10;
+  } else if (sysCfg.thermostat1_input == 5) { // Fixed value 10C
+    roomTemp = 100;
+  }
+
+  return roomTemp;
+}
+
 void ICACHE_FLASH_ATTR thermostat(int current_t, int setpoint) {
 
   if (current_t < setpoint - sysCfg.thermostat1hysteresislow) {
@@ -48,8 +107,19 @@ void ICACHE_FLASH_ATTR thermostatRelayOn() {
   // to avoid relay cycling only turn the relay on
   // after it has been off for sysConfig.therm_relay_rest_min
   if (sntp_get_current_timestamp() > thermostatRelayOffTime + (sysCfg.therm_relay_rest_min * 60)) {
-    currGPIO12State = 1;
-    ioGPIO(currGPIO12State, 12);
+
+    if (sysCfg.relay_1_thermostat == 1) {
+      currGPIO12State = 1;
+      ioGPIO(currGPIO12State, 12);
+    }
+    if (sysCfg.relay_2_thermostat == 1) {
+      currGPIO13State = 1;
+      ioGPIO(currGPIO12State, 13);
+    }
+    if (sysCfg.relay_3_thermostat == 1) {
+      currGPIO15State = 1;
+      ioGPIO(currGPIO15State, 15);
+    }
   } else {
     os_printf("Thermostat: Attempt to turn thermostat relay on during rest period, ignored\n");
   }
@@ -57,9 +127,19 @@ void ICACHE_FLASH_ATTR thermostatRelayOn() {
 
 void ICACHE_FLASH_ATTR thermostatRelayOff() {
 
-  if (currGPIO12State != 0) {
+  if (sysCfg.relay_1_thermostat == 1 && currGPIO12State != 0) {
     currGPIO12State = 0;
     ioGPIO(currGPIO12State, 12);
+    thermostatRelayOffTime = sntp_get_current_timestamp();
+  }
+  if (sysCfg.relay_2_thermostat == 1 && currGPIO13State != 0) {
+    currGPIO13State = 0;
+    ioGPIO(currGPIO12State, 13);
+    thermostatRelayOffTime = sntp_get_current_timestamp();
+  }
+  if (sysCfg.relay_3_thermostat == 1 && currGPIO15State != 0) {
+    currGPIO15State = 0;
+    ioGPIO(currGPIO15State, 15);
     thermostatRelayOffTime = sntp_get_current_timestamp();
   }
 }
@@ -79,58 +159,12 @@ static void ICACHE_FLASH_ATTR pollThermostatCb(void *arg) {
 
   if (sysCfg.thermostat1state == 0) {
     os_printf("Thermostat: Not enabled.\n");
+    // turn relays associated with the thermostat off
+    thermostatRelayOff();
     return;
   }
 
-  long Treading = -9999;
-
-  if (sysCfg.sensor_dht22_enable) {
-    struct sensor_reading *result = readDHT();
-    if (result->success) {
-      Treading = result->temperature * 10;
-      if (sysCfg.thermostat1_input == 2) // Humidistat
-        Treading = result->humidity * 100;
-    }
-  } else {
-    if (sysCfg.sensor_ds18b20_enable && sysCfg.thermostat1_input == 0) {
-      struct sensor_reading *result = read_ds18b20();
-      if (result->success) {
-        int SignBit, Whole, Fract;
-        Treading = result->temperature;
-
-        SignBit = Treading & 0x8000;          // test most sig bit
-        if (SignBit)                          // negative
-          Treading = (Treading ^ 0xffff) + 1; // 2's comp
-
-        Whole = Treading >> 4; // separate off the whole and fractional portions
-        Fract = (Treading & 0xf) * 10 / 16;
-
-        if (SignBit) // negative
-          Whole *= -1;
-        Treading = Whole * 10 + Fract;
-      }
-    } // ds8b20 enabled
-  }
-
-  if (sysCfg.thermostat1_input == 3) { // MQTT input to thermostat
-
-    if (sntp_get_current_timestamp() - mqttTreadingTS > sysCfg.mqtt_temp_timeout_secs) {
-      // mqttTreading too old
-      os_printf("Thermostat: MQTT temperature reading stale (older than %d minutes)\n",
-                sysCfg.mqtt_temp_timeout_secs / 60);
-      Treading = -9999;
-    } else {
-      Treading = mqttTreading; // Treading is tenth of a degree, eg 24.5 = 245
-    }
-  }
-
-  if (sysCfg.thermostat1_input == 4) { // Serial input to thermostat
-    Treading = serialTreading;         // Treading is tenth of a degree, eg 24.5 = 2450
-  }
-
-  if (sysCfg.thermostat1_input == 5) { // Fixed value to thermostat
-    Treading = 100;
-  }
+  int Treading = getRoomTemp();
 
   // Update the thermostat setpoint if in AUTO mode as it is reported via MQTT
   // Failing to do this here means it defaults to -9999 in auto mode if Treading is invalid.

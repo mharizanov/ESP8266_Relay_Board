@@ -133,6 +133,10 @@ void ICACHE_FLASH_ATTR CFG_Load() {
     sysCfg.relay_1_state = 0;
     sysCfg.relay_2_state = 0;
     sysCfg.relay_3_state = 0;
+    // Default to relay1 being associated with thermostat
+    sysCfg.relay_1_thermostat = 1;
+    sysCfg.relay_2_thermostat = 0;
+    sysCfg.relay_3_thermostat = 0;
 
     os_sprintf((char *)sysCfg.relay1name, "%s", RELAY1NAME);
     os_sprintf((char *)sysCfg.relay2name, "%s", RELAY2NAME);

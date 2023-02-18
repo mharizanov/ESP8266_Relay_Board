@@ -22,6 +22,7 @@ Some random cgi routines.
 #include "mem.h"
 #include "mqtt.h"
 #include "stdout.h"
+#include "thermostat.h"
 #include "time_utils.h"
 #include "user_interface.h"
 #include <osapi.h>
@@ -51,6 +52,8 @@ int ICACHE_FLASH_ATTR cgiThermostat(HttpdConnData *connData) {
   char buff[2048];
   char temp[128];
   char humi[32];
+  char therm_room_temp[8];
+
   int len = 0;
 
   httpdStartResponse(connData, 200);
@@ -62,6 +65,8 @@ int ICACHE_FLASH_ATTR cgiThermostat(HttpdConnData *connData) {
     // Connection aborted. Clean up.
     return HTTPD_CGI_DONE;
   }
+  int roomTemp = getRoomTemp();
+  os_sprintf(therm_room_temp, "%d.%d", (int)roomTemp / 10, abs(roomTemp - ((int)roomTemp / 10) * 10));
 
   os_strcpy(buff, "Unknown");
   os_strcpy(temp, "N/A");
@@ -69,41 +74,17 @@ int ICACHE_FLASH_ATTR cgiThermostat(HttpdConnData *connData) {
 
   len = httpdFindArg(connData->getArgs, "param", buff, sizeof(buff));
   if (len > 0) {
-
     if (os_strcmp(buff, "state") == 0) {
-
-      if (sysCfg.sensor_dht22_enable && (sysCfg.thermostat1_input == 1 || sysCfg.thermostat1_input == 2)) {
-        dht_temp_str(temp);
-        dht_humi_str(humi);
-      } else if (sysCfg.sensor_ds18b20_enable && sysCfg.thermostat1_input == 0) {
-        ds_str(temp, 0);
-      }
-
-      else if (sysCfg.thermostat1_input == 3) { // Mqtt reading should be degC *10
-        if ((int)mqttTreading == -9999) {
-          os_strcpy(temp, "-9999");
-
-        } else {
-          os_sprintf(temp, "%d.%d", (int)mqttTreading / 10, mqttTreading - ((int)mqttTreading / 10) * 10);
-        }
-      }
-
-      else if (sysCfg.thermostat1_input == 4) { // Serial reading should be degC *10
-        os_sprintf(temp, "%d.%d", (int)serialTreading / 10, serialTreading - ((int)serialTreading / 10) * 10);
-      }
-
-      else if (sysCfg.thermostat1_input == 5) { // Fixed value
-        os_strcpy(temp, "10");
-      }
 
       os_sprintf(buff,
                  "{ \"temperature\": \"%s\",\n\"humidity\":\"%s\",\n"
                  "\"humidistat\":%d,\n\"relay1state\":%d,\n\"relay1name\":\"%s\",\n\"opmode\":%d,\n\""
                  "state\":%d,\n\"manualsetpoint\":%d,\n\"thermostat1_input\":%d,\n\"automode\": %d,\n"
                  "\"mqtthost\": \"%s,\"\n }\n",
-                 temp, humi, (int)sysCfg.thermostat1_input == 2 ? 1 : 0, currGPIO12State, (char *)sysCfg.relay1name,
-                 (int)sysCfg.thermostat1opmode, (int)sysCfg.thermostat1state, (int)sysCfg.thermostat1manualsetpoint,
-                 (int)sysCfg.thermostat1_input, (int)sysCfg.thermostat1mode, (char *)sysCfg.mqtt_host);
+                 (char *)therm_room_temp, humi, (int)sysCfg.thermostat1_input == 2 ? 1 : 0, currGPIO12State,
+                 (char *)sysCfg.relay1name, (int)sysCfg.thermostat1opmode, (int)sysCfg.thermostat1state,
+                 (int)sysCfg.thermostat1manualsetpoint, (int)sysCfg.thermostat1_input, (int)sysCfg.thermostat1mode,
+                 (char *)sysCfg.mqtt_host);
     }
 
     if (os_strcmp(buff, "temperature") == 0) {

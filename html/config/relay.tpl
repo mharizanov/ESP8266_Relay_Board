@@ -17,15 +17,15 @@
 </tr>
 <tr>
 <td>Relay 1 name:</td><td><input type="text" name="relay1name" id="relay1name" value="%relay1name%"/></td>
-<td></td>
+<td>Thermostat controlled ? <input type="checkbox" name="relay1thermostat" id="relay1thermostat" %relay1thermostat%></input></td>
 </tr>
 <tr>
 <td>Relay 2 name:</td><td><input type="text" name="relay2name" id="relay2name" value="%relay2name%"/></td>
-<td></td>
+<td>Thermostat controlled ? <input type="checkbox" name="relay2thermostat" id="relay2thermostat" %relay2thermostat%></input></td>
 </tr>
 <tr>
 <td>Relay 3 name:</td><td><input type="text" name="relay3name" id="relay3name" value="%relay3name%"/></td>
-<td></td>
+<td>Thermostat controlled ? <input type="checkbox" name="relay3thermostat" id="relay3thermostat" %relay3thermostat%></input></td>
 </tr>
 <tr>
 <td>Relay 1 Thermostat Rest Minutes:</td><td><input type="text" name="therm-relay-rest-min" id="therm-relay-rest-min" value="%therm-relay-rest-min%"/></td>

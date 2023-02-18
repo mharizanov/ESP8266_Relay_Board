@@ -75,15 +75,6 @@ static ICACHE_FLASH_ATTR void MQTTbroadcastReading(void *arg) {
 
   if (sysCfg.mqtt_enable == 1) {
     // os_printf("Sending MQTT\n");
-
-    if (sysCfg.sensor_ds18b20_enable) {
-      struct sensor_reading *result = read_ds18b20();
-      if (result->success) {
-        char temp[32];
-        ds_str(temp, 0);
-      }
-    }
-
     // broadcast current state
 
     if (sysCfg.sensor_dht22_enable) {
@@ -109,42 +100,52 @@ static ICACHE_FLASH_ATTR void MQTTbroadcastReading(void *arg) {
     }
 
     if (sysCfg.sensor_ds18b20_enable) {
-      ds_str(ds_temp, 0);
+      // publish all sensor ids and readings to ds18b20 MQTT topic
+      for (int i = 0; i < numds; i++) {
+        if (dsreading[i].success) {
+          ds_str(ds_temp, i);
+          os_sprintf(topic, "%s/%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x", sysCfg.mqtt_ds18b20_temp_pub_topic,
+                     addr[i][0], addr[i][1], addr[i][2], addr[i][3], addr[i][4], addr[i][5], addr[i][6], addr[i][7]);
 
-      os_sprintf(topic, "%s", sysCfg.mqtt_ds18b20_temp_pub_topic);
-      MQTT_Publish(&mqttClient, topic, ds_temp, os_strlen(ds_temp), 0, 0);
-      os_printf("Published \"%s\" to topic \"%s\"\n", ds_temp, topic);
+          MQTT_Publish(&mqttClient, topic, ds_temp, os_strlen(ds_temp), 0, 0);
+          os_printf("Published \"%s\" to topic \"%s\"\n", ds_temp, topic);
+        }
+      }
     } else {
+      // State publish MQTT (below)publishes temp of 1st ds18b20 sensor
+      // in its message, if ds18b20 not enabled set 1st sensor temp to N/A
       os_strcpy(ds_temp, "N/A");
     }
 
-    if (sysCfg.thermostat1_input == 0) {
-      os_strcpy(therm_room_temp, ds_temp);
-    } else if (sysCfg.thermostat1_input == 1 || sysCfg.thermostat1_input == 2) {
-      os_strcpy(therm_room_temp, dht_temp);
-    } else if (sysCfg.thermostat1_input == 3) { // Mqtt reading should be degC *10
-      if ((int)mqttTreading == -9999) {
-        os_strcpy(therm_room_temp, "-9999");
-      } else {
-        os_sprintf(therm_room_temp, "%d.%d", (int)mqttTreading / 10, mqttTreading - ((int)mqttTreading / 10) * 10);
-      }
-    } else if (sysCfg.thermostat1_input == 4) { // Serial reading should be degC *10
-      os_sprintf(therm_room_temp, "%d.%d", (int)serialTreading / 10, serialTreading - ((int)serialTreading / 10) * 10);
-    } else if (sysCfg.thermostat1_input == 5) { // Fixed value
-      os_strcpy(therm_room_temp, "10");
-    } else {
-      os_strcpy(therm_room_temp, "N/A");
-    }
+    /*
+        if (sysCfg.thermostat1_input == 0) {
+          os_strcpy(therm_room_temp, ds_temp);
+        } else if (sysCfg.thermostat1_input == 1 || sysCfg.thermostat1_input == 2) {
+          os_strcpy(therm_room_temp, dht_temp);
+        } else if (sysCfg.thermostat1_input == 3) { // Mqtt reading should be degC *10
+          if ((int)mqttTreading == -9999) {
+            // MQTT reading invalid or stale, report -9999 as therm_room_temp
+            os_strcpy(therm_room_temp, "-9999");
+          } else {
+            os_sprintf(therm_room_temp, "%d.%d", (int)mqttTreading / 10, mqttTreading - ((int)mqttTreading / 10) * 10);
+          }
+        } else if (sysCfg.thermostat1_input == 4) { // Serial reading should be degC *10
+          os_sprintf(therm_room_temp, "%d.%d", (int)serialTreading / 10, serialTreading - ((int)serialTreading / 10) *
+       10); } else if (sysCfg.thermostat1_input == 5) { // Fixed value os_strcpy(therm_room_temp, "10"); } else {
+          os_strcpy(therm_room_temp, "N/A");
+        }
+    */
+    int roomTemp = getRoomTemp();
+    os_sprintf(therm_room_temp, "%d.%d", (int)roomTemp / 10, abs(roomTemp - ((int)roomTemp / 10) * 10));
 
     if (sysCfg.thermostat1mode == 1) {
       // thermostat in Schedule mode
       os_sprintf(currentThermSetPoint, "%d.%d", (int)scheduleThermSetPoint / 10,
-                 scheduleThermSetPoint - ((int)scheduleThermSetPoint / 10) * 10);
-
+                 abs(scheduleThermSetPoint - ((int)scheduleThermSetPoint / 10) * 10));
     } else {
       // thermostat in Manual mode
       os_sprintf(currentThermSetPoint, "%d.%d", (int)sysCfg.thermostat1manualsetpoint / 10,
-                 sysCfg.thermostat1manualsetpoint - ((int)sysCfg.thermostat1manualsetpoint / 10) * 10);
+                 abs(sysCfg.thermostat1manualsetpoint - ((int)sysCfg.thermostat1manualsetpoint / 10) * 10));
     }
 
     os_sprintf(payload,

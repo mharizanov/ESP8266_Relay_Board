@@ -281,7 +281,7 @@ void ICACHE_FLASH_ATTR user_init(void) {
   os_printf("Relay Board Ready\n");
   os_printf("Free heap size:%d\n", system_get_free_heap_size());
   os_printf("Firmware version %s\n", FWVER);
-
+  os_printf("SDK version:%s\n", system_get_sdk_version());
 #ifdef CGIPWM_H
   // Mind the PWM pin!! defined in pwm.h
   duty = 0;

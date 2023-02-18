@@ -1,0 +1,31 @@
+ToDo
+
+
+Done
+Avoid thermostat cycling - timestamp relay activations and set limit 
+	(possibly make dedicated function for relay on/off with TS and check on the ON.. should always be able to turn it off)
+
+Config items for MQTT timeout & thermostat cycling
+
+Display of a bad or stale temperature should update on thermostat.html page  and not keep last reading
+
+Fix bug where thermostat off time is update is it is already off
+
+Change thermostat to work in tenths of a degree, not hundredths
+
+Remove used references to thermostat2 & thermostat3 (commented as may use in future version)
+
+Publish state to MQTT - thermostat (on/off, mode)+ relays 
+
+Publish all ds18b20 sensors to MQTT by device-id
+
+Choose which relays associate to each thermostat
+	Disable thermostat and turn relays off
+	when they relay state is change via webpage
+
+
+
+
+
+
+

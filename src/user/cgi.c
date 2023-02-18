@@ -43,8 +43,8 @@ int ICACHE_FLASH_ATTR cgiGPIO(HttpdConnData *connData) {
     currGPIO12State = atoi(buff);
     ioGPIO(currGPIO12State, 12);
     gotcmd = 1;
-    // Manually switching relays means switching the thermostat off
-    if (sysCfg.thermostat1state != 0) {
+    // Manually switching thermostat associated relays means switching the thermostat off
+    if (sysCfg.thermostat1state != 0 && sysCfg.relay_1_thermostat) {
       sysCfg.thermostat1state = 0;
     }
   }
@@ -54,12 +54,10 @@ int ICACHE_FLASH_ATTR cgiGPIO(HttpdConnData *connData) {
     currGPIO13State = atoi(buff);
     ioGPIO(currGPIO13State, 13);
     gotcmd = 1;
-    /*
-    // Manually switching relays means switching the thermostat off
-    if (sysCfg.thermostat2state != 0) {
-      sysCfg.thermostat2state = 0;
+    // Manually switching thermostat associated relays means switching the thermostat off
+    if (sysCfg.thermostat1state != 0 && sysCfg.relay_2_thermostat) {
+      sysCfg.thermostat1state = 0;
     }
-    */
   }
 
   len = httpdFindArg(connData->getArgs, "relay3", buff, sizeof(buff));
@@ -67,12 +65,10 @@ int ICACHE_FLASH_ATTR cgiGPIO(HttpdConnData *connData) {
     currGPIO15State = atoi(buff);
     ioGPIO(currGPIO15State, 15);
     gotcmd = 1;
-    /*
-    // Manually switching relays means switching the thermostat off
-    if (sysCfg.thermostat3state != 0) {
-      sysCfg.thermostat3state = 0;
+    // Manually switching thermostat associated relays means switching the thermostat off
+    if (sysCfg.thermostat1state != 0 && sysCfg.relay_3_thermostat) {
+      sysCfg.thermostat1state = 0;
     }
-  */
   }
 
   if (gotcmd == 1) {
@@ -673,6 +669,21 @@ int ICACHE_FLASH_ATTR cgiRLYSettings(HttpdConnData *connData) {
     os_strcpy((char *)sysCfg.relay3name, buff);
   }
 
+  len = httpdFindArg(connData->post->buff, "relay1thermostat", buff, sizeof(buff));
+  if (len > 0) {
+    sysCfg.relay_1_thermostat = (len > 0) ? 1 : 0;
+  }
+
+  len = httpdFindArg(connData->post->buff, "relay2thermostat", buff, sizeof(buff));
+  if (len > 0) {
+    sysCfg.relay_2_thermostat = (len > 0) ? 1 : 0;
+  }
+
+  len = httpdFindArg(connData->post->buff, "relay3thermostat", buff, sizeof(buff));
+  if (len > 0) {
+    sysCfg.relay_3_thermostat = (len > 0) ? 1 : 0;
+  }
+
   len = httpdFindArg(connData->post->buff, "therm-relay-rest-min", buff, sizeof(buff));
   if (len > 0) {
     sysCfg.therm_relay_rest_min = atoi(buff);
@@ -699,12 +710,24 @@ void ICACHE_FLASH_ATTR tplRLYSettings(HttpdConnData *connData, char *token, void
     os_strcpy(buff, (char *)sysCfg.relay1name);
   }
 
+  if (os_strcmp(token, "relay1thermostat") == 0) {
+    os_strcpy(buff, sysCfg.relay_1_thermostat == 1 ? "checked" : "");
+  }
+
   if (os_strcmp(token, "relay2name") == 0) {
     os_strcpy(buff, (char *)sysCfg.relay2name);
   }
 
+  if (os_strcmp(token, "relay2thermostat") == 0) {
+    os_strcpy(buff, sysCfg.relay_2_thermostat == 1 ? "checked" : "");
+  }
+
   if (os_strcmp(token, "relay3name") == 0) {
     os_strcpy(buff, (char *)sysCfg.relay3name);
+  }
+
+  if (os_strcmp(token, "relay3thermostat") == 0) {
+    os_strcpy(buff, sysCfg.relay_3_thermostat == 1 ? "checked" : "");
   }
 
   if (os_strcmp(token, "therm-relay-rest-min") == 0) {

@@ -670,19 +670,13 @@ int ICACHE_FLASH_ATTR cgiRLYSettings(HttpdConnData *connData) {
   }
 
   len = httpdFindArg(connData->post->buff, "relay1thermostat", buff, sizeof(buff));
-  if (len > 0) {
-    sysCfg.relay_1_thermostat = (len > 0) ? 1 : 0;
-  }
+  sysCfg.relay_1_thermostat = (len > 0) ? 1 : 0;
 
   len = httpdFindArg(connData->post->buff, "relay2thermostat", buff, sizeof(buff));
-  if (len > 0) {
-    sysCfg.relay_2_thermostat = (len > 0) ? 1 : 0;
-  }
+  sysCfg.relay_2_thermostat = (len > 0) ? 1 : 0;
 
   len = httpdFindArg(connData->post->buff, "relay3thermostat", buff, sizeof(buff));
-  if (len > 0) {
-    sysCfg.relay_3_thermostat = (len > 0) ? 1 : 0;
-  }
+  sysCfg.relay_3_thermostat = (len > 0) ? 1 : 0;
 
   len = httpdFindArg(connData->post->buff, "therm-relay-rest-min", buff, sizeof(buff));
   if (len > 0) {

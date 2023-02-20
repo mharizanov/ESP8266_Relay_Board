@@ -1,9 +1,25 @@
 #Three Channel WiFi Relay/Thermostat Board
 
-The Three Channel WiFi Relay/Thermostat Board is a WiFi connected multi-purpose relay board based on the [ESP8266 SoC].
+The Three Channel WiFi Relay/Thermostat Board is a WiFi connected multi-purpose relay board based on the [ESP8266 SoC], original build and designed my Martin Harizanov
 
-**NOTE**: The board connects to and controls high voltage, knowledge and care is required to handle it
+This fork of the code is actively maintained (2023), builds cleanly in Platfrom IO and has been rebased against NON-RTOS-SDK 2.2.3.
 
+Various enhancements have been made:
+
+###Enhancements to Martin's code
+- Full support for MQTT thermostat source
+- Enhanced MQTT reporting (state, DS18B20 JSON)
+- A void thermostat cycling 
+- New Config items for MQTT thermostat timeout & thermostat cycling
+- Display of a bad or stale temperature readings highlighted in thermostat UI
+- Fix bug where thermostat off time is update is it is already off
+- Change thermostat to work in tenths of a degree, not hundredths (direct compatibility with emonTh + emonGLCD)
+- Publish all ds18b20 sensors to MQTT by device-id
+- Choose which relays associate to each thermostat
+
+.
+
+--Original Readme.MD follows--
 
 ###Highlights
 
@@ -23,6 +39,7 @@ The Three Channel WiFi Relay/Thermostat Board is a WiFi connected multi-purpose 
  - DS18B20
  - DHT22
 
+**NOTE**: The board connects to and controls high voltage, knowledge and care is required to handle it
 See more at the [Three Channel WiFi Relay/Thermostat Board WiKi]
 
 #Author

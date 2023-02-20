@@ -11,7 +11,7 @@ Three channel WiFi relay/thermostat board <br/>
 (c) <a href="http://harizanov.com">Martin Harizanov</a> 2014-2015
 
 </p>
-<p>Firmware version: %fwver%.</p>
+<p>Firmware version: %fwver%, <a href="https://github.com/alandpearson/ESP8266_Relay_Board">Alan Pearson fork<a></p>
 <p>%freeheap%</p>
 
     <button onclick="location.href = '/';" class="float-left submit-button" >Back</button>

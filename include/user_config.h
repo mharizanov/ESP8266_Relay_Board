@@ -22,7 +22,7 @@
 //#define STA_SSID "dd-wrt"
 //#define STA_PASS "a1b2c3d4e5"
 #define STA_SSID "pearson.uk"
-#define STA_PASS "spectrum"
+#define STA_PASS "password"
 
 #define STA_TYPE AUTH_WPA2_PSK
 

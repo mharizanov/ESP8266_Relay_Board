@@ -11,7 +11,7 @@
 #define FG_LOCATION 0x62 // NONOS-SDK - circa around position 384K in flash
 
 // 0x7C on 512K flash is where the internal RF data lives - stay away from there(last 16k)
-#define FWVER "1.1/February 18th 2023"
+#define FWVER "1.2/February 19th 2023"
 
 /*DEFAULT CONFIGURATIONS*/
 

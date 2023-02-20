@@ -75,16 +75,15 @@ int ICACHE_FLASH_ATTR cgiThermostat(HttpdConnData *connData) {
   len = httpdFindArg(connData->getArgs, "param", buff, sizeof(buff));
   if (len > 0) {
     if (os_strcmp(buff, "state") == 0) {
-
       os_sprintf(buff,
                  "{ \"temperature\": \"%s\",\n\"humidity\":\"%s\",\n"
                  "\"humidistat\":%d,\n\"relay1state\":%d,\n\"relay1name\":\"%s\",\n\"opmode\":%d,\n\""
                  "state\":%d,\n\"manualsetpoint\":%d,\n\"thermostat1_input\":%d,\n\"automode\": %d,\n"
-                 "\"mqtthost\": \"%s,\"\n }\n",
+                 "\"mqtthost\": \"%s\",\n \"time\": \"%d\"}\n",
                  (char *)therm_room_temp, humi, (int)sysCfg.thermostat1_input == 2 ? 1 : 0, currGPIO12State,
                  (char *)sysCfg.relay1name, (int)sysCfg.thermostat1opmode, (int)sysCfg.thermostat1state,
                  (int)sysCfg.thermostat1manualsetpoint, (int)sysCfg.thermostat1_input, (int)sysCfg.thermostat1mode,
-                 (char *)sysCfg.mqtt_host);
+                 (char *)sysCfg.mqtt_host, sntp_get_current_timestamp());
     }
 
     if (os_strcmp(buff, "temperature") == 0) {

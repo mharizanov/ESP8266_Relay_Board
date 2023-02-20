@@ -53,7 +53,7 @@ for (var d in schedule) {
 }
 
 var maxc = 24;
-var minc = 5;
+var minc = 10;
 // ================================================
 // State variables
 // ================================================
@@ -85,13 +85,27 @@ setInterval(server_get, 5000);
 setInterval(updateclock, 1000);
 
 function updateclock() {
-  now = new Date();
+
+  servertime = 0;
+
+  if (thermostat.time != 0) {
+    now = new Date(parseInt(thermostat.time) * 1000);
+    servertime = 1;
+  } else {
+    now = new Date(0);
+    servertime = 0;
+  }
   timenow = now.getHours() + (now.getMinutes() / 60);
   today = days[now.getDay()];
 
   checkVisibility();
 
-  $("#datetime").html(today.toUpperCase() + " " + format_time(timenow));
+  if (servertime) {
+    $("#datetime").html("<center>" + today.toUpperCase() + " " + format_time(timenow) + "</center>");
+  } else {
+    $("#datetime").html("<center><font color=\"red\">?Current Server Date Time?</font></center>");
+  }
+  //$("#datetime").html("Time Now:" + thermostat.time);
 
   if (thermostat.automode == 0) {
     setpoint = thermostat.manualsetpoint;
@@ -521,6 +535,8 @@ function format_time(time) {
   var mins = Math.round((time - hour) * 60);
   if (mins < 10)
     mins = "0" + mins;
+  if (hour < 10)
+    hour = "0" + hour;
   return hour + ":" + mins;
 }
 

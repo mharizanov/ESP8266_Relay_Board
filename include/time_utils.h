@@ -2,7 +2,8 @@
 #define __TIME_UTILS_H
 
 char *epoch_to_str(unsigned long epoch);
-int  get_month(unsigned long *t, int year);
-int  get_year(unsigned long *t) ;
+char *epoch_to_str_hhmm(unsigned long epoch);
 
+int get_month(unsigned long *t, int year);
+int get_year(unsigned long *t);
 #endif

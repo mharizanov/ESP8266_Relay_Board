@@ -14,21 +14,18 @@ FW_BASE		= firmware
 # Base directory for the compiler
 #XTENSA_TOOLS_ROOT ?= $(HOME)/esp/xtensa-lx106-elf/bin
 #XTENSA_TOOLS_ROOT ?= /Users/apearson/.platformio/packages/toolchain-xtensa/bin
-XTENSA_TOOLS_ROOT ?= /Users/apearson/.platformio/packages/toolchain-xtensa@1.40802.0/bin
+XTENSA_TOOLS_ROOT ?= $(HOME)/.platformio/packages/toolchain-xtensa@1.40802.0/bin
 
 #Extra Tensilica includes from the ESS VM
-#SDK_EXTRA_INCLUDES ?= /Users/apearson/.platformio/packages/framework-esp8266-nonos-sdk/include
-SDK_EXTRA_INCLUDES ?= /Users/apearson/.platformio/packages/framework-esp8266-nonos-sdk/third_party/include
-SDK_EXTRA_INCLUDES ?= /tmp
-#SDK_EXTRA_LIBS ?= /opt/xtensa-lx106-elf/lib/gcc/xtensa-lx106-elf/4.8.2/
+SDK_EXTRA_INCLUDES ?= $(HOME)/.platformio/packages/framework-esp8266-nonos-sdk/third_party/include
 SDK_EXTRA_LIBS ?= /tmp/al.l
 
 # base directory of the ESP8266 SDK package, absolute
-SDK_BASE	?= /Users/apearson/.platformio/packages/framework-esp8266-nonos-sdk
+SDK_BASE	?= $(HOME)/.platformio/packages/framework-esp8266-nonos-sdk
 
 #Esptool.py path and port
 #ESPTOOL		?= /home/apearson/esptool/esptool
-ESPTOOL		?= /Users/apearson/.platformio/packages/tool-esptool/esptool
+ESPTOOL		?= $(HOME)/.platformio/packages/tool-esptool/esptool
 ESPPORT		?= /dev/ttyUSB0
 #ESPDELAY indicates seconds to wait between flashing the two binary images
 ESPDELAY	?= 3
@@ -43,8 +40,8 @@ TARGET		= httpd
 		  #xtensa-lx106-elf/include/sys 
 MODULES		= src/user 
 EXTRA_INCDIR	= include \
-		  sys \
-		  include/sys \
+		sys \
+		include/sys \
 		. \
 		lib/heatshrink/ \
 		$(SDK_EXTRA_INCLUDES) 
@@ -67,7 +64,7 @@ CFLAGS		= -Os -ggdb -std=c99  -Wpointer-arith -Wundef -Wall -Wl,-EL -fno-inline-
 		-mlongcalls -mtext-section-literals  -D__ets__ -DICACHE_FLASH \
 		-Wno-address -Wno-unused-function -Wno-unused-but-set-variable \
 		-DPLATFORMIO=60106 -DESP8266 -DARDUINO_ARCH_ESP8266 -DARDUINO_ESP8266_ESP01 \
-		-DLWIP_OPEN_SRC -DTENSILICA -DICACHE_FLASH -DGZIP_COMPRESSION -DPIO_FRAMEWORK_ARDUINO_ESPRESSIF_SDK22x_190703 \
+		-DLWIP_OPEN_SRC -DTENSILICA -DICACHE_FLASH -DPIO_FRAMEWORK_ARDUINO_ESPRESSIF_SDK22x_190703 \
 		-DF_CPU=80000000L -D__ets__ \
 		-U__STRICT_ANSI__ 
 		

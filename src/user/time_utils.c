@@ -53,7 +53,6 @@ char *ICACHE_FLASH_ATTR epoch_to_str_hhmm(unsigned long epoch) {
   unsigned char hour = epoch / 3600;
   epoch %= 3600;
   unsigned char min = epoch / 60;
-  unsigned char sec = epoch % 60;
 
   os_sprintf(buf, "%02d:%02d", hour, min);
   return buf;

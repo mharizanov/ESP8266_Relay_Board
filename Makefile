@@ -32,7 +32,7 @@ ESPDELAY	?= 3
 ESPBAUD		?= 115200
 
 # name for the target project
-TARGET		= httpd
+TARGET		= relayboard
 
 # which modules (subdirectories) of the project to include in compiling
 #MODULES		= driver user lwip/api lwip/app lwip/core lwip/core/ipv4 lwip/netif
@@ -85,7 +85,7 @@ SDK_INCDIR	= include include/json
 # these are the names and options to generate them
 FW_FILE_1	= 0x00000
 FW_FILE_1_ARGS	= -bo $@ -bs .text -bs .data -bs .rodata -bc -ec
-FW_FILE_2	= 0x40000
+FW_FILE_2	= 0x10000
 FW_FILE_2_ARGS	= -es .irom0.text $@ -ec
 FW_FILE_3       = webpages.espfs
 
@@ -160,11 +160,11 @@ ifeq ($(GZIP_COMPRESSION),"yes")
 		$(Q) cp -r html html_compressed;
 		#$(Q) cd html_compressed; find . -type f -regex ".*/.*\.\(html\|css\|js\)" -exec sh -c "gzip -n {}; mv {}.gz {}" \;; cd ..;	
 		$(Q) cd html_compressed; find -E . -type f  -iregex '.*\.(html|css|js)'  -exec sh -c "gzip -n {}; mv {}.gz {}" \;; cd ..;	
-		$(Q) cd html_compressed; find .  | ../mkespfsimage/mkespfsimage > ../$(FW_FILE_3); cd ..;
+		$(Q) cd html_compressed; find .  | ../mkespfsimage/mkespfsimage > ../firmware/$(FW_FILE_3); cd ..;
 else
-		$(Q) cd html; find . | ../mkespfsimage/mkespfsimage > ../$(FW_FILE_3); cd ..
+		$(Q) cd html; find . | ../mkespfsimage/mkespfsimage > ../firmware/$(FW_FILE_3); cd ..
 endif
-		$(Q) if [ $$(stat -f '%z' $(FW_FILE_3)) -gt $$(( 0x2E000 )) ]; then echo $(FW_FILE_3)" too big!"; false; fi
+		$(Q) if [ $$(stat -f '%z' firmware/$(FW_FILE_3)) -gt $$(( 0x2E000 )) ]; then echo firmware/$(FW_FILE_3)" too big!"; false; fi
 
 $(TARGET_OUT): $(APP_AR)
 	$(vecho) "LD $@"
@@ -193,7 +193,7 @@ mkespfsimage/mkespfsimage: mkespfsimage/
 
 htmlflash: $(FW_FILE_3)
 	if [ $$(stat -c '%s' $(FW_FILE_3)) -gt $$(( 0x2E000 )) ]; then echo $(FW_FILE_3)" too big!"; false; fi
-	$(ESPTOOL) -cp $(ESPPORT) -cb $(ESPBAUD) -ca 0x12000 -cf $(FW_FILE_3) -v
+	$(ESPTOOL) -cp $(ESPPORT) -cb $(ESPBAUD) -ca 0x50000 -cf $(FW_FILE_3) -v
 
 clean:
 	$(Q) rm -f $(APP_AR)

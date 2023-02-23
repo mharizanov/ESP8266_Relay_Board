@@ -154,7 +154,7 @@ static ICACHE_FLASH_ATTR void MQTTbroadcastReading(void *arg) {
                "\"relay1\":%d,\n"
                "\"relay2\":%d,\n"
                "\"relay3\":%d,\n"
-               "\"opMode\":%d,\n\"thermostatEnabled\":%d,\n\"thermostatSetPoint\":\"%s\",\n"
+               "\"opMode\":%d,\n\"thermostatEnabled\":%d,\n\"thermostatSetPoint\":\"%d\",\n"
                "\"roomTemp\":\"%s\",\n\"autoMode\": %d\n"
                "}\n",
                ds_temp, dht_temp, dht_humi, (int)sysCfg.thermostat1_input == 2 ? 1 : 0, currGPIO12State,

@@ -27,7 +27,7 @@ To change firmware, set the programming switch to “PGM” position and attach 
 I find any of the cheap ESP programming USB plugs work well. JeeLabs USBBUB-II was not reliable. YMMV.
 Also see the (https://github.com/esp8266/esp8266-wiki/wiki/Uploading) ESP8266 WiKi for more details on uploading code.
 
-[(https://harizanov.com/wp-content/uploads/2015/02/esp8266-board-firmware-update-mode-300x225.jpg)]
+[![image](https://harizanov.com/wp-content/uploads/2015/02/esp8266-board-firmware-update-mode-300x225.jpg)]
 
 Do not forget to flip back the PGM switch to the right side when done, or the code won’t start and the module will be stuck on bootloader mode.
 

@@ -10,6 +10,8 @@
 #define SNTP_SERVER_DNS 1
 //#define SNTP_SERVER_ADDRESS "pool.ntp.org"
 #define SNTP_SERVER_ADDRESS "213.161.194.93"
+#define EAGLE_FLASH_BIN_ADDR (SYSTEM_PARTITION_CUSTOMER_BEGIN + 1)
+#define EAGLE_IROM0TEXT_BIN_ADDR (SYSTEM_PARTITION_CUSTOMER_BEGIN + 2)
 
 #include "espmissingincludes.h"
 #include "user_interface.h"
@@ -292,7 +294,30 @@ void ICACHE_FLASH_ATTR user_init(void) {
 
   // OLEDInit();
 }
+/*
+#define SPI_FLASH_SIZE_MAP FLASH_SIZE_4M_MAP_256_256
 
+static const partition_item_t partition_table[] = {
+
+    {EAGLE_FLASH_BIN_ADDR, 0x00000, 0xB000},
+    {EAGLE_IROM0TEXT_BIN_ADDR, 0x10000, 0x40000}, // try 40000
+    {SYSTEM_PARTITION_RF_CAL, 0x7C000, 0x1000},
+    {SYSTEM_PARTITION_PHY_DATA, 0x7A000, 0x1000},
+    {SYSTEM_PARTITION_SYSTEM_PARAMETER, 0x7E000, 0x1000},
+    // {SYSTEM_PARTITION_BOOTLOADER,0x0,0x1000},
+    //{SYSTEM_PARTITION_OTA_1, 0x1000, SYSTEM_PARTITION_OTA_SIZE},
+    //{SYSTEM_PARTITION_OTA_2, SYSTEM_PARTITION_OTA_2_ADDR, SYSTEM_PARTITION_OTA_SIZE},
+};
+
+void ICACHE_FLASH_ATTR user_pre_init(void) {
+  if (!system_partition_table_regist(partition_table, sizeof(partition_table) / sizeof(partition_table[0]),
+                                     SPI_FLASH_SIZE_MAP)) {
+    os_printf("system_partition_table_regist fail\r\n");
+    while (1)
+      ;
+  }
+}
+*/
 uint32 ICACHE_FLASH_ATTR user_rf_cal_sector_set(void) {
   enum flash_size_map size_map = system_get_flash_size_map();
   uint32 rf_cal_sec = 0;

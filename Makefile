@@ -12,17 +12,23 @@ BUILD_BASE	= build
 FW_BASE		= firmware
 
 # Base directory for the compiler
-XTENSA_TOOLS_ROOT ?= /opt/Espressif/crosstool-NG/builds/xtensa-lx106-elf/bin
+#XTENSA_TOOLS_ROOT ?= $(HOME)/esp/xtensa-lx106-elf/bin
+#XTENSA_TOOLS_ROOT ?= /Users/apearson/.platformio/packages/toolchain-xtensa/bin
+XTENSA_TOOLS_ROOT ?= /Users/apearson/.platformio/packages/toolchain-xtensa@1.40802.0/bin
 
 #Extra Tensilica includes from the ESS VM
-SDK_EXTRA_INCLUDES ?= /Users/apearson/.platformio/packages/framework-esp8266-nonos-sdk/include
-SDK_EXTRA_LIBS ?= /opt/xtensa-lx106-elf/lib/gcc/xtensa-lx106-elf/4.8.2/
+#SDK_EXTRA_INCLUDES ?= /Users/apearson/.platformio/packages/framework-esp8266-nonos-sdk/include
+SDK_EXTRA_INCLUDES ?= /Users/apearson/.platformio/packages/framework-esp8266-nonos-sdk/third_party/include
+SDK_EXTRA_INCLUDES ?= /tmp
+#SDK_EXTRA_LIBS ?= /opt/xtensa-lx106-elf/lib/gcc/xtensa-lx106-elf/4.8.2/
+SDK_EXTRA_LIBS ?= /tmp/al.l
 
 # base directory of the ESP8266 SDK package, absolute
-SDK_BASE	?= /opt/Espressif/ESP8266_SDK
+SDK_BASE	?= /Users/apearson/.platformio/packages/framework-esp8266-nonos-sdk
 
 #Esptool.py path and port
-ESPTOOL		?= /home/apearson/esptool/esptool
+#ESPTOOL		?= /home/apearson/esptool/esptool
+ESPTOOL		?= /Users/apearson/.platformio/packages/tool-esptool/esptool
 ESPPORT		?= /dev/ttyUSB0
 #ESPDELAY indicates seconds to wait between flashing the two binary images
 ESPDELAY	?= 3
@@ -33,14 +39,21 @@ TARGET		= httpd
 
 # which modules (subdirectories) of the project to include in compiling
 #MODULES		= driver user lwip/api lwip/app lwip/core lwip/core/ipv4 lwip/netif
-MODULES		= driver user 
+		  #xtensa-lx106-elf/include 
+		  #xtensa-lx106-elf/include/sys 
+MODULES		= src/user 
 EXTRA_INCDIR	= include \
+		  sys \
+		  include/sys \
 		. \
 		lib/heatshrink/ \
-		$(SDK_EXTRA_INCLUDES)
+		$(SDK_EXTRA_INCLUDES) 
+
 
 # libraries used in this project, mainly provided by the SDK
-LIBS		= c hal gcc phy pp net80211 wpa main lwip
+LIBS		= c gcc phy pp net80211 wpa main lwip crypto airkiss at driver espnow json mbedtls mesh pwm smartconfig ssl upgrade wpa2 wps 
+
+#-lairkiss -lat -lc -lcrypto -ldriver -lespnow -lgcc -ljson -llwip -lmain -lmbedtls -lmesh -lnet80211 -lphy -lpp -lpwm -lsmartconfig -lssl -lupgrade -lwpa -lwpa2 -lwps
 
 # if GZIP_COMPRESSION is enabled then the static css, js, and html files will be compressed with gzip before added to the espfs image.
 # This could speed up the downloading of these files, but might break compatibility with older web browsers not supporting gzip encoding
@@ -48,9 +61,17 @@ LIBS		= c hal gcc phy pp net80211 wpa main lwip
 GZIP_COMPRESSION = "yes"
 
 # compiler flags using during compilation of source files
+#	-nostdlib -mlongcalls -mtext-section-literals  -D__ets__ -DICACHE_FLASH 
 CFLAGS		= -Os -ggdb -std=c99  -Wpointer-arith -Wundef -Wall -Wl,-EL -fno-inline-functions \
-		-nostdlib -mlongcalls -mtext-section-literals  -D__ets__ -DICACHE_FLASH \
-		-Wno-address -Wno-unused-function -Wno-unused-but-set-variable
+		  -Wno-implicit-function-declaration -nostdlib  -ffunction-sections -fdata-sections -fno-builtin-printf \
+		-mlongcalls -mtext-section-literals  -D__ets__ -DICACHE_FLASH \
+		-Wno-address -Wno-unused-function -Wno-unused-but-set-variable \
+		-DPLATFORMIO=60106 -DESP8266 -DARDUINO_ARCH_ESP8266 -DARDUINO_ESP8266_ESP01 \
+		-DLWIP_OPEN_SRC -DTENSILICA -DICACHE_FLASH -DGZIP_COMPRESSION -DPIO_FRAMEWORK_ARDUINO_ESPRESSIF_SDK22x_190703 \
+		-DF_CPU=80000000L -D__ets__ \
+		-U__STRICT_ANSI__ 
+		
+
 
 # linker flags used to generate the main object file
 LDFLAGS		= -nostdlib -Wl,--no-check-sections -u call_user_start -Wl,-static -L$(SDK_EXTRA_LIBS)

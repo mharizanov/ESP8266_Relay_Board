@@ -1,3 +1,20 @@
+#FOTA Update Version - Requires NONOS-SDK 3.0.6 AND 1MB flash minimum.
+Use command line make to build, PlatformIO does not have this capability or up to date libraries at present.
+
+1) Edit the Makefile and set the paths to the SDK and XTENSA compiler; set the FLASH_SIZE for your board
+2) Edit burn_boot.sh and burn_webpages.sh and set the path to ESPTOOL for your environment 
+3) make clean
+4) make
+5) ./burn_boot.sh
+
+Note, as per standard approach, only boot.bin and user1.bin are burnt to flash. 
+user2.bin is burnt as a OTA upgrade.
+
+
+Uses the new SDK partition_table_t struct and should autoconfigure as per the Makefile.
+Only tested on 1Mb flash; will not work on 512Kb for sure, however larger flash size should work (as supported by ESP8266 chip itself)
+
+
 #Three Channel WiFi Relay/Thermostat Board
 
 The Three Channel WiFi Relay/Thermostat Board is a WiFi connected multi-purpose relay board based on the [ESP8266 SoC], original designed by Martin Harizanov and sold by Open Energy Monitor Store in the UK

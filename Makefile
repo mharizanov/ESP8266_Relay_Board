@@ -11,25 +11,83 @@
 BUILD_BASE	= build
 FW_BASE		= firmware
 
-# Base directory for the compiler
-#XTENSA_TOOLS_ROOT ?= $(HOME)/esp/xtensa-lx106-elf/bin
-#XTENSA_TOOLS_ROOT ?= /Users/apearson/.platformio/packages/toolchain-xtensa/bin
-XTENSA_TOOLS_ROOT ?= $(HOME)/.platformio/packages/toolchain-xtensa@1.40802.0/bin
+#SET THIS !
+FLASH_SIZE ?= 1MB
 
-#Extra Tensilica includes from the ESS VM
-SDK_EXTRA_INCLUDES ?= $(HOME)/.platformio/packages/framework-esp8266-nonos-sdk/third_party/include
-SDK_EXTRA_LIBS ?= /tmp/al.l
+# Base directory for the compiler
+XTENSA_TOOLS_ROOT ?= $(HOME)/esp/xtensa-lx106-elf/bin
+#XTENSA_TOOLS_ROOT ?= $(HOME)/.platformio/packages/toolchain-xtensa@1.40802.0/bin
+
+AR = xtensa-lx106-elf-ar
+CC = xtensa-lx106-elf-gcc
+CXX = xtensa-lx106-elf-g++
+CPP = xtensa-lx106-elf-cpp
+
 
 # base directory of the ESP8266 SDK package, absolute
-SDK_BASE	?= $(HOME)/.platformio/packages/framework-esp8266-nonos-sdk
+#SDK_BASE	?= $(HOME)/.platformio/packages/framework-esp8266-nonos-sdk
+SDK_BASE        ?= $(HOME)/esp/ESP8266_NONOS_SDK
+#Extra Tensilica includes from the ESS VM
+#Not sure these are needed anymore
+SDK_EXTRA_INCLUDES ?= $(SDK_BASE)/third_party/include
+SDK_EXTRA_LIBS ?= /tmp/al.l
 
-#Esptool.py path and port
-#ESPTOOL		?= /home/apearson/esptool/esptool
-ESPTOOL		?= $(HOME)/.platformio/packages/tool-esptool/esptool
-ESPPORT		?= /dev/ttyUSB0
-#ESPDELAY indicates seconds to wait between flashing the two binary images
-ESPDELAY	?= 3
-ESPBAUD		?= 115200
+# Path to bootloader file
+BOOTFILE	?= $(SDK_BASE/bin/boot_v1.7.bin)
+
+APPGEN_TOOL	?= gen_appbin.py
+
+
+ESP_FLASH_MAX       ?= 503808  # max bin file
+
+ifeq ("$(FLASH_SIZE)","512KB")
+# Winbond 25Q40 512KB flash, typ for esp-01 thru esp-11
+ESP_SPI_SIZE        ?= 0       # 0->512KB (256KB+256KB)
+ESP_FLASH_MODE      ?= 0       # 0->QIO
+ESP_FLASH_FREQ_DIV  ?= 0       # 0->40Mhz
+ET_FS               ?= 4m      # 4Mbit flash size in esptool flash command
+ET_FF               ?= 40m     # 40Mhz flash speed in esptool flash command
+ET_BLANK            ?= 0x7E000 # where to flash blank.bin to erase wireless settings
+
+else ifeq ("$(FLASH_SIZE)","1MB")
+# ESP-01E
+ESP_SPI_SIZE        ?= 2       # 2->1MB (512KB+512KB)
+ESP_FLASH_MODE      ?= 0       # 0->QIO
+#ESP_FLASH_FREQ_DIV  ?= 15      # 15->80MHz
+ESP_FLASH_FREQ_DIV  ?= 0      # 15->80MHz
+ET_FS               ?= 8m      # 8Mbit flash size in esptool flash command
+ET_FF               ?= 40m     # 40Mhz flash speed in esptool flash command
+#ET_FF               ?= 80     # 80Mhz flash speed in esptool flash command
+ET_BLANK            ?= 0xFE000 # where to flash blank.bin to erase wireless settings
+
+else ifeq ("$(FLASH_SIZE)","2MB")
+# Manuf 0xA1 Chip 0x4015 found on wroom-02 modules
+# Here we're using two partitions of approx 0.5MB because that's what's easily available in terms
+# of linker scripts in the SDK. Ideally we'd use two partitions of approx 1MB, the remaining 2MB
+# cannot be used for code (esp8266 limitation).
+ESP_SPI_SIZE        ?= 4       # 6->4MB (1MB+1MB) or 4->4MB (512KB+512KB)
+ESP_FLASH_MODE      ?= 0       # 0->QIO, 2->DIO
+ESP_FLASH_FREQ_DIV  ?= 15      # 15->80Mhz
+ET_FS               ?= 16m     # 16Mbit flash size in esptool flash command
+ET_FF               ?= 80m     # 80Mhz flash speed in esptool flash command
+ET_BLANK            ?= 0x1FE000 # where to flash blank.bin to erase wireless settings
+
+else
+# Winbond 25Q32 4MB flash, typ for esp-12
+# Here we're using two partitions of approx 0.5MB because that's what's easily available in terms
+# of linker scripts in the SDK. Ideally we'd use two partitions of approx 1MB, the remaining 2MB
+# cannot be used for code (esp8266 limitation).
+ESP_SPI_SIZE        ?= 4       # 6->4MB (1MB+1MB) or 4->4MB (512KB+512KB)
+ESP_FLASH_MODE      ?= 0       # 0->QIO, 2->DIO
+ESP_FLASH_FREQ_DIV  ?= 15      # 15->80Mhz
+ET_FS               ?= 32m     # 32Mbit flash size in esptool flash command
+ET_FF               ?= 80m     # 80Mhz flash speed in esptool flash command
+ET_BLANK            ?= 0x3FE000 # where to flash blank.bin to erase wireless settings
+endif
+
+
+DEFINES += -DSPI_FLASH_SIZE_MAP=$(ESP_SPI_SIZE)
+
 
 # name for the target project
 TARGET		= relayboard
@@ -48,7 +106,8 @@ EXTRA_INCDIR	= include \
 
 
 # libraries used in this project, mainly provided by the SDK
-LIBS		= c gcc phy pp net80211 wpa main lwip crypto airkiss at driver espnow json mbedtls mesh pwm smartconfig ssl upgrade wpa2 wps 
+#LIBS		= c gcc phy pp net80211 wpa main lwip crypto airkiss at driver espnow json mbedtls mesh pwm smartconfig ssl upgrade wpa2 wps 
+LIBS		= c gcc phy pp net80211 wpa main lwip crypto airkiss at driver espnow json pwm smartconfig ssl upgrade wpa2 wps 
 
 #-lairkiss -lat -lc -lcrypto -ldriver -lespnow -lgcc -ljson -llwip -lmain -lmbedtls -lmesh -lnet80211 -lphy -lpp -lpwm -lsmartconfig -lssl -lupgrade -lwpa -lwpa2 -lwps
 
@@ -65,7 +124,7 @@ CFLAGS		= -Os -ggdb -std=c99  -Wpointer-arith -Wundef -Wall -Wl,-EL -fno-inline-
 		-Wno-address -Wno-unused-function -Wno-unused-but-set-variable \
 		-DPLATFORMIO=60106 -DESP8266 -DARDUINO_ARCH_ESP8266 -DARDUINO_ESP8266_ESP01 \
 		-DLWIP_OPEN_SRC -DTENSILICA -DICACHE_FLASH -DPIO_FRAMEWORK_ARDUINO_ESPRESSIF_SDK22x_190703 \
-		-DF_CPU=80000000L -D__ets__ \
+		-DF_CPU=80000000L -D__ets__ $(DEFINES) \
 		-U__STRICT_ANSI__ 
 		
 
@@ -74,26 +133,29 @@ CFLAGS		= -Os -ggdb -std=c99  -Wpointer-arith -Wundef -Wall -Wl,-EL -fno-inline-
 LDFLAGS		= -nostdlib -Wl,--no-check-sections -u call_user_start -Wl,-static -L$(SDK_EXTRA_LIBS)
 
 # linker script used for the above linkier step
-LD_SCRIPT	= eagle.app.v6.ld
+#LD_SCRIPT	= eagle.app.v6.ld
+LD_SCRIPT1	= eagle.app.v6.new.1024.app1.ld
+LD_SCRIPT2	= eagle.app.v6.new.1024.app2.ld
 
 # various paths from the SDK used in this project
 SDK_LIBDIR	= lib
 SDK_LDDIR	= ld
 SDK_INCDIR	= include include/json
+SDK_TOOLSDIR	= tools
 
 # we create two different files for uploading into the flash
 # these are the names and options to generate them
-FW_FILE_1	= 0x00000
-FW_FILE_1_ARGS	= -bo $@ -bs .text -bs .data -bs .rodata -bc -ec
-FW_FILE_2	= 0x10000
-FW_FILE_2_ARGS	= -es .irom0.text $@ -ec
 FW_FILE_3       = webpages.espfs
 
 # select which tools to use as compiler, librarian and linker
 CC		:= $(XTENSA_TOOLS_ROOT)/xtensa-lx106-elf-gcc
 AR		:= $(XTENSA_TOOLS_ROOT)/xtensa-lx106-elf-ar
 LD		:= $(XTENSA_TOOLS_ROOT)/xtensa-lx106-elf-gcc
-
+NM 		:= $(XTENSA_TOOLS_ROOT)/xtensa-lx106-elf-nm
+OBJCP	 	:= $(XTENSA_TOOLS_ROOT)/xtensa-lx106-elf-objcopy
+OBJDP 		:= $(XTENSA_TOOLS_ROOT)/xtensa-lx106-elf-objdump
+ELF_SIZE	:= $(XTENSA_TOOLS_ROOT)/xtensa-lx106-elf-size
+COMPILE		:= gcc
 
 
 ####
@@ -104,6 +166,9 @@ BUILD_DIR	:= $(addprefix $(BUILD_BASE)/,$(MODULES))
 
 SDK_LIBDIR	:= $(addprefix $(SDK_BASE)/,$(SDK_LIBDIR))
 SDK_INCDIR	:= $(addprefix -I$(SDK_BASE)/,$(SDK_INCDIR))
+SDK_TOOLS	:= $(addprefix $(SDK_BASE)/,$(SDK_TOOLSDIR))
+APPGEN_TOOL	:= $(addprefix $(SDK_TOOLS)/,$(APPGEN_TOOL))
+
 
 SRC		:= $(foreach sdir,$(SRC_DIR),$(wildcard $(sdir)/*.c))
 OBJ		:= $(patsubst %.c,$(BUILD_BASE)/%.o,$(SRC))
@@ -111,7 +176,8 @@ LIBS		:= $(addprefix -l,$(LIBS))
 APP_AR		:= $(addprefix $(BUILD_BASE)/,$(TARGET)_app.a)
 TARGET_OUT	:= $(addprefix $(BUILD_BASE)/,$(TARGET).out)
 
-LD_SCRIPT	:= $(addprefix -T$(SDK_BASE)/$(SDK_LDDIR)/,$(LD_SCRIPT))
+LD_SCRIPT1	:= $(addprefix $(SDK_BASE)/$(SDK_LDDIR)/,$(LD_SCRIPT1))
+LD_SCRIPT2	:= $(addprefix $(SDK_BASE)/$(SDK_LDDIR)/,$(LD_SCRIPT2))
 
 INCDIR	:= $(addprefix -I,$(SRC_DIR))
 EXTRA_INCDIR	:= $(addprefix -I,$(EXTRA_INCDIR))
@@ -119,6 +185,10 @@ MODULE_INCDIR	:= $(addsuffix /include,$(INCDIR))
 
 FW_FILE_1	:= $(addprefix $(FW_BASE)/,$(FW_FILE_1).bin)
 FW_FILE_2	:= $(addprefix $(FW_BASE)/,$(FW_FILE_2).bin)
+USER1_OUT 	:= $(addprefix $(BUILD_BASE)/,$(TARGET).user1.out)
+USER2_OUT 	:= $(addprefix $(BUILD_BASE)/,$(TARGET).user2.out)
+
+PYTHON=python2
 
 V ?= $(VERBOSE)
 ifeq ("$(V)","1")
@@ -143,15 +213,50 @@ endef
 
 .PHONY: all checkdirs clean
 
-all: checkdirs $(TARGET_OUT) $(FW_FILE_1) $(FW_FILE_2) $(FW_FILE_3)
+all: checkdirs $(FW_BASE)/user1.bin $(FW_BASE)/user2.bin
 
-$(FW_FILE_1): $(TARGET_OUT) firmware
-	$(vecho) "FW $@"
-	$(Q) $(ESPTOOL) -eo $(TARGET_OUT) $(FW_FILE_1_ARGS)
+$(USER1_OUT): $(APP_AR) $(LD_SCRIPT1)
+	$(vecho) "LD $@"
+	$(Q) $(LD) -L$(SDK_LIBDIR) -T$(LD_SCRIPT1) $(LDFLAGS) -Wl,--start-group $(LIBS) $(APP_AR) -Wl,--end-group -o $@
+	@echo Dump  : $(OBJDP) -x $(USER1_OUT)
+	@echo Disass: $(OBJDP) -d -l -x $(USER1_OUT)
+#	$(Q) $(OBJDP) -x $(TARGET_OUT) | egrep espfs_img
 
-$(FW_FILE_2): $(TARGET_OUT) firmware
+$(USER2_OUT): $(APP_AR) $(LD_SCRIPT2)
+	$(vecho) "LD $@"
+	$(Q) $(LD) -L$(SDK_LIBDIR) -T$(LD_SCRIPT2) $(LDFLAGS) -Wl,--start-group $(LIBS) $(APP_AR) -Wl,--end-group -o $@
+#	$(Q) $(OBJDP) -x $(TARGET_OUT) | egrep espfs_img
+
+$(FW_BASE):
 	$(vecho) "FW $@"
-	$(Q) $(ESPTOOL) -eo $(TARGET_OUT) $(FW_FILE_2_ARGS)
+	$(Q) mkdir -p $@
+
+$(FW_BASE)/user1.bin: $(USER1_OUT) $(FW_BASE)
+	$(Q) $(OBJCP) --only-section .text -O binary $(USER1_OUT) eagle.app.v6.text.bin
+	$(Q) $(OBJCP) --only-section .data -O binary $(USER1_OUT) eagle.app.v6.data.bin
+	$(Q) $(OBJCP) --only-section .rodata -O binary $(USER1_OUT) eagle.app.v6.rodata.bin
+	$(Q) $(OBJCP) --only-section .irom0.text -O binary $(USER1_OUT) eagle.app.v6.irom0text.bin
+	$(Q) $(ELF_SIZE) -A $(USER1_OUT) |grep -v " 0$$" |grep .
+	$(Q) COMPILE=gcc PATH=$(XTENSA_TOOLS_ROOT):$(PATH) python $(APPGEN_TOOL) $(USER1_OUT) 2 $(ESP_FLASH_MODE) $(ESP_FLASH_FREQ_DIV) $(ESP_SPI_SIZE) 1 >/dev/null
+	$(Q) rm -f eagle.app.v6.*.bin
+	$(Q) mv eagle.app.flash.bin $@
+	@echo "    user1.bin uses $$(stat -f '%z' $@) bytes of" $(ESP_FLASH_MAX) "available"
+	$(Q) if [ $$(stat -f '%z' $@) -gt $$(( $(ESP_FLASH_MAX) )) ]; then echo "$@ too big!"; false; fi
+
+$(FW_BASE)/user2.bin: $(USER2_OUT) $(FW_BASE)
+	$(Q) $(OBJCP) --only-section .text -O binary $(USER2_OUT) eagle.app.v6.text.bin
+	$(Q) $(OBJCP) --only-section .data -O binary $(USER2_OUT) eagle.app.v6.data.bin
+	$(Q) $(OBJCP) --only-section .rodata -O binary $(USER2_OUT) eagle.app.v6.rodata.bin
+	$(Q) $(OBJCP) --only-section .irom0.text -O binary $(USER2_OUT) eagle.app.v6.irom0text.bin
+	$(Q) COMPILE=gcc PATH=$(XTENSA_TOOLS_ROOT):$(PATH) python $(APPGEN_TOOL) $(USER2_OUT) 2 $(ESP_FLASH_MODE) $(ESP_FLASH_FREQ_DIV) $(ESP_SPI_SIZE) 2 >/dev/null
+	$(Q) rm -f eagle.app.v6.*.bin
+	$(Q) mv eagle.app.flash.bin $@
+	$(Q) if [ $$(stat -f '%z' $@) -gt $$(( $(ESP_FLASH_MAX) )) ]; then echo "$@ too big!"; false; fi
+
+$(APP_AR): $(OBJ)
+	$(vecho) "AR $@"
+	$(Q) $(AR) cru $@ $^
+
 
 $(FW_FILE_3): html/ html/config/ html/config/wifi/ html/control/ mkespfsimage/mkespfsimage
 	$(vecho) "MKEFSIMAGE $@"
@@ -166,34 +271,14 @@ else
 endif
 		$(Q) if [ $$(stat -f '%z' firmware/$(FW_FILE_3)) -gt $$(( 0x2E000 )) ]; then echo firmware/$(FW_FILE_3)" too big!"; false; fi
 
-$(TARGET_OUT): $(APP_AR)
-	$(vecho) "LD $@"
-	$(Q) $(LD) -L$(SDK_LIBDIR) $(LD_SCRIPT) $(LDFLAGS) -Wl,--start-group $(LIBS) $(APP_AR) -Wl,--end-group -o $@
-
-$(APP_AR): $(OBJ)
-	$(vecho) "AR $@"
-	$(Q) $(AR) cru $@ $^
 
 checkdirs: $(BUILD_DIR) $(FW_BASE)
 
 $(BUILD_DIR):
 	$(Q) mkdir -p $@
 
-firmware:
-	$(Q) mkdir -p $@
-
-flash: $(FW_FILE_1) $(FW_FILE_2)
-	$(Q) $(ESPTOOL) -cp $(ESPPORT) -cb $(ESPBAUD) -ca 0x00000 -cf firmware/0x00000.bin -v
-	$(Q) [ $(ESPDELAY) -ne 0 ] && echo "Please put the ESP in bootloader mode..." || true
-	$(Q) sleep $(ESPDELAY) || true
-	$(Q) $(ESPTOOL) -cp $(ESPPORT) -cb $(ESPBAUD) -ca 0x40000 -cf firmware/0x40000.bin -v
-
 mkespfsimage/mkespfsimage: mkespfsimage/
 	make -C mkespfsimage
-
-htmlflash: $(FW_FILE_3)
-	if [ $$(stat -c '%s' $(FW_FILE_3)) -gt $$(( 0x2E000 )) ]; then echo $(FW_FILE_3)" too big!"; false; fi
-	$(ESPTOOL) -cp $(ESPPORT) -cb $(ESPBAUD) -ca 0x50000 -cf $(FW_FILE_3) -v
 
 clean:
 	$(Q) rm -f $(APP_AR)

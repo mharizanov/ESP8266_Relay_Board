@@ -1,5 +1,6 @@
 ToDo
-
+NTP DST implementation
+Thermostat timeout for all sources
 
 Done
 Avoid thermostat cycling - timestamp relay activations and set limit 

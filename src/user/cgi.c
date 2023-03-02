@@ -175,6 +175,7 @@ void ICACHE_FLASH_ATTR tplCounter(HttpdConnData *connData, char *token, void **a
   httpdSend(connData, buff, -1);
 }
 
+/*
 // Cgi that reads the SPI flash. Assumes 512KByte flash.
 int ICACHE_FLASH_ATTR cgiReadFlash(HttpdConnData *connData) {
   int *pos = (int *)&connData->cgiData;
@@ -199,7 +200,7 @@ int ICACHE_FLASH_ATTR cgiReadFlash(HttpdConnData *connData) {
   else
     return HTTPD_CGI_MORE;
 }
-
+*/
 // Template code for the DHT 22 page.
 void ICACHE_FLASH_ATTR tplDHT(HttpdConnData *connData, char *token, void **arg) {
   char buff[128];

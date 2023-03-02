@@ -57,3 +57,38 @@ char *ICACHE_FLASH_ATTR epoch_to_str_hhmm(unsigned long epoch) {
   os_sprintf(buf, "%02d:%02d", hour, min);
   return buf;
 }
+
+bool IsDST_EU(int day, int month, int dow) {
+  if (month < 3 || month > 10)
+    return false;
+  if (month > 3 && month < 10)
+    return true;
+
+  int previousSunday = day - dow;
+
+  if (month == 3)
+    return previousSunday >= 25;
+  if (month == 10)
+    return previousSunday < 25;
+
+  return false; // this line never gonna happend
+}
+
+bool IsDST_NA(int day, int month, int dow) {
+  // January, February, and December are out.
+  if (month < 3 || month > 11) {
+    return false;
+  }
+  // April to October are in
+  if (month > 3 && month < 11) {
+    return true;
+  }
+  int previousSunday = day - dow;
+  // In march, we are DST if our previous Sunday was on or after the 8th.
+  if (month == 3) {
+    return previousSunday >= 8;
+  }
+  // In November we must be before the first Sunday to be DST.
+  // That means the previous Sunday must be before the 1st.
+  return previousSunday <= 1;
+}

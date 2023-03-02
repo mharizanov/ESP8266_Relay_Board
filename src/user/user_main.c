@@ -16,7 +16,7 @@
 #include "espmissingincludes.h"
 #include "user_interface.h"
 
-#include "auth.h"
+//#include "auth.h"
 #include "broadcastd.h"
 #include "cgi.h"
 #include "cgithermostat.h"
@@ -35,13 +35,13 @@
 #include "stdout.h"
 //#include "thermostat.h"
 #include "time_utils.h"
-#include "user_interface.h"
 #include "wifi.h"
 
+#include "mem.h"
+#include "upgrade.h"
 //#include "netbios.h"
 //#include "pwm.h"
 //#include "cgipwm.h"
-
 //#include "oled.h"
 
 MQTT_Client mqttClient;
@@ -79,8 +79,8 @@ HttpdBuiltInUrl builtInUrls[] = {{"/", cgiRedirect, "/index.tpl"},
 
                                  //{"/flash.bin", cgiReadFlash, NULL},
 
-                                 {"/config/*", authBasic, myPassFn},
-                                 {"/control/*", authBasic, myPassFn},
+                                 // {"/config/*", authBasic, myPassFn},
+                                 // {"/control/*", authBasic, myPassFn},
 
                                  {"/control/ui.tpl", cgiEspFsTemplate, tplUI},
                                  {"/control/relay.tpl", cgiEspFsTemplate, tplGPIO},
@@ -128,6 +128,77 @@ void ICACHE_FLASH_ATTR http_callback_IP(char *response, int http_status, char *f
   }
 }
 
+static void ICACHE_FLASH_ATTR ota_finished_callback(void *arg) {
+  struct upgrade_server_info *update = arg;
+  if (update->upgrade_flag == true) {
+    os_printf("[OTA]success; rebooting!\n");
+    system_upgrade_reboot();
+  } else {
+    os_printf("[OTA]failed!\n");
+  }
+
+  os_free(update->pespconn);
+  os_free(update->url);
+  os_free(update);
+}
+
+static void ICACHE_FLASH_ATTR handleUpgrade(uint8_t serverVersion, const char *server_ip, uint16_t port,
+                                            const char *path) {
+  const char *file;
+
+  os_printf("[OTA]Upgrade called\n");
+
+  uint8_t userBin = system_upgrade_userbin_check();
+  switch (userBin) {
+  case UPGRADE_FW_BIN1:
+    file = "/user2.bin";
+    break;
+  case UPGRADE_FW_BIN2:
+    file = "/user1.bin";
+    break;
+  default:
+    os_printf("[OTA]Invalid userbin number!\n");
+    return;
+  }
+
+  uint16_t version = 1;
+  if (serverVersion <= version) {
+    os_printf("[OTA]No update. Server version:%d, local version %d\n", serverVersion, version);
+    return;
+  }
+
+  os_printf("[OTA]Upgrade available version: %d\n", serverVersion);
+
+  struct upgrade_server_info *update = (struct upgrade_server_info *)os_zalloc(sizeof(struct upgrade_server_info));
+  update->pespconn = (struct espconn *)os_zalloc(sizeof(struct espconn));
+
+  os_memcpy(update->ip, server_ip, 4);
+  update->port = port;
+
+  os_printf("[OTA]Server " IPSTR ":%d. Path: %s%s\n", IP2STR(update->ip), update->port, path, file);
+
+  update->check_cb = ota_finished_callback;
+  update->check_times = 10000;
+  update->url = (uint8 *)os_zalloc(512);
+
+  os_sprintf((char *)update->url,
+             "GET %s%s HTTP/1.1\r\n"
+             "Host: " IPSTR ":%d\r\n"
+             "Connection: close\r\n"
+             "\r\n",
+             path, file, IP2STR(update->ip), update->port);
+
+  if (system_upgrade_start(update) == false) {
+    os_printf("[OTA]Could not start upgrade\n");
+
+    os_free(update->pespconn);
+    os_free(update->url);
+    os_free(update);
+  } else {
+    os_printf("[OTA]Upgrading...\n");
+  }
+}
+
 void ICACHE_FLASH_ATTR wifiConnectCb(uint8_t status) {
   if (status == STATION_GOT_IP) {
 
@@ -139,6 +210,12 @@ void ICACHE_FLASH_ATTR wifiConnectCb(uint8_t status) {
     } else {
       MQTT_Disconnect(&mqttClient);
     }
+    uint8_t serverVersion = 2;
+    const char server_ip[4] = {192, 168, 10, 7};
+    uint16_t port = 80;
+    char *path = "/esp8266fw/relayboard";
+
+    handleUpgrade(serverVersion, server_ip, port, path);
   }
 }
 
@@ -284,29 +361,50 @@ void ICACHE_FLASH_ATTR user_init(void) {
   os_printf("Free heap size:%d\n", system_get_free_heap_size());
   os_printf("Firmware version %s\n", FWVER);
   os_printf("SDK version:%s\n", system_get_sdk_version());
-#ifdef CGIPWM_H
-  // Mind the PWM pin!! defined in pwm.h
-  duty = 0;
-  pwm_init(50, &duty);
-  pwm_set_duty(duty, 0);
-  pwm_start();
-#endif
+  /*
+  #ifdef CGIPWM_H
+    // Mind the PWM pin!! defined in pwm.h
+    duty = 0;
+    pwm_init(50, &duty);
+    pwm_set_duty(duty, 0);
+    pwm_start();
+  #endif
 
-  // OLEDInit();
+    // OLEDInit();
+  */
 }
-/*
-#define SPI_FLASH_SIZE_MAP FLASH_SIZE_4M_MAP_256_256
+
+// This is for SDK version 3.x, but I haven't been able to get it to work
+// yet with 512kb flash (need to try with larger flash)
+// Should also try with 512kb and remove the while(1) ?
+
+#define SPI_FLASH_SIZE_MAP 2
+
+#define SYSTEM_PARTITION_OTA_SIZE 0x6A000
+#define SYSTEM_PARTITION_OTA_2_ADDR 0x81000
+#define SYSTEM_PARTITION_RF_CAL_ADDR 0xfb000
+#define SYSTEM_PARTITION_PHY_DATA_ADDR 0xfc000
+#define SYSTEM_PARTITION_SYSTEM_PARAMETER_ADDR 0xfd000
+#define SYSTEM_PARTITION_CUSTOMER_PRIV_PARAM_ADDR 0x7c000
+#define SYSTEM_PARTITION_CUSTOMER_PRIV_PARAM SYSTEM_PARTITION_CUSTOMER_BEGIN
 
 static const partition_item_t partition_table[] = {
 
-    {EAGLE_FLASH_BIN_ADDR, 0x00000, 0xB000},
-    {EAGLE_IROM0TEXT_BIN_ADDR, 0x10000, 0x40000}, // try 40000
-    {SYSTEM_PARTITION_RF_CAL, 0x7C000, 0x1000},
-    {SYSTEM_PARTITION_PHY_DATA, 0x7A000, 0x1000},
-    {SYSTEM_PARTITION_SYSTEM_PARAMETER, 0x7E000, 0x1000},
-    // {SYSTEM_PARTITION_BOOTLOADER,0x0,0x1000},
-    //{SYSTEM_PARTITION_OTA_1, 0x1000, SYSTEM_PARTITION_OTA_SIZE},
-    //{SYSTEM_PARTITION_OTA_2, SYSTEM_PARTITION_OTA_2_ADDR, SYSTEM_PARTITION_OTA_SIZE},
+    {SYSTEM_PARTITION_BOOTLOADER, 0x0, 0x1000},
+    {SYSTEM_PARTITION_OTA_1, 0x1000, SYSTEM_PARTITION_OTA_SIZE},
+    {SYSTEM_PARTITION_OTA_2, SYSTEM_PARTITION_OTA_2_ADDR, SYSTEM_PARTITION_OTA_SIZE},
+    {SYSTEM_PARTITION_RF_CAL, SYSTEM_PARTITION_RF_CAL_ADDR, 0x1000},
+    {SYSTEM_PARTITION_PHY_DATA, SYSTEM_PARTITION_PHY_DATA_ADDR, 0x1000},
+    {SYSTEM_PARTITION_SYSTEM_PARAMETER, SYSTEM_PARTITION_SYSTEM_PARAMETER_ADDR, 0x3000},
+    {SYSTEM_PARTITION_CUSTOMER_PRIV_PARAM, SYSTEM_PARTITION_CUSTOMER_PRIV_PARAM_ADDR, 0x1000},
+
+    /*
+        {EAGLE_FLASH_BIN_ADDR, 0x00000, 0xB000},
+        {EAGLE_IROM0TEXT_BIN_ADDR, 0x10000, 0x40000}, // try 40000
+        {SYSTEM_PARTITION_RF_CAL, 0x7C000, 0x1000},
+        {SYSTEM_PARTITION_PHY_DATA, 0x7A000, 0x1000},
+        {SYSTEM_PARTITION_SYSTEM_PARAMETER, 0x7E000, 0x1000},
+    */
 };
 
 void ICACHE_FLASH_ATTR user_pre_init(void) {
@@ -317,7 +415,7 @@ void ICACHE_FLASH_ATTR user_pre_init(void) {
       ;
   }
 }
-*/
+
 uint32 ICACHE_FLASH_ATTR user_rf_cal_sector_set(void) {
   enum flash_size_map size_map = system_get_flash_size_map();
   uint32 rf_cal_sec = 0;

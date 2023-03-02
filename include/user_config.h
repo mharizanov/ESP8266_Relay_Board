@@ -9,7 +9,6 @@
 #define CFG_HOLDER 0x00FF0006
 //#define CFG_LOCATION 0x3C     //Working value on old SDK
 #define FG_LOCATION 0x62 // NONOS-SDK - circa around position 384K in flash
-
 // 0x7C on 512K flash is where the internal RF data lives - stay away from there(last 16k)
 #define FWVER "1.2/February 19th 2023"
 
@@ -22,7 +21,7 @@
 //#define STA_SSID "dd-wrt"
 //#define STA_PASS "a1b2c3d4e5"
 #define STA_SSID "pearson.uk"
-#define STA_PASS "password"
+#define STA_PASS "spectrum"
 
 #define STA_TYPE AUTH_WPA2_PSK
 

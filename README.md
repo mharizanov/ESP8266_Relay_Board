@@ -1,5 +1,19 @@
 #FOTA Update Version - Requires NONOS-SDK 3.0.6 AND 1MB flash minimum.
+
+So you want OTA on your 3-CH relay board, huh ?
+Bad news is you need 1Mb flash and to my knowledge, all of the 3-CH boards came with 512Kb
+Two choices
+1) Desolder and solder a new flash chip (not too hard, but great care required)
+	https://www.youtube.com/watch?v=7Q6ABad7U6o
+2) Desolder and solder a new ESP-03 module (most new one come with 1MB flash)
+Again, great care required not to damage the PCB tracks
+
+Personlly, I think it's easier to desolder the flash chip and replace. It looks daunting, an if you fail you'll have a dead ESP-03.
+At this stage, your option is then to replace the ESP-03 itself with a 1MB variant.
+
+To build, you'll need to use the command line Makefile and have all the toolchains installed (make, XTENSA, SDK, python, esptool.py etc).
 Use command line make to build, PlatformIO does not have this capability or up to date libraries at present.
+The build works for me on a Macbook (intel) running Catalina (10.15.7). I assume it will run fine on Linux also.
 
 1) Edit the Makefile and set the paths to the SDK and XTENSA compiler; set the FLASH_SIZE for your board
 2) Edit burn_boot.sh and burn_webpages.sh and set the path to ESPTOOL for your environment 

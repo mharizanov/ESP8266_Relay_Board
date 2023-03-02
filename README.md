@@ -1,8 +1,9 @@
 #FOTA Update Version - Requires NONOS-SDK 3.0.6 AND 1MB flash minimum.
 
 So you want OTA on your 3-CH relay board, huh ?
-Bad news is you need 1Mb flash and to my knowledge, all of the 3-CH boards came with 512Kb
-Two choices
+Bad news is you need 1Mb flash and to my knowledge, all of the 3-CH boards came with 512Kb.
+
+Two choices:
 1) Desolder and solder a new flash chip (not too hard, but great care required)
 	https://www.youtube.com/watch?v=7Q6ABad7U6o
 2) Desolder and solder a new ESP-03 module (most new one come with 1MB flash)

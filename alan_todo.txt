@@ -1,6 +1,8 @@
 ToDo
 NTP DST implementation
+
 Thermostat timeout for all sources
+
 
 Done
 Avoid thermostat cycling - timestamp relay activations and set limit 
@@ -24,8 +26,7 @@ Choose which relays associate to each thermostat
 	Disable thermostat and turn relays off
 	when they relay state is change via webpage
 
-
-
+FOTA upgrade now down via webpage push (about.tpl) - thank you #esp-link project
 
 
 

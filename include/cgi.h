@@ -3,6 +3,9 @@
 
 #include "httpd.h"
 
+void errorResponse(HttpdConnData *connData, int code, char *message);
+void noCacheHeaders(HttpdConnData *connData, int code);
+
 int cgiGPIO(HttpdConnData *connData);
 void tplGPIO(HttpdConnData *connData, char *token, void **arg);
 int cgiReadFlash(HttpdConnData *connData);

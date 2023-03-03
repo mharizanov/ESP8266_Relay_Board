@@ -13,7 +13,7 @@
 #define EAGLE_FLASH_BIN_ADDR (SYSTEM_PARTITION_CUSTOMER_BEGIN + 1)
 #define EAGLE_IROM0TEXT_BIN_ADDR (SYSTEM_PARTITION_CUSTOMER_BEGIN + 2)
 
-#include "espmissingincludes.h"
+#include "esp8266.h"
 #include "user_interface.h"
 
 //#include "auth.h"
@@ -39,6 +39,9 @@
 
 #include "mem.h"
 #include "upgrade.h"
+
+#include "cgiflash.h"
+
 //#include "netbios.h"
 //#include "pwm.h"
 //#include "cgipwm.h"
@@ -76,6 +79,11 @@ should be placed above the URLs they protect.
 HttpdBuiltInUrl builtInUrls[] = {{"/", cgiRedirect, "/index.tpl"},
                                  {"/index.tpl", cgiEspFsTemplate, tplCounter},
                                  {"/about.tpl", cgiEspFsTemplate, tplCounter},
+
+                                 {"/flash/next", cgiGetFirmwareNext, NULL},
+                                 {"/flash/upload", cgiUploadFirmware, NULL},
+                                 {"/flash/reboot", cgiRebootFirmware, NULL},
+                                 {"/flash/version", cgiGetFirmwareVersion, NULL},
 
                                  //{"/flash.bin", cgiReadFlash, NULL},
 
@@ -210,12 +218,15 @@ void ICACHE_FLASH_ATTR wifiConnectCb(uint8_t status) {
     } else {
       MQTT_Disconnect(&mqttClient);
     }
+
+    /*
     uint8_t serverVersion = 2;
     const char server_ip[4] = {192, 168, 10, 7};
     uint16_t port = 80;
     char *path = "/esp8266fw/relayboard";
 
     handleUpgrade(serverVersion, server_ip, port, path);
+    */
   }
 }
 

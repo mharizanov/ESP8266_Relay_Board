@@ -9,8 +9,8 @@ Two choices:
 2) Desolder and solder a new ESP-03 module (most new one come with 1MB flash)
 Again, great care required not to damage the PCB tracks
 
-Personlly, I think it's easier to desolder the flash chip and replace. It looks daunting, an if you fail you'll have a dead ESP-03.
-At this stage, your option is then to replace the ESP-03 itself with a 1MB variant.
+Personlly, I think it's easier to desolder the flash chip and replace. It looks daunting, and if you fail you'll have a dead ESP-03.
+At this stage, your option is then to replace the ESP-03 itself with a 1MB variant (ebay is full of them).
 
 To build, you'll need to use the command line Makefile and have all the toolchains installed (make, XTENSA, SDK, python, esptool.py etc).
 Use command line make to build, PlatformIO does not have this capability or up to date libraries at present.
@@ -25,9 +25,15 @@ The build works for me on a Macbook (intel) running Catalina (10.15.7). I assume
 Note, as per standard approach, only boot.bin and user1.bin are burnt to flash. 
 user2.bin is burnt as a OTA upgrade.
 
-
 Uses the new SDK partition_table_t struct and should autoconfigure as per the Makefile.
 Only tested on 1Mb flash; will not work on 512Kb for sure, however larger flash size should work (as supported by ESP8266 chip itself)
+
+
+To upgrade firmware, visit the About page of the web interface and follow the instructions. You will need to upload either user1.bin or user2.bin (found in the firmware directory after compilation) as directed.
+Alternatively, wiflash (thanks esp-link project) is included to allow command line firmware push as follows:
+sh wiflash <ip address of relay board> ./firmware/user1.bin ./firmware/user2.bin 
+
+Huge thanks to the https://github.com/jeelabs/esp-link project without whom, I would have never figure out how to do this.
 
 
 #Three Channel WiFi Relay/Thermostat Board
@@ -50,6 +56,7 @@ Various enhancements have been made:
 - Change thermostat to work in tenths of a degree, not hundredths (direct compatibility with emonTh + emonGLCD)
 - Publish all ds18b20 sensors to MQTT by device-id
 - Choose which relays associate to each thermostat
+- FOTA Upgrade via webpage upload (thank you ESP-LINK project for the code)
 
 .
 

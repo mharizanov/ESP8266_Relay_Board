@@ -27,6 +27,20 @@ Some random cgi routines.
 #include <stdlib.h>
 #include <string.h>
 
+void ICACHE_FLASH_ATTR errorResponse(HttpdConnData *connData, int code, char *message) {
+  noCacheHeaders(connData, code);
+  httpdEndHeaders(connData);
+  httpdSend(connData, message, -1);
+  os_printf("HTTP %d error response: \"%s\"\n", code, message);
+}
+
+void ICACHE_FLASH_ATTR noCacheHeaders(HttpdConnData *connData, int code) {
+  httpdStartResponse(connData, code);
+  httpdHeader(connData, "Cache-Control", "no-cache, no-store, must-revalidate");
+  httpdHeader(connData, "Pragma", "no-cache");
+  httpdHeader(connData, "Expires", "0");
+}
+
 // Cgi that turns the Relays on or off according to the 'relayX' param in the GET data
 int ICACHE_FLASH_ATTR cgiGPIO(HttpdConnData *connData) {
   int len;

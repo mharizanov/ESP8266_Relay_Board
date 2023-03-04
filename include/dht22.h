@@ -1,4 +1,5 @@
 #include "c_types.h"
+#include <time.h>
 
 enum sensor_type { SENSOR_DHT11, SENSOR_DHT22 };
 
@@ -8,6 +9,7 @@ struct sensor_reading {
   const char *source;
   uint8_t sensor_id[16];
   BOOL success;
+  time_t readingTS; // timestamp of the reading
 };
 
 struct sensor_reading *readDHT(void);

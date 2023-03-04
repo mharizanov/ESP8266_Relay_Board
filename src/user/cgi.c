@@ -54,42 +54,42 @@ int ICACHE_FLASH_ATTR cgiGPIO(HttpdConnData *connData) {
 
   len = httpdFindArg(connData->getArgs, "relay1", buff, sizeof(buff));
   if (len > 0) {
-    currGPIO12State = atoi(buff);
-    ioGPIO(currGPIO12State, 12);
+    relay1State = atoi(buff);
+    ioGPIO(relay1State, RELAY1GPIO);
     gotcmd = 1;
     // Manually switching thermostat associated relays means switching the thermostat off
-    if (sysCfg.thermostat1state != 0 && sysCfg.relay_1_thermostat) {
+    if (sysCfg.thermostat1state != 0 && sysCfg.relay1_thermostat) {
       sysCfg.thermostat1state = 0;
     }
   }
 
   len = httpdFindArg(connData->getArgs, "relay2", buff, sizeof(buff));
   if (len > 0) {
-    currGPIO13State = atoi(buff);
-    ioGPIO(currGPIO13State, 13);
+    relay2State = atoi(buff);
+    ioGPIO(relay2State, RELAY2GPIO);
     gotcmd = 1;
     // Manually switching thermostat associated relays means switching the thermostat off
-    if (sysCfg.thermostat1state != 0 && sysCfg.relay_2_thermostat) {
+    if (sysCfg.thermostat1state != 0 && sysCfg.relay2_thermostat) {
       sysCfg.thermostat1state = 0;
     }
   }
 
   len = httpdFindArg(connData->getArgs, "relay3", buff, sizeof(buff));
   if (len > 0) {
-    currGPIO15State = atoi(buff);
-    ioGPIO(currGPIO15State, 15);
+    relay3State = atoi(buff);
+    ioGPIO(relay3State, RELAY3GPIO);
     gotcmd = 1;
     // Manually switching thermostat associated relays means switching the thermostat off
-    if (sysCfg.thermostat1state != 0 && sysCfg.relay_3_thermostat) {
+    if (sysCfg.thermostat1state != 0 && sysCfg.relay3_thermostat) {
       sysCfg.thermostat1state = 0;
     }
   }
 
   if (gotcmd == 1) {
     if (sysCfg.relay_latching_enable) {
-      sysCfg.relay_1_state = currGPIO12State;
-      sysCfg.relay_2_state = currGPIO13State;
-      sysCfg.relay_3_state = currGPIO15State;
+      sysCfg.relay1_state = relay1State;
+      sysCfg.relay2_state = relay2State;
+      sysCfg.relay3_state = relay3State;
       CFG_Save();
     }
 
@@ -104,9 +104,9 @@ int ICACHE_FLASH_ATTR cgiGPIO(HttpdConnData *connData) {
 
     len = os_sprintf(buff,
                      "{\"relay1\": %d\n,\"relay1name\":\"%s\",\n\"relay2\": %d\n,\"relay2name\":\"%s\",\n\"relay3\": "
-                     "%d\n,\"relay3name\":\"%s\" }\n",
-                     currGPIO12State, (char *)sysCfg.relay1name, currGPIO13State, (char *)sysCfg.relay2name,
-                     currGPIO15State, (char *)sysCfg.relay3name);
+                     "%d\n,\"relay3name\":\"%s\", \n\"relaytotal\": %d\n}\n",
+                     relay1State, (char *)sysCfg.relay1_name, relay2State, (char *)sysCfg.relay2_name, relay3State,
+                     (char *)sysCfg.relay3_name, sysCfg.relay_total);
     httpdSend(connData, buff, -1);
     return HTTPD_CGI_DONE;
   }
@@ -121,19 +121,19 @@ void ICACHE_FLASH_ATTR tplGPIO(HttpdConnData *connData, char *token, void **arg)
   os_strcpy(buff, "Unknown");
 
   if (os_strcmp(token, "relay1name") == 0) {
-    os_strcpy(buff, (char *)sysCfg.relay1name);
+    os_strcpy(buff, (char *)sysCfg.relay1_name);
   }
 
   if (os_strcmp(token, "relay2name") == 0) {
-    os_strcpy(buff, (char *)sysCfg.relay2name);
+    os_strcpy(buff, (char *)sysCfg.relay2_name);
   }
 
   if (os_strcmp(token, "relay3name") == 0) {
-    os_strcpy(buff, (char *)sysCfg.relay3name);
+    os_strcpy(buff, (char *)sysCfg.relay3_name);
   }
 
   if (os_strcmp(token, "relay1") == 0) {
-    if (currGPIO12State) {
+    if (relay1State) {
       os_strcpy(buff, "on");
     } else {
       os_strcpy(buff, "off");
@@ -143,7 +143,7 @@ void ICACHE_FLASH_ATTR tplGPIO(HttpdConnData *connData, char *token, void **arg)
     os_printf("\n ");
   }
   if (os_strcmp(token, "relay2") == 0) {
-    if (currGPIO13State) {
+    if (relay2State) {
       os_strcpy(buff, "on");
     } else {
       os_strcpy(buff, "off");
@@ -153,7 +153,7 @@ void ICACHE_FLASH_ATTR tplGPIO(HttpdConnData *connData, char *token, void **arg)
     os_printf("\n ");
   }
   if (os_strcmp(token, "relay3") == 0) {
-    if (currGPIO15State) {
+    if (relay3State) {
       os_strcpy(buff, "on");
     } else {
       os_strcpy(buff, "off");
@@ -162,6 +162,9 @@ void ICACHE_FLASH_ATTR tplGPIO(HttpdConnData *connData, char *token, void **arg)
     os_printf(buff);
     os_printf("\n ");
   }
+  if (os_strcmp(token, "relay-total") == 0) {
+    os_sprintf(buff, "%d", sysCfg.relay_total);
+  }
   httpdSend(connData, buff, -1);
 }
 
@@ -169,6 +172,7 @@ static long hitCounter = 0;
 
 // Template code for the counter on the index page.
 void ICACHE_FLASH_ATTR tplCounter(HttpdConnData *connData, char *token, void **arg) {
+
   char buff[128];
   if (token == NULL)
     return;
@@ -334,7 +338,7 @@ int ICACHE_FLASH_ATTR cgiState(HttpdConnData *connData) {
   os_sprintf(buff,
              "{ \n\"relay1\": \"%d\"\n,\n\"relay2\": \"%d\"\n,\n\"relay3\": \"%d\",\n  \n\"DHT22temperature\": "
              "\"%s\"\n , \n\"DHT22humidity\": \"%s\"\n,\"DS18B20temperature\": \"%s\"\n}\n",
-             currGPIO12State, currGPIO13State, currGPIO15State, temp, humi, tmp);
+             relay1State, relay2State, relay3State, temp, humi, tmp);
 
   httpdSend(connData, buff, -1);
   return HTTPD_CGI_DONE;
@@ -363,15 +367,15 @@ void ICACHE_FLASH_ATTR tplUI(HttpdConnData *connData, char *token, void **arg) {
   os_strcpy(buff, "Unknown");
 
   if (os_strcmp(token, "relay1name") == 0) {
-    os_strcpy(buff, (char *)sysCfg.relay1name);
+    os_strcpy(buff, (char *)sysCfg.relay1_name);
   }
 
   if (os_strcmp(token, "relay2name") == 0) {
-    os_strcpy(buff, (char *)sysCfg.relay2name);
+    os_strcpy(buff, (char *)sysCfg.relay2_name);
   }
 
   if (os_strcmp(token, "relay3name") == 0) {
-    os_strcpy(buff, (char *)sysCfg.relay3name);
+    os_strcpy(buff, (char *)sysCfg.relay3_name);
   }
 
   httpdSend(connData, buff, -1);
@@ -423,10 +427,6 @@ void ICACHE_FLASH_ATTR tplMQTT(HttpdConnData *connData, char *token, void **arg)
 
   if (os_strcmp(token, "mqtt-temp-subs-topic") == 0) {
     os_strcpy(buff, (char *)sysCfg.mqtt_temp_subs_topic);
-  }
-
-  if (os_strcmp(token, "mqtt-temp-timeout-secs") == 0) {
-    os_sprintf(buff, "%d", sysCfg.mqtt_temp_timeout_secs);
   }
 
   if (os_strcmp(token, "mqtt-dht22-temp-pub-topic") == 0) {
@@ -500,11 +500,6 @@ int ICACHE_FLASH_ATTR cgiMQTT(HttpdConnData *connData) {
   len = httpdFindArg(connData->post->buff, "mqtt-temp-subs-topic", buff, sizeof(buff));
   if (len > 0) {
     os_sprintf((char *)sysCfg.mqtt_temp_subs_topic, buff);
-  }
-
-  len = httpdFindArg(connData->post->buff, "mqtt-temp-timeout-secs", buff, sizeof(buff));
-  if (len > 0) {
-    sysCfg.mqtt_temp_timeout_secs = atoi(buff);
   }
 
   len = httpdFindArg(connData->post->buff, "mqtt-dht22-temp-pub-topic", buff, sizeof(buff));
@@ -609,6 +604,14 @@ void ICACHE_FLASH_ATTR tplNTP(HttpdConnData *connData, char *token, void **arg) 
     os_sprintf(buff, "%d", (int)sysCfg.ntp_tz);
   }
 
+  if (os_strcmp(token, "dst_disabled") == 0 && sysCfg.DST == 0) {
+    os_sprintf(buff, " selected ");
+  } else if (os_strcmp(token, "dst_EU") == 0 && sysCfg.DST == 1) {
+    os_sprintf(buff, " selected ");
+  } else if (os_strcmp(token, "dst_NA") == 0 && sysCfg.DST == 2) {
+    os_sprintf(buff, " selected ");
+  }
+
   if (os_strcmp(token, "NTP") == 0) {
     // os_sprintf(buff, "Time: %s GMT%s%02d\n", epoch_to_str(sntp_time), sntp_tz > 0 ? "+" : "", sntp_tz);
     os_sprintf(buff, "Time: %s \n", epoch_to_str(sntp_get_current_timestamp()));
@@ -633,6 +636,11 @@ int ICACHE_FLASH_ATTR cgiNTP(HttpdConnData *connData) {
   if (len > 0) {
     sysCfg.ntp_tz = atoi(buff);
     sntp_set_timezone(sysCfg.ntp_tz);
+  }
+
+  len = httpdFindArg(connData->post->buff, "DST", buff, sizeof(buff));
+  if (len > 0) {
+    sysCfg.DST = atoi(buff);
   }
 
   CFG_Save();
@@ -665,38 +673,44 @@ int ICACHE_FLASH_ATTR cgiRLYSettings(HttpdConnData *connData) {
     // Connection aborted. Clean up.
     return HTTPD_CGI_DONE;
   }
+  len = httpdFindArg(connData->post->buff, "relay-total", buff, sizeof(buff));
+  sysCfg.relay_total = (len > 0) ? atoi(buff) : sysCfg.relay_total;
 
   len = httpdFindArg(connData->post->buff, "relay-latching-enable", buff, sizeof(buff));
   sysCfg.relay_latching_enable = (len > 0) ? 1 : 0;
 
-  len = httpdFindArg(connData->post->buff, "relay1name", buff, sizeof(buff));
+  len = httpdFindArg(connData->post->buff, "relay1-name", buff, sizeof(buff));
   if (len > 0) {
-    os_strcpy((char *)sysCfg.relay1name, buff);
+    os_strcpy((char *)sysCfg.relay1_name, buff);
   }
 
-  len = httpdFindArg(connData->post->buff, "relay2name", buff, sizeof(buff));
+  len = httpdFindArg(connData->post->buff, "relay2-name", buff, sizeof(buff));
   if (len > 0) {
-    os_strcpy((char *)sysCfg.relay2name, buff);
+    os_strcpy((char *)sysCfg.relay2_name, buff);
   }
 
-  len = httpdFindArg(connData->post->buff, "relay3name", buff, sizeof(buff));
+  len = httpdFindArg(connData->post->buff, "relay3-name", buff, sizeof(buff));
   if (len > 0) {
-    os_strcpy((char *)sysCfg.relay3name, buff);
+    os_strcpy((char *)sysCfg.relay3_name, buff);
   }
 
-  len = httpdFindArg(connData->post->buff, "relay1thermostat", buff, sizeof(buff));
-  sysCfg.relay_1_thermostat = (len > 0) ? 1 : 0;
+  len = httpdFindArg(connData->post->buff, "relay1-thermostat", buff, sizeof(buff));
+  sysCfg.relay1_thermostat = (len > 0) ? 1 : 0;
 
-  len = httpdFindArg(connData->post->buff, "relay2thermostat", buff, sizeof(buff));
-  sysCfg.relay_2_thermostat = (len > 0) ? 1 : 0;
+  len = httpdFindArg(connData->post->buff, "relay2-thermostat", buff, sizeof(buff));
+  sysCfg.relay2_thermostat = (len > 0) ? 1 : 0;
 
-  len = httpdFindArg(connData->post->buff, "relay3thermostat", buff, sizeof(buff));
-  sysCfg.relay_3_thermostat = (len > 0) ? 1 : 0;
+  len = httpdFindArg(connData->post->buff, "relay3-thermostat", buff, sizeof(buff));
+  sysCfg.relay3_thermostat = (len > 0) ? 1 : 0;
 
-  len = httpdFindArg(connData->post->buff, "therm-relay-rest-min", buff, sizeof(buff));
-  if (len > 0) {
-    sysCfg.therm_relay_rest_min = atoi(buff);
-  }
+  len = httpdFindArg(connData->post->buff, "relay1-gpio", buff, sizeof(buff));
+  sysCfg.relay1_gpio = (len > 0) ? atoi(buff) : sysCfg.relay1_gpio;
+
+  len = httpdFindArg(connData->post->buff, "relay2-gpio", buff, sizeof(buff));
+  sysCfg.relay2_gpio = (len > 0) ? atoi(buff) : sysCfg.relay2_gpio;
+
+  len = httpdFindArg(connData->post->buff, "relay3-gpio", buff, sizeof(buff));
+  sysCfg.relay3_gpio = (len > 0) ? atoi(buff) : sysCfg.relay3_gpio;
 
   CFG_Save();
   httpdRedirect(connData, "/");
@@ -711,37 +725,46 @@ void ICACHE_FLASH_ATTR tplRLYSettings(HttpdConnData *connData, char *token, void
 
   os_strcpy(buff, "Unknown");
 
+  if (os_strcmp(token, "relay-total-1") == 0 && sysCfg.relay_total == 1) {
+    os_strcpy(buff, "selected");
+  }
+
+  if (os_strcmp(token, "relay-total-2") == 0 && sysCfg.relay_total == 2) {
+    os_strcpy(buff, "selected");
+  }
+
+  if (os_strcmp(token, "relay-total-3") == 0 && sysCfg.relay_total == 3) {
+    os_strcpy(buff, "selected");
+  }
+
   if (os_strcmp(token, "relay-latching-enable") == 0) {
     os_strcpy(buff, sysCfg.relay_latching_enable == 1 ? "checked" : "");
   }
 
-  if (os_strcmp(token, "relay1name") == 0) {
-    os_strcpy(buff, (char *)sysCfg.relay1name);
+  if (os_strcmp(token, "relay1-name") == 0) {
+    os_strcpy(buff, (char *)sysCfg.relay1_name);
   }
 
-  if (os_strcmp(token, "relay1thermostat") == 0) {
-    os_strcpy(buff, sysCfg.relay_1_thermostat == 1 ? "checked" : "");
+  if (os_strcmp(token, "relay1-thermostat") == 0) {
+    os_strcpy(buff, sysCfg.relay1_thermostat == 1 ? "checked" : "");
   }
 
-  if (os_strcmp(token, "relay2name") == 0) {
-    os_strcpy(buff, (char *)sysCfg.relay2name);
+  if (os_strcmp(token, "relay2-name") == 0) {
+    os_strcpy(buff, (char *)sysCfg.relay2_name);
   }
 
-  if (os_strcmp(token, "relay2thermostat") == 0) {
-    os_strcpy(buff, sysCfg.relay_2_thermostat == 1 ? "checked" : "");
+  if (os_strcmp(token, "relay2-thermostat") == 0) {
+    os_strcpy(buff, sysCfg.relay2_thermostat == 1 ? "checked" : "");
   }
 
-  if (os_strcmp(token, "relay3name") == 0) {
-    os_strcpy(buff, (char *)sysCfg.relay3name);
+  if (os_strcmp(token, "relay3-name") == 0) {
+    os_strcpy(buff, (char *)sysCfg.relay3_name);
   }
 
-  if (os_strcmp(token, "relay3thermostat") == 0) {
-    os_strcpy(buff, sysCfg.relay_3_thermostat == 1 ? "checked" : "");
+  if (os_strcmp(token, "relay3-thermostat") == 0) {
+    os_strcpy(buff, sysCfg.relay3_thermostat == 1 ? "checked" : "");
   }
 
-  if (os_strcmp(token, "therm-relay-rest-min") == 0) {
-    os_sprintf(buff, "%d", sysCfg.therm_relay_rest_min);
-  }
   httpdSend(connData, buff, -1);
 }
 
@@ -760,26 +783,6 @@ int ICACHE_FLASH_ATTR cgiSensorSettings(HttpdConnData *connData) {
 
   len = httpdFindArg(connData->post->buff, "sensor-dht22-enable", buff, sizeof(buff));
   sysCfg.sensor_dht22_enable = (len > 0) ? 1 : 0;
-
-  len = httpdFindArg(connData->post->buff, "thermostat1-input", buff, sizeof(buff));
-  if (len > 0) {
-    sysCfg.thermostat1_input = atoi(buff);
-  }
-
-  len = httpdFindArg(connData->post->buff, "thermostat1-input", buff, sizeof(buff));
-  if (len > 0) {
-    sysCfg.thermostat1_input = atoi(buff);
-  }
-
-  len = httpdFindArg(connData->post->buff, "thermostat1hysteresishigh", buff, sizeof(buff));
-  if (len > 0) {
-    sysCfg.thermostat1hysteresishigh = atoi(buff);
-  }
-
-  len = httpdFindArg(connData->post->buff, "thermostat1hysteresislow", buff, sizeof(buff));
-  if (len > 0) {
-    sysCfg.thermostat1hysteresislow = atoi(buff);
-  }
 
   CFG_Save();
   httpdRedirect(connData, "/");
@@ -802,36 +805,118 @@ void ICACHE_FLASH_ATTR tplSensorSettings(HttpdConnData *connData, char *token, v
     os_strcpy(buff, sysCfg.sensor_dht22_enable == 1 ? "checked" : "");
   }
 
-  if (os_strcmp(token, "selectedds18b20") == 0) {
+  httpdSend(connData, buff, -1);
+}
+
+int ICACHE_FLASH_ATTR cgiThermostatSettings(HttpdConnData *connData) {
+
+  int len;
+  char buff[128];
+
+  if (connData->conn == NULL) {
+    // Connection aborted. Clean up.
+    return HTTPD_CGI_DONE;
+  }
+
+  len = httpdFindArg(connData->post->buff, "therm1-input", buff, sizeof(buff));
+  if (len > 0) {
+    sysCfg.thermostat1_input = atoi(buff);
+  }
+
+  len = httpdFindArg(connData->post->buff, "therm1-input", buff, sizeof(buff));
+  if (len > 0) {
+    sysCfg.thermostat1_input = atoi(buff);
+  }
+
+  len = httpdFindArg(connData->post->buff, "therm1-hysteresis-high", buff, sizeof(buff));
+  if (len > 0) {
+    sysCfg.thermostat1_hysteresis_high = atoi(buff);
+  }
+
+  len = httpdFindArg(connData->post->buff, "thermostat1-hysteresis-low", buff, sizeof(buff));
+  if (len > 0) {
+    sysCfg.thermostat1_hysteresis_low = atoi(buff);
+  }
+
+  len = httpdFindArg(connData->post->buff, "therm-low-temp-colour-deg", buff, sizeof(buff));
+  if (len > 0) {
+    sysCfg.therm_low_temp_colour_deg = atoi(buff);
+  }
+
+  len = httpdFindArg(connData->post->buff, "therm-high-temp-colour-deg", buff, sizeof(buff));
+  if (len > 0) {
+    sysCfg.therm_high_temp_colour_deg = atoi(buff);
+  }
+
+  len = httpdFindArg(connData->post->buff, "therm-room-temp-timeout-secs", buff, sizeof(buff));
+  if (len > 0) {
+    sysCfg.therm_room_temp_timeout_secs = atoi(buff);
+  }
+
+  len = httpdFindArg(connData->post->buff, "therm-relay-rest-min", buff, sizeof(buff));
+  if (len > 0) {
+    sysCfg.therm_relay_rest_min = atoi(buff);
+  }
+
+  CFG_Save();
+  httpdRedirect(connData, "/");
+  return HTTPD_CGI_DONE;
+}
+
+void ICACHE_FLASH_ATTR tplThermostatSettings(HttpdConnData *connData, char *token, void **arg) {
+
+  char buff[128];
+  if (token == NULL)
+    return;
+
+  os_strcpy(buff, "Unknown");
+
+  if (os_strcmp(token, "selected-ds18b20") == 0) {
     os_strcpy(buff, sysCfg.thermostat1_input == 0 ? "selected" : "");
   }
 
-  if (os_strcmp(token, "selecteddht22t") == 0) {
+  if (os_strcmp(token, "selected-dht22t") == 0) {
     os_strcpy(buff, sysCfg.thermostat1_input == 1 ? "selected" : "");
   }
 
-  if (os_strcmp(token, "selecteddht22h") == 0) {
+  if (os_strcmp(token, "selected-dht22h") == 0) {
     os_strcpy(buff, sysCfg.thermostat1_input == 2 ? "selected" : "");
   }
 
-  if (os_strcmp(token, "selectedmqtt") == 0) {
+  if (os_strcmp(token, "selected-mqtt") == 0) {
     os_strcpy(buff, sysCfg.thermostat1_input == 3 ? "selected" : "");
   }
 
-  if (os_strcmp(token, "selectedserial") == 0) {
+  if (os_strcmp(token, "selected-serial") == 0) {
     os_strcpy(buff, sysCfg.thermostat1_input == 4 ? "selected" : "");
   }
 
-  if (os_strcmp(token, "selectedfixed") == 0) {
+  if (os_strcmp(token, "selected-fixed") == 0) {
     os_strcpy(buff, sysCfg.thermostat1_input == 5 ? "selected" : "");
   }
 
-  if (os_strcmp(token, "thermostat1hysteresishigh") == 0) {
-    os_sprintf(buff, "%d", (int)sysCfg.thermostat1hysteresishigh);
+  if (os_strcmp(token, "therm1-hysteresis-high") == 0) {
+    os_sprintf(buff, "%d", (int)sysCfg.thermostat1_hysteresis_high);
   }
 
-  if (os_strcmp(token, "thermostat1hysteresislow") == 0) {
-    os_sprintf(buff, "%d", (int)sysCfg.thermostat1hysteresislow);
+  if (os_strcmp(token, "therm1-hysteresis-low") == 0) {
+    os_sprintf(buff, "%d", (int)sysCfg.thermostat1_hysteresis_low);
+  }
+
+  if (os_strcmp(token, "therm-low-temp-colour-deg") == 0) {
+    os_sprintf(buff, "%d", sysCfg.therm_low_temp_colour_deg);
+  }
+
+  if (os_strcmp(token, "therm-high-temp-colour-deg") == 0) {
+    os_sprintf(buff, "%d", sysCfg.therm_high_temp_colour_deg);
+  }
+
+  if (os_strcmp(token, "therm-room-temp-timeout-secs") == 0) {
+    os_sprintf(buff, "%d", sysCfg.therm_room_temp_timeout_secs);
+  }
+
+  if (os_strcmp(token, "therm-relay-rest-min") == 0) {
+    os_sprintf(buff, "%d", sysCfg.therm_relay_rest_min);
   }
 
   httpdSend(connData, buff, -1);

@@ -6,9 +6,9 @@
 #define ICACHE_RAM_ATTR __attribute__((section(".iram0.text")))
 #define ICACHE_RODATA_ATTR __attribute__((section(".irom.text")))
 
-#define CFG_HOLDER 0x00FF0006
+#define CFG_HOLDER 0x00FF0009
 //#define CFG_LOCATION 0x3C     //Working value on old SDK
-#define CFG_LOCATION 0x62 // NONOS-SDK - circa around position 384K in flash
+#define CFG_LOCATION 0x70 // NONOS-SDK - circa around position 458K in flash
 // 0x7C on 512K flash is where the internal RF data lives - stay away from there(last 16k)
 #define FWVER "1.3/March 2nd 2023"
 
@@ -64,9 +64,14 @@
 #define SENSOR_DHT22_ENABLE 0
 
 #define RELAY_LATCHING_ENABLE 0
+#define RELAY_TOTAL 3 // number of relays
 #define RELAY1NAME "Relay 1"
 #define RELAY2NAME "Relay 2"
 #define RELAY3NAME "Relay 3"
+
+#define RELAY1GPIO 12
+#define RELAY2GPIO 13
+#define RELAY3GPIO 15
 
 #define MQTT_BUF_SIZE 255
 #define MQTT_RECONNECT_TIMEOUT 5 /*second*/

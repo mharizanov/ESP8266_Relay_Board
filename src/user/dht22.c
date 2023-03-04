@@ -21,6 +21,7 @@
 #include "osapi.h"
 #include "user_interface.h"
 #include <stdlib.h>
+#include <time.h>
 
 #include "dht22.h"
 
@@ -31,6 +32,9 @@
 #define DHT_PIN 2
 
 enum sensor_type SENSOR;
+
+// Temperature reading timestamps (used for thermostat if configured)
+time_t dht22TreadingTS; // timestamp for the reading
 
 static inline float ICACHE_FLASH_ATTR scale_humidity(int *data) {
   if (SENSOR == SENSOR_DHT11) {
@@ -175,10 +179,12 @@ static void ICACHE_FLASH_ATTR pollDHTCb(void *arg) {
   // os_printf("Temp =  %d*C, Hum = %d%%\n", (int)(reading.temperature * 100), (int)(reading.humidity * 100));
 
   reading.success = 1;
+  reading.readingTS = sntp_get_current_timestamp();
+
   return;
 fail:
 
-  os_printf("Failed to get DHT reading, dying\n");
+  os_printf("Failed to get DHT reading.\n");
   reading.success = 0;
 }
 

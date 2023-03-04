@@ -82,13 +82,16 @@ HttpdBuiltInUrl builtInUrls[] = {{"/", cgiRedirect, "/index.tpl"},
 
                                  {"/flash/next", cgiGetFirmwareNext, NULL},
                                  {"/flash/upload", cgiUploadFirmware, NULL},
+                                 {"/flash/upload-espfs", cgiUploadEspfs, NULL},
+                                 {"/flash/flash-size", cgiGetFlashSize, NULL},
+
                                  {"/flash/reboot", cgiRebootFirmware, NULL},
                                  {"/flash/version", cgiGetFirmwareVersion, NULL},
 
                                  //{"/flash.bin", cgiReadFlash, NULL},
 
-                                 // {"/config/*", authBasic, myPassFn},
-                                 // {"/control/*", authBasic, myPassFn},
+                                 //                     {"/config/*", authBasic, myPassFn},
+                                 //                   {"/control/*", authBasic, myPassFn},
 
                                  {"/control/ui.tpl", cgiEspFsTemplate, tplUI},
                                  {"/control/relay.tpl", cgiEspFsTemplate, tplGPIO},
@@ -123,6 +126,8 @@ HttpdBuiltInUrl builtInUrls[] = {{"/", cgiRedirect, "/index.tpl"},
                                  {"/config/relay.cgi", cgiRLYSettings, NULL},
                                  {"/config/sensor.tpl", cgiEspFsTemplate, tplSensorSettings},
                                  {"/config/sensor.cgi", cgiSensorSettings, NULL},
+                                 {"/config/thermostat.tpl", cgiEspFsTemplate, tplThermostatSettings},
+                                 {"/config/thermostat_config.cgi", cgiThermostatSettings, NULL},
 
                                  {"*", cgiEspFsHook, NULL}, // Catch-all cgi function for the filesystem
                                  {NULL, NULL, NULL}};
@@ -136,6 +141,11 @@ void ICACHE_FLASH_ATTR http_callback_IP(char *response, int http_status, char *f
   }
 }
 
+/* Get rid of below
+It works well but needs the firmware
+hosted on a webserver to upgrade
+Maybe worth looking into in the future
+to tie into github releases ?
 static void ICACHE_FLASH_ATTR ota_finished_callback(void *arg) {
   struct upgrade_server_info *update = arg;
   if (update->upgrade_flag == true) {
@@ -206,6 +216,7 @@ static void ICACHE_FLASH_ATTR handleUpgrade(uint8_t serverVersion, const char *s
     os_printf("[OTA]Upgrading...\n");
   }
 }
+*/
 
 void ICACHE_FLASH_ATTR wifiConnectCb(uint8_t status) {
   if (status == STATION_GOT_IP) {
@@ -220,6 +231,7 @@ void ICACHE_FLASH_ATTR wifiConnectCb(uint8_t status) {
     }
 
     /*
+    //Webserver based firmware upgrade testing
     uint8_t serverVersion = 2;
     const char server_ip[4] = {192, 168, 10, 7};
     uint16_t port = 80;
@@ -284,24 +296,24 @@ void ICACHE_FLASH_ATTR mqttDataCb(uint32_t *args, const char *topic, uint32_t to
       os_printf("Relay %d is now: %s \r\n", relayNum - '0', strData);
 
       if (relayNum == '1') {
-        currGPIO12State = atoi(strData);
-        ioGPIO(currGPIO12State, 12);
+        relay1State = atoi(strData);
+        ioGPIO(relay1State, RELAY1GPIO);
       }
 
       if (relayNum == '2') {
-        currGPIO13State = atoi(strData);
-        ioGPIO(currGPIO13State, 13);
+        relay2State = atoi(strData);
+        ioGPIO(relay2State, RELAY2GPIO);
       }
 
       if (relayNum == '3') {
-        currGPIO15State = atoi(strData);
-        ioGPIO(currGPIO15State, 15);
+        relay3State = atoi(strData);
+        ioGPIO(relay3State, RELAY3GPIO);
       }
 
       if (sysCfg.relay_latching_enable) {
-        sysCfg.relay_1_state = currGPIO12State;
-        sysCfg.relay_2_state = currGPIO13State;
-        sysCfg.relay_3_state = currGPIO15State;
+        sysCfg.relay1_state = relay1State;
+        sysCfg.relay2_state = relay2State;
+        sysCfg.relay3_state = relay3State;
         CFG_Save();
       }
     }
@@ -329,6 +341,12 @@ void ICACHE_FLASH_ATTR user_init(void) {
   if (sysCfg.ntp_enable == 1) {
     sntp_setservername(0, "pool.ntp.org");
     sntp_set_timezone(sysCfg.ntp_tz);
+
+    if (sysCfg.DST == 1 || sysCfg.DST == 2) {
+      // If we are configured for DST, check every 30 seconds.
+      dst_check_init(30000);
+    }
+
     sntp_init();
   }
 

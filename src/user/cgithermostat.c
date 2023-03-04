@@ -80,8 +80,8 @@ int ICACHE_FLASH_ATTR cgiThermostat(HttpdConnData *connData) {
                  "\"humidistat\":%d,\n\"relay1state\":%d,\n\"relay1name\":\"%s\",\n\"opmode\":%d,\n\""
                  "state\":%d,\n\"manualsetpoint\":%d,\n\"thermostat1_input\":%d,\n\"automode\": %d,\n"
                  "\"mqtthost\": \"%s\",\n \"time\": \"%d\"}\n",
-                 (char *)therm_room_temp, humi, (int)sysCfg.thermostat1_input == 2 ? 1 : 0, currGPIO12State,
-                 (char *)sysCfg.relay1name, (int)sysCfg.thermostat1opmode, (int)sysCfg.thermostat1state,
+                 (char *)therm_room_temp, humi, (int)sysCfg.thermostat1_input == 2 ? 1 : 0, relay1State,
+                 (char *)sysCfg.relay1_name, (int)sysCfg.thermostat1opmode, (int)sysCfg.thermostat1state,
                  (int)sysCfg.thermostat1manualsetpoint, (int)sysCfg.thermostat1_input, (int)sysCfg.thermostat1mode,
                  (char *)sysCfg.mqtt_host, sntp_get_current_timestamp());
     }
@@ -109,7 +109,7 @@ int ICACHE_FLASH_ATTR cgiThermostat(HttpdConnData *connData) {
       if (connData->post->len > 0) {
         os_printf("N/A\n");
       } else {
-        os_sprintf(buff, "%s", (char *)sysCfg.relay1name);
+        os_sprintf(buff, "%s", (char *)sysCfg.relay1_name);
       }
     }
 
@@ -117,18 +117,14 @@ int ICACHE_FLASH_ATTR cgiThermostat(HttpdConnData *connData) {
       if (connData->post->len > 0) {
         os_printf("N/A\n");
       } else {
-        os_sprintf(buff, "%d", currGPIO12State);
+        os_sprintf(buff, "%d", relay1State);
       }
     }
 
     if (os_strcmp(buff, "thermostat_state") == 0) {
       if (connData->post->len > 0) {
         sysCfg.thermostat1state = (int)atoi(connData->post->buff);
-
-        // Switching off thermostat means force off for relay 1
-        currGPIO12State = 0;
-        ioGPIO(currGPIO12State, 12);
-
+        thermostatRelayOff();
         CFG_Save();
         os_printf("Handle thermostat state (%d) saved\n", (int)sysCfg.thermostat1state);
       } else {

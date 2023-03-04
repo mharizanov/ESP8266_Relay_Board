@@ -1,7 +1,21 @@
 ToDo
-NTP DST implementation
 
-Thermostat timeout for all sources
+
+
+Configurable GPIO for relays (via webpage?)
+
+Select number of relays and update code to respect this
+	Inc webpages, IO calls, MQTT(?) and POST requests
+
+tidy up ui.js and only take what is needed	
+
+
+Thermostat Advance button
+	Advance to next schedule
+	When manually adjusting temp, reset at next schedule
+	Make this configurable (manual override to next schedule)
+
+
 
 
 Done
@@ -28,6 +42,14 @@ Choose which relays associate to each thermostat
 
 FOTA upgrade now down via webpage push (about.tpl) - thank you #esp-link project
 
+Thermostat timeout for all sources implemented
 
+Move all thermostat config to its own page in the Web GUI
 
+ESPFS webpage upload now available through the Web GUI
+
+Tidy up about.tpl page and only show firmware upgrade options when flash_map > 2 (over 512Kb)
+Disable URLs for flashing firmware if flash_map < 2
+
+Supports DST for Europe and North America (thanks Martin Harizanov for the code template)
 

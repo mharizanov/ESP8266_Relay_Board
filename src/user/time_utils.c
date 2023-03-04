@@ -1,5 +1,6 @@
 
 #include "c_types.h"
+#include "config.h"
 #include "espmissingincludes.h"
 #include "osapi.h"
 
@@ -71,7 +72,7 @@ bool IsDST_EU(int day, int month, int dow) {
   if (month == 10)
     return previousSunday < 25;
 
-  return false; // this line never gonna happend
+  return false; // this line never going to happen
 }
 
 bool IsDST_NA(int day, int month, int dow) {
@@ -91,4 +92,32 @@ bool IsDST_NA(int day, int month, int dow) {
   // In November we must be before the first Sunday to be DST.
   // That means the previous Sunday must be before the 1st.
   return previousSunday <= 1;
+}
+
+static void ICACHE_FLASH_ATTR dst_set(void *arg) {
+
+  if (sysCfg.DST == 1) {
+    // Europe DST
+    if (IsDST_EU) {
+      sntp_set_timezone(sysCfg.ntp_tz + 1);
+    } else {
+      sntp_set_timezone(sysCfg.ntp_tz);
+    }
+  } else if (sysCfg.DST == 2) {
+    // US DST
+    if (IsDST_NA) {
+      sntp_set_timezone(sysCfg.ntp_tz + 1);
+    } else {
+      sntp_set_timezone(sysCfg.ntp_tz);
+    }
+  }
+}
+
+void ICACHE_FLASH_ATTR dst_check_init(uint32_t polltime) {
+
+  os_printf("dst_check_init: poll interval of %d sec\n", (int)polltime / 1000);
+
+  static ETSTimer dstCheckTimer;
+  os_timer_setfn(&dstCheckTimer, dst_set, NULL);
+  os_timer_arm(&dstCheckTimer, polltime, 1);
 }

@@ -15,6 +15,11 @@
 #include "io.h"
 #include "osapi.h"
 #include "uart_hw.h"
+#include <time.h>
+
+// Temperature reading timestamps (used for thermostat if configured)
+int serialTreading = -9999;
+time_t serialTreadingTS; // timestamp for the reading
 
 typedef struct {
   uint32 RcvBuffSize;
@@ -96,24 +101,24 @@ LOCAL void uart0_rx_intr_handler(void *para) {
         os_printf("Relay %d is now: %d \r\n", relayNum, relayState);
 
         if (relayNum == 1) {
-          currGPIO12State = relayState;
-          ioGPIO(currGPIO12State, 12);
+          relay1State = relayState;
+          ioGPIO(relay1State, RELAY1GPIO);
         }
 
         if (relayNum == 2) {
-          currGPIO13State = relayState;
-          ioGPIO(currGPIO13State, 13);
+          relay2State = relayState;
+          ioGPIO(relay2State, RELAY2GPIO);
         }
 
         if (relayNum == 3) {
-          currGPIO15State = relayState;
-          ioGPIO(currGPIO15State, 15);
+          relay3State = relayState;
+          ioGPIO(relay3State, RELAY3GPIO);
         }
 
         if (sysCfg.relay_latching_enable) {
-          sysCfg.relay_1_state = currGPIO12State;
-          sysCfg.relay_2_state = currGPIO13State;
-          sysCfg.relay_3_state = currGPIO15State;
+          sysCfg.relay1_state = relay1State;
+          sysCfg.relay2_state = relay2State;
+          sysCfg.relay3_state = relay3State;
           CFG_Save();
         }
       }

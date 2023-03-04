@@ -35,7 +35,7 @@ static void write_bit(int v);
 static void write(uint8_t v, int parasitePower);
 static inline int read_bit(void);
 static inline void write_bit(int v);
-static void select(const uint8_t rom[8]);
+static void romSelect(const uint8_t rom[8]);
 void ds_init(uint32_t polltime);
 static uint8_t reset(void);
 static uint8_t read();
@@ -169,7 +169,7 @@ static inline int ICACHE_FLASH_ATTR read_bit(void) {
 //
 // Do a ROM select
 //
-static void ICACHE_FLASH_ATTR select(const uint8_t *rom) {
+static void ICACHE_FLASH_ATTR romSelect(const uint8_t *rom) {
   uint8_t i;
   write(0x55, 0); // Choose ROM
   for (i = 0; i < 8; i++)
@@ -223,7 +223,7 @@ int ICACHE_FLASH_ATTR readDS(uint8_t *dsaddr) {
 
   // perform the conversion
   reset();
-  select(dsaddr);
+  romSelect(dsaddr);
 
   write(0x44, 1); // perform temperature conversion
 
@@ -233,7 +233,7 @@ int ICACHE_FLASH_ATTR readDS(uint8_t *dsaddr) {
 
   dbg("Scratchpad: ");
   reset();
-  select(dsaddr);
+  romSelect(dsaddr);
   write(0xbe, 0); // read scratchpad
 
   for (i = 0; i < 9; i++) {
@@ -267,6 +267,7 @@ static void ICACHE_FLASH_ATTR pollDSCb(void *arg) {
   if (TReading != -9999) {
     dsreading[currds].temperature = TReading;
     dsreading[currds].success = 1;
+    dsreading[currds].readingTS = sntp_get_current_timestamp();
   } else {
     dsreading[currds].success = 0;
   }

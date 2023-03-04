@@ -22,9 +22,9 @@
 
 static ETSTimer resetBtntimer;
 
-char currGPIO12State = 0;
-char currGPIO13State = 0;
-char currGPIO15State = 0;
+char relay1State = 0;
+char relay2State = 0;
+char relay3State = 0;
 
 void ICACHE_FLASH_ATTR ioGPIO(int ena, int gpio) {
   // gpio_output_set is overkill. ToDo: use better macros
@@ -65,21 +65,21 @@ void ICACHE_FLASH_ATTR ioInit() {
   if (sysCfg.relay_latching_enable) {
 
     os_printf("Relay latching is %d, Relay1=%d,Relay2=%d,Relay3=%d\n\r", (int)sysCfg.relay_latching_enable,
-              (int)sysCfg.relay_1_state, (int)sysCfg.relay_2_state, (int)sysCfg.relay_3_state);
+              (int)sysCfg.relay1_state, (int)sysCfg.relay2_state, (int)sysCfg.relay3_state);
 
-    currGPIO12State = (int)sysCfg.relay_1_state;
-    currGPIO13State = (int)sysCfg.relay_2_state;
-    currGPIO15State = (int)sysCfg.relay_3_state;
+    relay1State = (int)sysCfg.relay1_state;
+    relay2State = (int)sysCfg.relay2_state;
+    relay3State = (int)sysCfg.relay3_state;
 
-    ioGPIO((int)sysCfg.relay_1_state, 12);
-    ioGPIO((int)sysCfg.relay_2_state, 13);
-    ioGPIO((int)sysCfg.relay_3_state, 15);
+    ioGPIO((int)sysCfg.relay1_state, RELAY1GPIO);
+    ioGPIO((int)sysCfg.relay2_state, RELAY2GPIO);
+    ioGPIO((int)sysCfg.relay3_state, RELAY3GPIO);
   }
 
   else {
-    ioGPIO(0, 12);
-    ioGPIO(0, 13);
-    ioGPIO(0, 15);
+    ioGPIO(0, RELAY1GPIO);
+    ioGPIO(0, RELAY2GPIO);
+    ioGPIO(0, RELAY3GPIO);
   }
 
   // gpio_output_set(0, 0, (1<<12), (1<<BTNGPIO));

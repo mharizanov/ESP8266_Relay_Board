@@ -63,85 +63,103 @@ typedef struct {
   uint8_t sta_ip[16];
   uint8_t sta_mask[16];
   uint8_t sta_gw[16];
+
   uint8_t sta_ssid[32];
   uint8_t sta_pass[32];
-  uint32_t sta_type;
-
   uint8_t ap_ip[32];
   uint8_t ap_mask[32];
-  uint8_t ap_gw[32];
 
-  uint32_t httpd_port;
-  uint32_t httpd_auth;
+  uint32_t sta_type;
+
+  uint8_t ap_gw[32];
+  uint8_t broadcastd_ro_apikey[32];
   uint8_t httpd_user[16];
   uint8_t httpd_pass[16];
 
+  uint32_t httpd_port;
+  uint32_t httpd_auth;
   uint32_t broadcastd_enable;
   uint32_t broadcastd_port;
+
   uint8_t broadcastd_host[32];
   uint8_t broadcastd_url[256];
-  uint32_t broadcastd_thingspeak_channel;
-  uint8_t broadcastd_ro_apikey[32];
+  uint8_t DST;
+  uint8_t ntp_enable;
 
-  uint32_t ntp_enable;
+  uint32_t broadcastd_thingspeak_channel;
   int32_t ntp_tz;
 
   uint32_t mqtt_enable;
   uint8_t mqtt_host[64];
   uint32_t mqtt_port;
   uint32_t mqtt_keepalive;
+
   uint8_t mqtt_devid[32];
   uint8_t mqtt_user[32];
   uint8_t mqtt_pass[64];
-  uint32_t mqtt_use_ssl;
   uint8_t mqtt_relay_subs_topic[64];
+
   uint8_t mqtt_temp_subs_topic[64];
   uint8_t mqtt_dht22_temp_pub_topic[64];
-  uint32_t mqtt_temp_timeout_secs;
   uint8_t mqtt_dht22_humi_pub_topic[64];
   uint8_t mqtt_ds18b20_temp_pub_topic[64];
+
   uint8_t mqtt_state_pub_topic[64];
 
-  uint32_t sensor_ds18b20_enable;
-  uint32_t sensor_dht22_enable;
+  uint8_t sensor_ds18b20_enable;
+  uint8_t sensor_dht22_enable;
+  uint16_t mqtt_use_ssl;
+
+  uint8_t relay_total;
+  uint8_t relay_latching_enable;
+  uint8_t relay1_state;
+  uint8_t relay2_state;
+
+  uint8_t relay3_state;
+  uint8_t relay1_thermostat;
+  uint8_t relay2_thermostat;
+  uint8_t relay3_thermostat;
+
+  uint8_t relay1_name[24];
+  uint8_t relay2_name[24];
+  uint8_t relay3_name[24];
+
+  uint8_t relay1_gpio;
+  uint8_t relay2_gpio;
+  uint8_t relay3_gpio;
+  uint8_t therm_relay_rest_min;
+
+  uint16_t therm_low_temp_colour_deg;
+  uint16_t therm_high_temp_colour_deg;
+
+  uint32_t therm_room_temp_timeout_secs;
   uint32_t thermostat1_input;
-
-  uint32_t relay_latching_enable;
-  uint32_t relay_1_state;
-  uint32_t relay_2_state;
-  uint32_t relay_3_state;
-  uint8_t relay1name[24];
-  uint8_t relay2name[24];
-  uint8_t relay3name[24];
-  uint32_t relay_1_thermostat;
-  uint32_t relay_2_thermostat;
-  uint32_t relay_3_thermostat;
-
   uint32_t thermostat1state;
   uint32_t thermostat1manualsetpoint;
+
   uint32_t thermostat1mode;
   uint32_t thermostat1opmode;
-  uint32_t thermostat1hysteresishigh;
-  uint32_t thermostat1hysteresislow;
+  uint32_t thermostat1_hysteresis_high;
+  uint32_t thermostat1_hysteresis_low;
+
   weekSchedule thermostat1schedule;
   /*
       uint32_t thermostat2state;
       uint32_t thermostat2manualsetpoint;
       uint32_t thermostat2mode;
       uint32_t thermostat2opmode;
-      uint32_t thermostat2hysteresishigh;
-      uint32_t thermostat2hysteresislow;
+      uint32_t thermostat2_hysteresis_high;
+      uint32_t thermostat2_hysteresis_low;
       weekSchedule thermostat2schedule;
 
       uint32_t thermostat3state;
       uint32_t thermostat3manualsetpoint;
       uint32_t thermostat3mode;
       uint32_t thermostat3opmode;
-      uint32_t thermostat3hysteresishigh;
-      uint32_t thermostat3hysteresislow;
+      uint32_t thermostat3_hysteresis_high;
+      uint32_t thermostat3_hysteresis_low;
       weekSchedule thermostat3schedule;
   */
-  uint8_t therm_relay_rest_min;
 
 } SYSCFG;
 

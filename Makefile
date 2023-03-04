@@ -86,7 +86,7 @@ ET_BLANK            ?= 0x3FE000 # where to flash blank.bin to erase wireless set
 endif
 
 
-DEFINES += -DSPI_FLASH_SIZE_MAP=$(ESP_SPI_SIZE)
+DEFINES += -DSPI_FLASH_SIZE_MAP=$(ESP_SPI_SIZE) -DCGIFLASH_DBG
 
 
 # name for the target project

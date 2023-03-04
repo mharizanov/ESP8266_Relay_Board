@@ -7,10 +7,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.3.0/jquery.mobile-1.3.0.min.css" />
-    <script src="http://code.jquery.com/jquery-1.8.2.min.js"></script>
-    <script src="http://code.jquery.com/mobile/1.3.0/jquery.mobile-1.3.0.min.js"></script>
-    <script src="ui.js"></script>
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+    <script src="https://code.jquery.com/jquery-2.2.4.js"></script>
+    <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.js"></script>
+    <script src="../js/ui_tpl.js"></script>
+    <script src="../js/relay.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function() {
+        server_get();
+        displayRelays(state.relaytotal );
+
+      });
+      </script>
+
     <link rel="stylesheet" href="ui.css" />
   </head>
 
@@ -29,21 +38,21 @@
         <div class="content-primary">
           <div class="s-title"><center>Relay Control</center></div>
           <ul data-role="listview" data-inset="true" >
-            <li>
+            <li id="relay1tr">
                     <label for="relay1"><b>%relay1name%</b></label>
                     <select name="relay1" id="relay1" data-mini="false" data-role="slider">
                       <option value="0">Off</option>
                       <option value="1">On</option>
                     </select>
             </li>
-            <li>
+            <li id="relay2tr">
                     <label for="relay2"><b>%relay2name%</b></label>
                     <select name="relay2" id="relay2" data-mini="false" data-role="slider">
                       <option value="0">Off</option>
                       <option value="1">On</option>
                     </select>
             </li>
-            <li>
+            <li id=relay3tr>
                     <label for="relay3"><b>%relay3name%</b></label>
                     <select name="relay3" id="relay3" data-mini="false" data-role="slider">
                       <option value="0">Off</option>
@@ -57,7 +66,7 @@
           <div class="s-title"><center>DS18B20 temperature sensor</center></div>
           <ul data-role="listview" data-inset="true" >
             <li>
-                    <label><b>DS18B20</b></label>
+                    <b>DS18B20</b>
                     <span class="inputvalue" name="DS18B20temperature" id="DS18B20temperature">N/A</span>
             </li>
         </div>
@@ -66,11 +75,11 @@
           <div class="s-title"><center>DHT22 sensor</center></div>
           <ul data-role="listview" data-inset="true" >
             <li>
-                    <label><b>DHT22 Temperature</b></label>
+                    <b>DHT22 Temperature</b>
                     <span class="inputvalue" name="DHT22temperature" id="DHT22temperature">N/A</span>
             </li>
             <li>
-                    <label><b>DHT22 Humidity</b></label>
+                    <b>DHT22 Humidity</b>
                     <span class="inputvalue" name="DHT22humidity" id="DHT22humidity">N/A</span>
             </li>
         </div>

@@ -47,7 +47,7 @@ static void ICACHE_FLASH_ATTR broadcastReading(void *arg) {
   if (sysCfg.sensor_dht22_enable) {
     dht_temp_str(t2);
     dht_humi_str(t3);
-    os_sprintf(buf, buf2, currGPIO12State, currGPIO13State, currGPIO15State, "N/A", t2, t3);
+    os_sprintf(buf, buf2, relay1State, relay2State, relay3State, "N/A", t2, t3);
   }
 
   if (sysCfg.sensor_ds18b20_enable) { // If DS18b20 daemon is enabled, then send up to 3 sensor's data instead
@@ -56,7 +56,7 @@ static void ICACHE_FLASH_ATTR broadcastReading(void *arg) {
       ds_str(t2, 1); // reuse to save space
     if (numds > 2)
       ds_str(t3, 2); // reuse to save space
-    os_sprintf(buf, buf2, currGPIO12State, currGPIO13State, currGPIO15State, t1, t2, t3);
+    os_sprintf(buf, buf2, relay1State, relay2State, relay3State, t1, t2, t3);
   }
 
   http_get(buf, http_callback_example);
@@ -157,9 +157,9 @@ static ICACHE_FLASH_ATTR void MQTTbroadcastReading(void *arg) {
                "\"opMode\":%d,\n\"thermostatEnabled\":%d,\n\"thermostatSetPoint\":\"%d\",\n"
                "\"roomTemp\":\"%s\",\n\"autoMode\": %d\n"
                "}\n",
-               ds_temp, dht_temp, dht_humi, (int)sysCfg.thermostat1_input == 2 ? 1 : 0, currGPIO12State,
-               currGPIO13State, currGPIO15State, (int)sysCfg.thermostat1opmode, (int)sysCfg.thermostat1state,
-               (int)currentThermSetPoint, (char *)therm_room_temp, (int)sysCfg.thermostat1mode);
+               ds_temp, dht_temp, dht_humi, (int)sysCfg.thermostat1_input == 2 ? 1 : 0, relay1State, relay2State,
+               relay3State, (int)sysCfg.thermostat1opmode, (int)sysCfg.thermostat1state, (int)currentThermSetPoint,
+               (char *)therm_room_temp, (int)sysCfg.thermostat1mode);
 
     os_sprintf(topic, "%s", sysCfg.mqtt_state_pub_topic);
     os_printf("Broadcastd: Publishing state via MQTT to \"%s\", length %d\n", topic, os_strlen(payload));

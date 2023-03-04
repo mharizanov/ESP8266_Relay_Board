@@ -30,5 +30,7 @@ void tplRLYSettings(HttpdConnData *connData, char *token, void **arg);
 int cgiRLYSettings(HttpdConnData *connData);
 void tplSensorSettings(HttpdConnData *connData, char *token, void **arg);
 int cgiSensorSettings(HttpdConnData *connData);
+void tplThermostatSettings(HttpdConnData *connData, char *token, void **arg);
+int cgiThermostatSettings(HttpdConnData *connData);
 
 #endif

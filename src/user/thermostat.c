@@ -36,7 +36,7 @@ int ICACHE_FLASH_ATTR getRoomTemp() {
   // is assigned to thermostat
   if (sysCfg.sensor_dht22_enable && (sysCfg.thermostat1_input == 1 || sysCfg.thermostat1_input == 2)) {
     struct sensor_reading *result = readDHT();
-    if (result->success) {
+    if (result->success && (sntp_get_current_timestamp() - result->readingTS > sysCfg.therm_room_temp_timeout_secs)) {
 
       if (sysCfg.thermostat1_input == 2) { // Humidistat
         roomTemp = result->humidity * 100;
@@ -48,7 +48,7 @@ int ICACHE_FLASH_ATTR getRoomTemp() {
     }
   } else if (sysCfg.sensor_ds18b20_enable && sysCfg.thermostat1_input == 0) {
     struct sensor_reading *result = read_ds18b20();
-    if (result->success) {
+    if (result->success && (sntp_get_current_timestamp() - result->readingTS > sysCfg.therm_room_temp_timeout_secs)) {
       int SignBit, Whole, Fract;
       roomTemp = result->temperature;
 
@@ -69,16 +69,24 @@ int ICACHE_FLASH_ATTR getRoomTemp() {
   }
 
   else if (sysCfg.thermostat1_input == 3) { // Mqtt reading should be degC *10
-    if (sntp_get_current_timestamp() - mqttTreadingTS > sysCfg.mqtt_temp_timeout_secs) {
+    if (sntp_get_current_timestamp() - mqttTreadingTS > sysCfg.therm_room_temp_timeout_secs) {
       // mqttTreading too old, invalidate it by setting to -9999
       os_printf("Thermostat: MQTT temperature reading stale (older than %d minutes)\n",
-                sysCfg.mqtt_temp_timeout_secs / 60);
+                sysCfg.therm_room_temp_timeout_secs / 60);
       mqttTreading = -9999;
     } else {
       roomTemp = mqttTreading; // Treading is tenth of a degree, eg 24.5 = 245
     }
   } else if (sysCfg.thermostat1_input == 4) { // Serial reading should be degC *10
-    roomTemp = serialTreading * 10;
+    if (sntp_get_current_timestamp() - serialTreadingTS > sysCfg.therm_room_temp_timeout_secs) {
+      // mqttTreading too old, invalidate it by setting to -9999
+      os_printf("Thermostat:  Serial temperature reading stale (older than %d minutes)\n",
+                sysCfg.therm_room_temp_timeout_secs / 60);
+      mqttTreading = -9999;
+    } else {
+      roomTemp = serialTreading * 10;
+    }
+
   } else if (sysCfg.thermostat1_input == 5) { // Fixed value 10C
     roomTemp = 100;
   }
@@ -88,13 +96,13 @@ int ICACHE_FLASH_ATTR getRoomTemp() {
 
 void ICACHE_FLASH_ATTR thermostat(int current_t, int setpoint) {
 
-  if (current_t < setpoint - sysCfg.thermostat1hysteresislow) {
+  if (current_t < setpoint - sysCfg.thermostat1_hysteresis_low) {
     os_printf("Thermostat: Current temperature (%d) is below setpoint.\n", current_t);
     if (sysCfg.thermostat1opmode == THERMOSTAT_HEATING)
       thermostatRelayOn();
     else
       thermostatRelayOff();
-  } else if (current_t > setpoint + sysCfg.thermostat1hysteresishigh) {
+  } else if (current_t > setpoint + sysCfg.thermostat1_hysteresis_high) {
     os_printf("Thermostat: Current temperature (%d) is above setpoint.\n", current_t);
     if (sysCfg.thermostat1opmode == THERMOSTAT_HEATING)
       thermostatRelayOff();
@@ -108,17 +116,17 @@ void ICACHE_FLASH_ATTR thermostatRelayOn() {
   // after it has been off for sysConfig.therm_relay_rest_min
   if (sntp_get_current_timestamp() > thermostatRelayOffTime + (sysCfg.therm_relay_rest_min * 60)) {
 
-    if (sysCfg.relay_1_thermostat == 1) {
-      currGPIO12State = 1;
-      ioGPIO(currGPIO12State, 12);
+    if (sysCfg.relay1_thermostat == 1) {
+      relay1State = 1;
+      ioGPIO(relay1State, RELAY1GPIO);
     }
-    if (sysCfg.relay_2_thermostat == 1) {
-      currGPIO13State = 1;
-      ioGPIO(currGPIO12State, 13);
+    if (sysCfg.relay2_thermostat == 1) {
+      relay2State = 1;
+      ioGPIO(relay1State, RELAY2GPIO);
     }
-    if (sysCfg.relay_3_thermostat == 1) {
-      currGPIO15State = 1;
-      ioGPIO(currGPIO15State, 15);
+    if (sysCfg.relay3_thermostat == 1) {
+      relay3State = 1;
+      ioGPIO(relay3State, RELAY3GPIO);
     }
   } else {
     os_printf("Thermostat: Attempt to turn thermostat relay on during rest period, ignored\n");
@@ -127,19 +135,19 @@ void ICACHE_FLASH_ATTR thermostatRelayOn() {
 
 void ICACHE_FLASH_ATTR thermostatRelayOff() {
 
-  if (sysCfg.relay_1_thermostat == 1 && currGPIO12State != 0) {
-    currGPIO12State = 0;
-    ioGPIO(currGPIO12State, 12);
+  if (sysCfg.relay1_thermostat == 1 && relay1State != 0) {
+    relay1State = 0;
+    ioGPIO(relay1State, RELAY1GPIO);
     thermostatRelayOffTime = sntp_get_current_timestamp();
   }
-  if (sysCfg.relay_2_thermostat == 1 && currGPIO13State != 0) {
-    currGPIO13State = 0;
-    ioGPIO(currGPIO12State, 13);
+  if (sysCfg.relay2_thermostat == 1 && relay2State != 0) {
+    relay2State = 0;
+    ioGPIO(relay1State, RELAY2GPIO);
     thermostatRelayOffTime = sntp_get_current_timestamp();
   }
-  if (sysCfg.relay_3_thermostat == 1 && currGPIO15State != 0) {
-    currGPIO15State = 0;
-    ioGPIO(currGPIO15State, 15);
+  if (sysCfg.relay3_thermostat == 1 && relay3State != 0) {
+    relay3State = 0;
+    ioGPIO(relay3State, RELAY3GPIO);
     thermostatRelayOffTime = sntp_get_current_timestamp();
   }
 }

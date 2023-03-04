@@ -7,21 +7,27 @@
 <div id="main">
 <h1>Harizanov 3Ch Relay/Thermostat</h1>
 <p>
-<ul>
-<li><a href="config/wifi/wifi.tpl">WiFi</a> settings.</li>
-<li><a href="config/mqtt.tpl">MQTT</a> settings.</li>
-<li><a href="config/httpd.tpl">HTTP Daemon</a> settings.</li>
-<li><a href="config/ntp.tpl">NTP</a> settings.</li>
-<li><a href="config/sensor.tpl">Sensor</a> settings.</li>
-<li><a href="config/broadcastd.tpl">Broadcast Daemon</a> settings.</li>
-<li>Relay <a href="config/relay.tpl">settings</a>.</li>
-<li><a href="control/relay.html">Relay</a> control page.</li>
-<li><a href="control/thermostat.html">Thermostat</a> control page.</li>
-<li><a href="control/thingspeak.html">Thingspeak</a> report page.</li>
-<li>Sensor readings: <a href="control/dht22.tpl">DHT22</a> or <a href="control/ds18b20.tpl">DS18B20</a>.</li>
-<li><a href="control/reset.cgi" onclick="return confirm('Are you sure you want to restart?')">Restart</a> the system.</li>
-<li><a href="about.tpl">About</a></li>
-</ul>
+<h2>Settings</h2>
+<a href="config/wifi/wifi.tpl">WiFi</a><BR>
+<a href="config/mqtt.tpl">MQTT</a><BR>
+<a href="config/httpd.tpl">HTTP Daemon</a><BR>
+<a href="config/ntp.tpl">NTP</a><BR>
+<a href="config/sensor.tpl">Sensor</a><BR>
+<a href="config/broadcastd.tpl">Broadcast Daemon</a><BR>
+<a href="config/relay.tpl">Relays</a><BR>
+<a href="config/thermostat.tpl">Thermostat</a>
+
+<h2>Control / View</h2>
+<a href="control/thingspeak.html">Thingspeak</a><BR>
+<a href="control/dht22.tpl">DHT22 Readings</a><BR>
+<a href="control/ds18b20.tpl">DS18B20 Readings</a><BR>
+<a href="control/relay.html">Relays</a><BR>
+<a href="control/thermostat.html">Thermostat</a>
+
+<h2>System</h2>
+<a href="control/reset.cgi" onclick="return confirm('Are you sure you want to restart?')">Restart the system</a><BR>
+<a href="about.tpl">About</a>
+
 </p>
 </div>
 </body></html>

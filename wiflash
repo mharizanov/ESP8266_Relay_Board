@@ -108,6 +108,8 @@ if [[ $? != 0 ]]; then
 	exit 1
 fi
 
+res=`curl $silent -XPOST --data-binary "@firmware/webpages.espfs" "http://$hostname/flash/upload-espfs"`
+
 sleep 2
 echo "Rebooting into new firmware" >&2
 curl -m 10 -s "http://$hostname/flash/reboot"

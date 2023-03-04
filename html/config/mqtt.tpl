@@ -27,7 +27,6 @@ sd('mqtt-pass',v);
 sd('mqtt-use-ssl',v);
 sd('mqtt-relay-subs-topic',v);
 sd('mqtt-temp-subs-topic',v);
-sd('mqtt-temp-timeout-secs',v);
 sd('mqtt-dht22-temp-pub-topic',v);
 sd('mqtt-dht22-temp-timeout-topic',v);
 sd('mqtt-dht22-humi-pub-topic',v);
@@ -60,8 +59,6 @@ sd('mqtt-state-pub-topic',v);
 <td>
 If thermostat is configured to use MQTT as temperature source use this topic.
 </td> </tr>
-<tr><td>Mqtt Temperature timeout:</td><td><input type="text" name="mqtt-temp-timeout-secs" id="mqtt-temp-timeout-secs" value="%mqtt-temp-timeout-secs%">     </td>
-<td>Timeout for Temp subs topic reception. Temp subs topic should be published &lt; every timeout seconds or thermostat turns off</td></tr>
 
 <tr><td>DHT22 temp pub topic:</td><td><input type="text" name="mqtt-dht22-temp-pub-topic" id="mqtt-dht22-temp-pub-topic" value="%mqtt-dht22-temp-pub-topic%">     </td></tr>
 

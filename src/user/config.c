@@ -108,6 +108,7 @@ void ICACHE_FLASH_ATTR CFG_Load() {
 
     sysCfg.ntp_enable = NTP_ENABLE;
     sysCfg.ntp_tz = NTP_TZ;
+    sysCfg.DST = 0;
 
     sysCfg.mqtt_enable = MQTT_ENABLE;
     os_sprintf((char *)sysCfg.mqtt_host, "%s", MQTT_HOST);
@@ -119,7 +120,6 @@ void ICACHE_FLASH_ATTR CFG_Load() {
     sysCfg.mqtt_use_ssl = MQTT_USE_SSL;
     os_sprintf((char *)sysCfg.mqtt_relay_subs_topic, MQTT_RELAY_SUBS_TOPIC, system_get_chip_id());
     os_sprintf((char *)sysCfg.mqtt_temp_subs_topic, MQTT_TEMP_SUBS_TOPIC, system_get_chip_id());
-    sysCfg.mqtt_temp_timeout_secs = 300; // 5 min timeout to receive temperature via MQTT (if used)
     os_sprintf((char *)sysCfg.mqtt_dht22_temp_pub_topic, MQTT_DHT22_TEMP_PUB_TOPIC, system_get_chip_id());
     os_sprintf((char *)sysCfg.mqtt_dht22_humi_pub_topic, MQTT_DHT22_HUMI_PUB_TOPIC, system_get_chip_id());
     os_sprintf((char *)sysCfg.mqtt_ds18b20_temp_pub_topic, MQTT_DS18B20_TEMP_PUB_TOPIC, system_get_chip_id());
@@ -129,18 +129,22 @@ void ICACHE_FLASH_ATTR CFG_Load() {
     sysCfg.sensor_dht22_enable = SENSOR_DHT22_ENABLE;
     sysCfg.thermostat1_input = 0; // 0=DS18b20, 1=DHT22
 
+    sysCfg.relay_total = RELAY_TOTAL;
     sysCfg.relay_latching_enable = RELAY_LATCHING_ENABLE;
-    sysCfg.relay_1_state = 0;
-    sysCfg.relay_2_state = 0;
-    sysCfg.relay_3_state = 0;
+    sysCfg.relay1_state = 0;
+    sysCfg.relay2_state = 0;
+    sysCfg.relay3_state = 0;
     // Default to relay1 being associated with thermostat
-    sysCfg.relay_1_thermostat = 1;
-    sysCfg.relay_2_thermostat = 0;
-    sysCfg.relay_3_thermostat = 0;
+    sysCfg.relay1_thermostat = 1;
+    sysCfg.relay2_thermostat = 0;
+    sysCfg.relay3_thermostat = 0;
+    sysCfg.relay1_gpio = RELAY1GPIO;
+    sysCfg.relay2_gpio = RELAY2GPIO;
+    sysCfg.relay3_gpio = RELAY3GPIO;
 
-    os_sprintf((char *)sysCfg.relay1name, "%s", RELAY1NAME);
-    os_sprintf((char *)sysCfg.relay2name, "%s", RELAY2NAME);
-    os_sprintf((char *)sysCfg.relay3name, "%s", RELAY3NAME);
+    os_sprintf((char *)sysCfg.relay1_name, "%s", RELAY1NAME);
+    os_sprintf((char *)sysCfg.relay2_name, "%s", RELAY2NAME);
+    os_sprintf((char *)sysCfg.relay3_name, "%s", RELAY3NAME);
 
     sysCfg.broadcastd_enable = BROADCASTD_ENABLE;
     sysCfg.broadcastd_port = BROADCASTD_PORT;
@@ -149,12 +153,15 @@ void ICACHE_FLASH_ATTR CFG_Load() {
     sysCfg.broadcastd_thingspeak_channel = BROADCASTD_THINGSPEAK_CHANNEL;
     os_sprintf((char *)sysCfg.broadcastd_ro_apikey, "%s", BROADCASTD_RO_APIKEY);
 
+    sysCfg.therm_room_temp_timeout_secs = 300; // 5 min timeout to receive temperature via MQTT (if used)
+    sysCfg.therm_high_temp_colour_deg = 24;
+    sysCfg.therm_low_temp_colour_deg = 10;
     sysCfg.thermostat1state = 0;
     sysCfg.thermostat1manualsetpoint = 210;
     sysCfg.thermostat1mode = THERMOSTAT_MANUAL;
     sysCfg.thermostat1opmode = THERMOSTAT_HEATING;
-    sysCfg.thermostat1hysteresishigh = 5; // in tenths of a degree, 5 means 0.5 degrees C
-    sysCfg.thermostat1hysteresislow = 5;
+    sysCfg.thermostat1_hysteresis_high = 5; // in tenths of a degree, 5 means 0.5 degrees C
+    sysCfg.thermostat1_hysteresis_low = 5;
 
     // Build default schedule for the thermostat
     for (int dow = 0; dow < 7; dow++) {

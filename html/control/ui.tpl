@@ -15,8 +15,6 @@
     <script type="text/javascript">
       $(document).ready(function() {
         server_get();
-        displayRelays(state.relaytotal );
-
       });
       </script>
 

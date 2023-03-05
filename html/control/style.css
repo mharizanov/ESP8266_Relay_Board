@@ -32,7 +32,7 @@ body {
 }
 
 #relay1 {
-    font-size:22px;
+    font-size:16px;
     color:#fff;
     background-color:#555;
     border-radius: 12px;
@@ -40,9 +40,13 @@ body {
     padding:10px;
     cursor:pointer;
     text-decoration:none;
+    width:100px;
+    text-align:center;
+    float:right ;
+    margin-right:10px;
 }
 #relay2 {
-    font-size:22px;
+    font-size:16px;
     color:#fff;
     background-color:#555;
     border-radius: 12px;
@@ -50,10 +54,14 @@ body {
     padding:10px;
     cursor:pointer;
     text-decoration:none;
+    width:100px;
+    text-align:center;
+    float:right ;
+    margin-right:10px;
 }
 
 #relay3 {
-    font-size:22px;
+    font-size:16px;
     color:#fff;
     background-color:#555;
     border-radius: 12px;
@@ -61,6 +69,20 @@ body {
     padding:10px;
     cursor:pointer;
     text-decoration:none;
+    width:100px;
+    text-align:center;
+    float:right;
+    margin-right:10px;
+}
+
+.relay-label {
+        padding: 0.1em 0px 0.1em 15px !important;
+        font-size:22px;
+}
+
+.relay-row {
+    width:100%; 
+    float:right;
 }
 
 .statusView {width: 100% !important;  margin:0px; position: relative !important; height:28px; padding:10px 0 0 0; background-color:#E9E9E9; font-weight:bold; -webkit-border-radius: 0.7em !important; border-radius: 0.7em; display:none; text-align:center; }
@@ -160,3 +182,5 @@ input[type=text] {
     pointer-events: none;
     border-left: 1px solid #fff;
 }
+
+

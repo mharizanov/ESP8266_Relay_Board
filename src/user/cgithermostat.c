@@ -52,7 +52,7 @@ int ICACHE_FLASH_ATTR cgiThermostat(HttpdConnData *connData) {
   char buff[2048];
   char temp[128];
   char humi[32];
-  char therm_room_temp[8];
+  // char therm_room_temp[8];
 
   int len = 0;
 

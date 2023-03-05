@@ -55,7 +55,7 @@
 <script type="text/javascript">
 
 $(document).ready(function() {
-  server_get();
+  relay_get();
   displayRelays($("#relay-total").find(":selected").val() );
 
 });

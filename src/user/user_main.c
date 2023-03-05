@@ -297,17 +297,17 @@ void ICACHE_FLASH_ATTR mqttDataCb(uint32_t *args, const char *topic, uint32_t to
 
       if (relayNum == '1') {
         relay1State = atoi(strData);
-        ioGPIO(relay1State, RELAY1GPIO);
+        relayOnOff(relay1State, 1);
       }
 
       if (relayNum == '2') {
         relay2State = atoi(strData);
-        ioGPIO(relay2State, RELAY2GPIO);
+        relayOnOff(relay2State, 2);
       }
 
       if (relayNum == '3') {
         relay3State = atoi(strData);
-        ioGPIO(relay3State, RELAY3GPIO);
+        relayOnOff(relay3State, 3);
       }
 
       if (sysCfg.relay_latching_enable) {

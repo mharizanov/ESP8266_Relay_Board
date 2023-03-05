@@ -4,25 +4,22 @@ ToDo
 
 Configurable GPIO for relays (via webpage?)
 
-Fix issue in cgithermostat.c where relay1 is returned as the thermostat run state
-	this should be renamed therm1_relay_on  and logic put in place 
-	to detect which relays are associated to the thermostat and
-	return a logical answer. Logical OR ? 
+user defined params via serial
+	CSV input into 4 global variable
+	user_params parameter added to main CGI to return them as JSON
+	publish them to MQTT ?
+
+
+Display relay rest state
 
 Fix issue where relay does not turn off in manual setpoint mode, yet thermostat is.
 	Does manual have a timeout ?:wq
-
 	Not sure this is an issue ? Wierd
 
-
 UI
-	javascript & cgi state calls to show themostat state
 	Display all DS18B20 sensor values (look numDs to find out how many?)
 
 
-
-Select number of relays and update code to respect this
-	Inc webpages, IO calls, MQTT(?) and POST requests
 
 
 
@@ -69,3 +66,14 @@ Disable URLs for flashing firmware if flash_map < 2
 
 Supports DST for Europe and North America (thanks Martin Harizanov for the code template)
 
+Fixed issue in cgithermostat.c where only relay1 is returned as the thermostat run state
+	this should be renamed therm1_relay_on  and logic put in place 
+	to detect which relays are associated to the thermostat and
+	return a logical answer. Logical OR ? 
+
+
+Number of relays is now configurable via UI.
+	If relay is not configured, it cannot be actuated via any means.
+
+Relays configured as thermostat controlled cannot be actuated via any other means.
+	Inc webpages, IO calls, MQTT(?) and POST requests

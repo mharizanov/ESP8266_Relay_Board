@@ -35,6 +35,21 @@ void ICACHE_FLASH_ATTR ioGPIO(int ena, int gpio) {
   }
 }
 
+void ICACHE_FLASH_ATTR relayOnOff(int onOff, int relayNumber) {
+
+  if (relayNumber == 1 && !sysCfg.relay1_thermostat && sysCfg.relay_total > 0) {
+    ioGPIO(onOff, RELAY1GPIO);
+  } else if (relayNumber == 2 && !sysCfg.relay2_thermostat && sysCfg.relay_total > 1) {
+    ioGPIO(onOff, RELAY2GPIO);
+  } else if (relayNumber == 3 && !sysCfg.relay3_thermostat && sysCfg.relay_total > 2) {
+    ioGPIO(onOff, RELAY3GPIO);
+  } else {
+    os_printf(
+        "relayOnOff:Invalid relay number %d or relay is controlled by thermostat only (configured for %d relays).\n",
+        relayNumber, sysCfg.relay_total);
+  }
+}
+
 static void ICACHE_FLASH_ATTR resetBtnTimerCb(void *arg) {
   static int resetCnt = 0;
   if (!GPIO_INPUT_GET(BTNGPIO)) {

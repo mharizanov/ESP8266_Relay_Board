@@ -116,6 +116,8 @@ void ICACHE_FLASH_ATTR thermostat(int current_t, int setpoint) {
 void ICACHE_FLASH_ATTR thermostatRelayOn() {
   // to avoid relay cycling only turn the relay on
   // after it has been off for sysConfig.therm_relay_rest_min
+  // do not use relayOnOff as it is protected against relay activations
+  // for thermostat relays that are not thermostat initiatiated
   if (sntp_get_current_timestamp() > thermostatRelayOffTime + (sysCfg.therm_relay_rest_min * 60)) {
 
     if (sysCfg.relay1_thermostat == 1) {

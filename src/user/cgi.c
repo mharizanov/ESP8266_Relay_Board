@@ -44,7 +44,7 @@ void ICACHE_FLASH_ATTR noCacheHeaders(HttpdConnData *connData, int code) {
 // Cgi that turns the Relays on or off according to the 'relayX' param in the GET data
 int ICACHE_FLASH_ATTR cgiGPIO(HttpdConnData *connData) {
   int len;
-  char buff[128];
+  char buff[250];
   int gotcmd = 0;
 
   if (connData->conn == NULL) {
@@ -55,34 +55,22 @@ int ICACHE_FLASH_ATTR cgiGPIO(HttpdConnData *connData) {
   len = httpdFindArg(connData->getArgs, "relay1", buff, sizeof(buff));
   if (len > 0) {
     relay1State = atoi(buff);
-    ioGPIO(relay1State, RELAY1GPIO);
+    relayOnOff(relay1State, 1);
     gotcmd = 1;
-    // Manually switching thermostat associated relays means switching the thermostat off
-    if (sysCfg.thermostat1_enable != 0 && sysCfg.relay1_thermostat) {
-      sysCfg.thermostat1_enable = 0;
-    }
   }
 
   len = httpdFindArg(connData->getArgs, "relay2", buff, sizeof(buff));
   if (len > 0) {
     relay2State = atoi(buff);
-    ioGPIO(relay2State, RELAY2GPIO);
+    relayOnOff(relay2State, 2);
     gotcmd = 1;
-    // Manually switching thermostat associated relays means switching the thermostat off
-    if (sysCfg.thermostat1_enable != 0 && sysCfg.relay2_thermostat) {
-      sysCfg.thermostat1_enable = 0;
-    }
   }
 
   len = httpdFindArg(connData->getArgs, "relay3", buff, sizeof(buff));
   if (len > 0) {
     relay3State = atoi(buff);
-    ioGPIO(relay3State, RELAY3GPIO);
+    relayOnOff(relay3State, 3);
     gotcmd = 1;
-    // Manually switching thermostat associated relays means switching the thermostat off
-    if (sysCfg.thermostat1_enable != 0 && sysCfg.relay3_thermostat) {
-      sysCfg.thermostat1_enable = 0;
-    }
   }
 
   if (gotcmd == 1) {
@@ -92,7 +80,6 @@ int ICACHE_FLASH_ATTR cgiGPIO(HttpdConnData *connData) {
       sysCfg.relay3_state = relay3State;
       CFG_Save();
     }
-
     httpdRedirect(connData, "relay.tpl");
     return HTTPD_CGI_DONE;
   } else { // with no parameters returns JSON with relay state
@@ -101,12 +88,25 @@ int ICACHE_FLASH_ATTR cgiGPIO(HttpdConnData *connData) {
     httpdHeader(connData, "Content-Type", "text/json");
     httpdHeader(connData, "Access-Control-Allow-Origin", "*");
     httpdEndHeaders(connData);
+    len =
+        os_sprintf(buff,
+                   "{\"relay1\": %d,\n\"relay1name\":\"%s\",\n\"relay1_therm_controlled\": %d,\n\"relay2\": "
+                   "%d,\n\"relay2name\":\"%s\",\n\"relay2_therm_controlled\": %d,\n "
+                   "\"relay3\":%d,\n\"relay3name\":\"%s\",\n\"relay3_therm_controlled\": %d,\n \"relaytotal\": %d\n}\n",
+                   relay1State, (char *)sysCfg.relay1_name, sysCfg.relay1_thermostat, relay2State,
+                   (char *)sysCfg.relay2_name, sysCfg.relay2_thermostat, relay3State, (char *)sysCfg.relay3_name,
+                   sysCfg.relay3_thermostat, sysCfg.relay_total);
 
-    len = os_sprintf(buff,
-                     "{\"relay1\": %d\n,\"relay1name\":\"%s\",\n\"relay2\": %d\n,\"relay2name\":\"%s\",\n\"relay3\": "
-                     "%d\n,\"relay3name\":\"%s\", \n\"relaytotal\": %d\n}\n",
-                     relay1State, (char *)sysCfg.relay1_name, relay2State, (char *)sysCfg.relay2_name, relay3State,
-                     (char *)sysCfg.relay3_name, sysCfg.relay_total);
+    /*
+        len = os_sprintf(buff, "{\"relay1\": %d\n,\"relay1name\":\"%s\", \n,\"relay1_therm_controlled\": %d\n, \
+                          \"relay2\": %d\n,\"relay2name\":\"%s\", \n\"relay2_therm_controlled\": %d\n, \
+                          \"relay3\": %d\n,\"relay3name\":\"%s\", \n\"relay3_therm_controlled\": %d\n, \
+                          \"relaytotal\": %d\n}\n",
+                         relay1State, (char *)sysCfg.relay1_name, sysCfg.relay1_thermostat, relay2State,
+                         (char *)sysCfg.relay2_name, sysCfg.relay2_thermostat, relay3State, (char *)sysCfg.relay3_name,
+                         sysCfg.relay3_thermostat, sysCfg.relay_total);
+
+      */
     httpdSend(connData, buff, -1);
     return HTTPD_CGI_DONE;
   }
@@ -365,36 +365,36 @@ void ICACHE_FLASH_ATTR tplUI(HttpdConnData *connData, char *token, void **arg) {
     return;
 
   os_strcpy(buff, "Unknown");
-
-  if (os_strcmp(token, "relay1name") == 0) {
-    os_strcpy(buff, (char *)sysCfg.relay1_name);
-  }
-
-  if (os_strcmp(token, "relay2name") == 0) {
-    os_strcpy(buff, (char *)sysCfg.relay2_name);
-  }
-
-  if (os_strcmp(token, "relay3name") == 0) {
-    os_strcpy(buff, (char *)sysCfg.relay3_name);
-  }
-
-  if (os_strcmp(token, "dht22-enable") == 0) {
-    if (!sysCfg.sensor_dht22_enable) {
-      os_strcpy(buff, " hidden");
+  /*
+    if (os_strcmp(token, "relay1name") == 0) {
+      os_strcpy(buff, (char *)sysCfg.relay1_name);
     }
-  }
 
-  if (os_strcmp(token, "ds18b20-enable") == 0) {
-    if (!sysCfg.sensor_ds18b20_enable) {
-      os_strcpy(buff, " hidden");
+    if (os_strcmp(token, "relay2name") == 0) {
+      os_strcpy(buff, (char *)sysCfg.relay2_name);
     }
-  }
-  if (os_strcmp(token, "thermostat-enable") == 0) {
-    if (!sysCfg.thermostat1_enable) {
-      os_strcpy(buff, " hidden");
-    }
-  }
 
+    if (os_strcmp(token, "relay3name") == 0) {
+      os_strcpy(buff, (char *)sysCfg.relay3_name);
+    }
+
+    if (os_strcmp(token, "dht22-enable") == 0) {
+      if (!sysCfg.sensor_dht22_enable) {
+        os_strcpy(buff, " hidden");
+      }
+    }
+
+    if (os_strcmp(token, "ds18b20-enable") == 0) {
+      if (!sysCfg.sensor_ds18b20_enable) {
+        os_strcpy(buff, " hidden");
+      }
+    }
+    if (os_strcmp(token, "thermostat-enable") == 0) {
+      if (!sysCfg.thermostat1_enable) {
+        os_strcpy(buff, " hidden");
+      }
+    }
+  */
   httpdSend(connData, buff, -1);
 }
 

@@ -365,36 +365,36 @@ void ICACHE_FLASH_ATTR tplUI(HttpdConnData *connData, char *token, void **arg) {
     return;
 
   os_strcpy(buff, "Unknown");
-  /*
-    if (os_strcmp(token, "relay1name") == 0) {
-      os_strcpy(buff, (char *)sysCfg.relay1_name);
-    }
 
-    if (os_strcmp(token, "relay2name") == 0) {
-      os_strcpy(buff, (char *)sysCfg.relay2_name);
-    }
+  if (os_strcmp(token, "relay1name") == 0) {
+    os_strcpy(buff, (char *)sysCfg.relay1_name);
+  }
 
-    if (os_strcmp(token, "relay3name") == 0) {
-      os_strcpy(buff, (char *)sysCfg.relay3_name);
-    }
+  if (os_strcmp(token, "relay2name") == 0) {
+    os_strcpy(buff, (char *)sysCfg.relay2_name);
+  }
 
-    if (os_strcmp(token, "dht22-enable") == 0) {
-      if (!sysCfg.sensor_dht22_enable) {
-        os_strcpy(buff, " hidden");
-      }
-    }
+  if (os_strcmp(token, "relay3name") == 0) {
+    os_strcpy(buff, (char *)sysCfg.relay3_name);
+  }
 
-    if (os_strcmp(token, "ds18b20-enable") == 0) {
-      if (!sysCfg.sensor_ds18b20_enable) {
-        os_strcpy(buff, " hidden");
-      }
+  if (os_strcmp(token, "dht22-enable") == 0) {
+    if (!sysCfg.sensor_dht22_enable) {
+      os_strcpy(buff, " hidden");
     }
-    if (os_strcmp(token, "thermostat-enable") == 0) {
-      if (!sysCfg.thermostat1_enable) {
-        os_strcpy(buff, " hidden");
-      }
+  }
+
+  if (os_strcmp(token, "ds18b20-enable") == 0) {
+    if (!sysCfg.sensor_ds18b20_enable) {
+      os_strcpy(buff, " hidden");
     }
-  */
+  }
+  if (os_strcmp(token, "thermostat-enable") == 0) {
+    if (!sysCfg.thermostat1_enable) {
+      os_strcpy(buff, " hidden");
+    }
+  }
+
   httpdSend(connData, buff, -1);
 }
 

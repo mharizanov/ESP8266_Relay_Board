@@ -66,7 +66,7 @@ int ICACHE_FLASH_ATTR cgiThermostat(HttpdConnData *connData) {
     return HTTPD_CGI_DONE;
   }
   int roomTemp = getRoomTemp();
-  os_sprintf(therm_room_temp, "%d.%d", (int)roomTemp / 10, abs(roomTemp - ((int)roomTemp / 10) * 10));
+  //  os_sprintf(therm_room_temp, "%d.%d", (int)roomTemp / 10, abs(roomTemp - ((int)roomTemp / 10) * 10));
 
   os_strcpy(buff, "Unknown");
   os_strcpy(temp, "N/A");
@@ -76,14 +76,16 @@ int ICACHE_FLASH_ATTR cgiThermostat(HttpdConnData *connData) {
   if (len > 0) {
     if (os_strcmp(buff, "state") == 0) {
       os_sprintf(buff,
-                 "{ \"temperature\": \"%s\",\n\"humidity\":\"%s\",\n"
-                 "\"humidistat\":%d,\n\"relay1state\":%d,\n\"relay1name\":\"%s\",\n\"opmode\":%d,\n\""
-                 "state\":%d,\n\"manualsetpoint\":%d,\n\"thermostat1_input\":%d,\n\"automode\": %d,\n"
+                 "{ \"room_temp\": %d,\n\"humidity\":\"%s\",\n"
+                 "\"humidistat\":%d,\n\"thermostat_relay_active\":%d,\n\"relay1name\":\"%s\",\n\"opmode\":%d,\n\""
+                 "enable\":%d,\n\"manual_setpoint\":%d,\"current_setpoint\":%d,\n\"thermostat1_input\":%d,\n\"schedule_"
+                 "mode\": %d,\n"
                  "\"mqtthost\": \"%s\",\n \"time\": \"%d\"}\n",
-                 (char *)therm_room_temp, humi, (int)sysCfg.thermostat1_input == 2 ? 1 : 0, relay1State,
-                 (char *)sysCfg.relay1_name, (int)sysCfg.thermostat1opmode, (int)sysCfg.thermostat1state,
-                 (int)sysCfg.thermostat1manualsetpoint, (int)sysCfg.thermostat1_input, (int)sysCfg.thermostat1mode,
-                 (char *)sysCfg.mqtt_host, sntp_get_current_timestamp());
+                 roomTemp, humi, (int)sysCfg.thermostat1_input == 2 ? 1 : 0, thermostatRelayActive,
+                 (char *)sysCfg.relay1_name, (int)sysCfg.thermostat1_opmode, (int)sysCfg.thermostat1_enable,
+                 (int)sysCfg.thermostat1_manual_setpoint, (int)thermostat1CurrentSetPoint,
+                 (int)sysCfg.thermostat1_input, (int)sysCfg.thermostat1_schedule_mode, (char *)sysCfg.mqtt_host,
+                 sntp_get_current_timestamp());
     }
 
     if (os_strcmp(buff, "temperature") == 0) {
@@ -97,11 +99,11 @@ int ICACHE_FLASH_ATTR cgiThermostat(HttpdConnData *connData) {
 
     if (os_strcmp(buff, "thermostat_opmode") == 0) {
       if (connData->post->len > 0) {
-        sysCfg.thermostat1opmode = (int)atoi(connData->post->buff);
+        sysCfg.thermostat1_opmode = (int)atoi(connData->post->buff);
         CFG_Save();
-        os_printf("Handle thermostat opmode (%d) saved\n", (int)sysCfg.thermostat1opmode);
+        os_printf("Handle thermostat opmode (%d) saved\n", (int)sysCfg.thermostat1_opmode);
       } else {
-        os_sprintf(buff, "%d", (int)sysCfg.thermostat1opmode);
+        os_sprintf(buff, "%d", (int)sysCfg.thermostat1_opmode);
       }
     }
 
@@ -121,34 +123,42 @@ int ICACHE_FLASH_ATTR cgiThermostat(HttpdConnData *connData) {
       }
     }
 
-    if (os_strcmp(buff, "thermostat_state") == 0) {
+    if (os_strcmp(buff, "thermostat_enable") == 0) {
       if (connData->post->len > 0) {
-        sysCfg.thermostat1state = (int)atoi(connData->post->buff);
+        sysCfg.thermostat1_enable = (int)atoi(connData->post->buff);
         thermostatRelayOff();
         CFG_Save();
-        os_printf("Handle thermostat state (%d) saved\n", (int)sysCfg.thermostat1state);
+        os_printf("Handle thermostat state (%d) saved\n", (int)sysCfg.thermostat1_enable);
       } else {
-        os_sprintf(buff, "%d", (int)sysCfg.thermostat1state);
+        os_sprintf(buff, "%d", (int)sysCfg.thermostat1_enable);
       }
     }
 
-    if (os_strcmp(buff, "thermostat_manualsetpoint") == 0) {
+    if (os_strcmp(buff, "thermostat_manual_setpoint") == 0) {
       if (connData->post->len > 0) {
-        sysCfg.thermostat1manualsetpoint = (int)atoi(connData->post->buff);
+        sysCfg.thermostat1_manual_setpoint = (int)atoi(connData->post->buff);
         CFG_Save();
-        os_printf("Handle thermostat manual setpoint save (%d)\n", (int)sysCfg.thermostat1manualsetpoint);
+        os_printf("Handle thermostat manual setpoint save (%d)\n", (int)sysCfg.thermostat1_manual_setpoint);
       } else {
-        os_sprintf(buff, "%d", (int)sysCfg.thermostat1manualsetpoint);
+        os_sprintf(buff, "%d", (int)sysCfg.thermostat1_manual_setpoint);
       }
     }
 
-    if (os_strcmp(buff, "thermostat_mode") == 0) {
+    if (os_strcmp(buff, "thermostat_current_setpoint") == 0) {
       if (connData->post->len > 0) {
-        sysCfg.thermostat1mode = (int)atoi(connData->post->buff);
-        CFG_Save();
-        os_printf("Handle thermostat mode save (%d)\n", (int)sysCfg.thermostat1mode);
+
       } else {
-        os_sprintf(buff, "%d", (int)sysCfg.thermostat1mode);
+        os_sprintf(buff, "%d", (int)thermostat1CurrentSetPoint);
+      }
+    }
+
+    if (os_strcmp(buff, "thermostat_schedule_mode") == 0) {
+      if (connData->post->len > 0) {
+        sysCfg.thermostat1_schedule_mode = (int)atoi(connData->post->buff);
+        CFG_Save();
+        os_printf("Handle thermostat mode save (%d)\n", (int)sysCfg.thermostat1_schedule_mode);
+      } else {
+        os_sprintf(buff, "%d", (int)sysCfg.thermostat1_schedule_mode);
       }
     }
 
@@ -199,24 +209,24 @@ int ICACHE_FLASH_ATTR cgiThermostat(HttpdConnData *connData) {
           os_memcpy(temp, connData->post->buff + t[i + 2].start, t[i + 2].end - t[i + 2].start);
           temp[t[i + 2].end - t[i + 2].start] = 0x0;
           os_sprintf(buff + strlen(buff), "Start = %s\n", temp);
-          sysCfg.thermostat1schedule.weekSched[found].daySched[sched].start = atoi(temp);
+          sysCfg.thermostat1_schedule.weekSched[found].daySched[sched].start = atoi(temp);
 
           os_memcpy(temp, connData->post->buff + t[i + 4].start, t[i + 4].end - t[i + 4].start);
           temp[t[i + 4].end - t[i + 4].start] = 0x0;
           os_sprintf(buff + strlen(buff), "End = %s\n", temp);
-          sysCfg.thermostat1schedule.weekSched[found].daySched[sched].end = atoi(temp);
+          sysCfg.thermostat1_schedule.weekSched[found].daySched[sched].end = atoi(temp);
 
           os_memcpy(temp, connData->post->buff + t[i + 6].start, t[i + 6].end - t[i + 6].start);
           temp[t[i + 6].end - t[i + 6].start] = 0x0;
           os_sprintf(buff + strlen(buff), "Setpoint = %s\n", temp);
-          sysCfg.thermostat1schedule.weekSched[found].daySched[sched].setpoint = atoi(temp);
+          sysCfg.thermostat1_schedule.weekSched[found].daySched[sched].setpoint = atoi(temp);
 
-          sysCfg.thermostat1schedule.weekSched[found].daySched[sched].active = 1;
+          sysCfg.thermostat1_schedule.weekSched[found].daySched[sched].active = 1;
 
           sched++;
         }
         if (sched < 8)
-          sysCfg.thermostat1schedule.weekSched[found].daySched[sched].active = 0; // mark the next schedule as inactive
+          sysCfg.thermostat1_schedule.weekSched[found].daySched[sched].active = 0; // mark the next schedule as inactive
 
         os_printf(buff);
         CFG_Save();
@@ -227,13 +237,13 @@ int ICACHE_FLASH_ATTR cgiThermostat(HttpdConnData *connData) {
         os_strcpy(buff, "{");
         for (int dow = 0; dow < 7; dow++) {
           os_sprintf(buff + strlen(buff), "\"%s\":[", days[dow]);
-          for (int sched = 0; sched < 8 && sysCfg.thermostat1schedule.weekSched[dow].daySched[sched].active == 1;
+          for (int sched = 0; sched < 8 && sysCfg.thermostat1_schedule.weekSched[dow].daySched[sched].active == 1;
                sched++) {
             os_sprintf(buff + strlen(buff), "{\"s\":%d,\"e\":%d,\"sp\":%d}",
-                       sysCfg.thermostat1schedule.weekSched[dow].daySched[sched].start,
-                       sysCfg.thermostat1schedule.weekSched[dow].daySched[sched].end,
-                       sysCfg.thermostat1schedule.weekSched[dow].daySched[sched].setpoint);
-            if (sched < 7 && sysCfg.thermostat1schedule.weekSched[dow].daySched[sched + 1].active == 1)
+                       sysCfg.thermostat1_schedule.weekSched[dow].daySched[sched].start,
+                       sysCfg.thermostat1_schedule.weekSched[dow].daySched[sched].end,
+                       sysCfg.thermostat1_schedule.weekSched[dow].daySched[sched].setpoint);
+            if (sched < 7 && sysCfg.thermostat1_schedule.weekSched[dow].daySched[sched + 1].active == 1)
               os_sprintf(buff + strlen(buff), ",");
           }
           os_sprintf(buff + strlen(buff), "]%s\n", dow < 6 ? "," : "");

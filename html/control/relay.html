@@ -30,15 +30,13 @@
         </div>
 </div>
 <script src="http://code.jquery.com/jquery-1.9.0.min.js"></script>
-<script>window.jQuery || document.write('<script src="jquery-1.9.0.min.js"><\/script>')</script>
+<script>window.jQuery || document.write('<script src="../js/jquery-1.9.0.min.js"><\/script>')</script>
 <script type="text/javascript" src="../js/relay.js"></script>
 <script  type="text/javascript">
 $(document).ready(function() {
   server_get();
   update();
   setInterval(server_get, 5000);
-  //setInterval(update, 5500);
-
   checkVisibility();
 });
 </script>

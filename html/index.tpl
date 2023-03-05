@@ -18,6 +18,7 @@
 <a href="config/thermostat.tpl">Thermostat</a>
 
 <h2>Control / View</h2>
+<a href="control/ui.tpl">Overview Page</a><BR>
 <a href="control/thingspeak.html">Thingspeak</a><BR>
 <a href="control/dht22.tpl">DHT22 Readings</a><BR>
 <a href="control/ds18b20.tpl">DS18B20 Readings</a><BR>

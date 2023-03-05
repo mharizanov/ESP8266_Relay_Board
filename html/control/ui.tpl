@@ -60,8 +60,8 @@
           </ul>
         </div><br>
         
-        <div class="content-secondary" %sensor-ds18b20-enable% >
-          <div class="s-title"><center>DS18B20 temperature sensor</center></div>
+        <div class="content-secondary" %ds18b20-enable% >
+          <div class="s-title"><center>DS18B20 Temperature Sensors</center></div>
           <ul data-role="listview" data-inset="true" >
             <li>
                     <b>DS18B20</b>
@@ -69,8 +69,8 @@
             </li>
         </div>
      
-        <div class="content-secondary" %sensor-dht22-enable% >
-          <div class="s-title"><center>DHT22 sensor</center></div>
+        <div class="content-secondary" %dht22-enable% >
+          <div class="s-title"><center>DHT22 Sensor</center></div>
           <ul data-role="listview" data-inset="true" >
             <li>
                     <b>DHT22 Temperature</b>
@@ -79,6 +79,27 @@
             <li>
                     <b>DHT22 Humidity</b>
                     <span class="inputvalue" name="DHT22humidity" id="DHT22humidity">N/A</span>
+            </li>
+        </div>
+
+          <div class="content-secondary" %thermostat-enable% >
+          <div class="s-title"><center>Thermostat</center></div>
+          <ul data-role="listview" data-inset="true" >
+            <li>
+                    <b>Thermostat</b>
+                    <span class="inputvalue" name="thermostat1_enable" id="thermostat_enable">N/A</span>
+            </li>
+            <li>
+                    <b>Thermostat Room Temperature</b>
+                    <span class="inputvalue" name="thermostat1_room_temperature" id="thermostat1_room_temperature">N/A</span>
+            </li>
+            <li>
+                    <b>Thermostat Set Point</b>
+                    <span class="inputvalue" name="thermostat1_setpoint" id="thermostat1_setpoint">N/A</span>
+            </li>
+             <li>
+                    <b>Thermostat call for heat</b>
+                    <span class="inputvalue" name="thermostat1_on" id="thermostat1_on">N/A</span>
             </li>
         </div>
    

@@ -134,17 +134,17 @@ typedef struct {
 
   uint32_t therm_room_temp_timeout_secs;
   uint32_t thermostat1_input;
-  uint32_t thermostat1state;
-  uint32_t thermostat1manualsetpoint;
+  uint32_t thermostat1_schedule_mode;
+  uint32_t thermostat1_manual_setpoint;
 
-  uint32_t thermostat1mode;
-  uint32_t thermostat1opmode;
+  uint32_t thermostat1_enable;
+  uint32_t thermostat1_opmode;
   uint32_t thermostat1_hysteresis_high;
   uint32_t thermostat1_hysteresis_low;
 
-  weekSchedule thermostat1schedule;
+  weekSchedule thermostat1_schedule;
   /*
-      uint32_t thermostat2state;
+      uint32_t thermostat2enable;
       uint32_t thermostat2manualsetpoint;
       uint32_t thermostat2mode;
       uint32_t thermostat2opmode;
@@ -152,7 +152,7 @@ typedef struct {
       uint32_t thermostat2_hysteresis_low;
       weekSchedule thermostat2schedule;
 
-      uint32_t thermostat3state;
+      uint32_t thermostat3enable;
       uint32_t thermostat3manualsetpoint;
       uint32_t thermostat3mode;
       uint32_t thermostat3opmode;

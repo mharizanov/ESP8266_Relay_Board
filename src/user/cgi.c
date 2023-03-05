@@ -58,8 +58,8 @@ int ICACHE_FLASH_ATTR cgiGPIO(HttpdConnData *connData) {
     ioGPIO(relay1State, RELAY1GPIO);
     gotcmd = 1;
     // Manually switching thermostat associated relays means switching the thermostat off
-    if (sysCfg.thermostat1state != 0 && sysCfg.relay1_thermostat) {
-      sysCfg.thermostat1state = 0;
+    if (sysCfg.thermostat1_enable != 0 && sysCfg.relay1_thermostat) {
+      sysCfg.thermostat1_enable = 0;
     }
   }
 
@@ -69,8 +69,8 @@ int ICACHE_FLASH_ATTR cgiGPIO(HttpdConnData *connData) {
     ioGPIO(relay2State, RELAY2GPIO);
     gotcmd = 1;
     // Manually switching thermostat associated relays means switching the thermostat off
-    if (sysCfg.thermostat1state != 0 && sysCfg.relay2_thermostat) {
-      sysCfg.thermostat1state = 0;
+    if (sysCfg.thermostat1_enable != 0 && sysCfg.relay2_thermostat) {
+      sysCfg.thermostat1_enable = 0;
     }
   }
 
@@ -80,8 +80,8 @@ int ICACHE_FLASH_ATTR cgiGPIO(HttpdConnData *connData) {
     ioGPIO(relay3State, RELAY3GPIO);
     gotcmd = 1;
     // Manually switching thermostat associated relays means switching the thermostat off
-    if (sysCfg.thermostat1state != 0 && sysCfg.relay3_thermostat) {
-      sysCfg.thermostat1state = 0;
+    if (sysCfg.thermostat1_enable != 0 && sysCfg.relay3_thermostat) {
+      sysCfg.thermostat1_enable = 0;
     }
   }
 
@@ -376,6 +376,23 @@ void ICACHE_FLASH_ATTR tplUI(HttpdConnData *connData, char *token, void **arg) {
 
   if (os_strcmp(token, "relay3name") == 0) {
     os_strcpy(buff, (char *)sysCfg.relay3_name);
+  }
+
+  if (os_strcmp(token, "dht22-enable") == 0) {
+    if (!sysCfg.sensor_dht22_enable) {
+      os_strcpy(buff, " hidden");
+    }
+  }
+
+  if (os_strcmp(token, "ds18b20-enable") == 0) {
+    if (!sysCfg.sensor_ds18b20_enable) {
+      os_strcpy(buff, " hidden");
+    }
+  }
+  if (os_strcmp(token, "thermostat-enable") == 0) {
+    if (!sysCfg.thermostat1_enable) {
+      os_strcpy(buff, " hidden");
+    }
   }
 
   httpdSend(connData, buff, -1);

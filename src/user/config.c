@@ -156,41 +156,41 @@ void ICACHE_FLASH_ATTR CFG_Load() {
     sysCfg.therm_room_temp_timeout_secs = 300; // 5 min timeout to receive temperature via MQTT (if used)
     sysCfg.therm_high_temp_colour_deg = 24;
     sysCfg.therm_low_temp_colour_deg = 10;
-    sysCfg.thermostat1state = 0;
-    sysCfg.thermostat1manualsetpoint = 210;
-    sysCfg.thermostat1mode = THERMOSTAT_MANUAL;
-    sysCfg.thermostat1opmode = THERMOSTAT_HEATING;
+    sysCfg.thermostat1_enable = 0;
+    sysCfg.thermostat1_manual_setpoint = 210;
+    sysCfg.thermostat1_schedule_mode = THERMOSTAT_MANUAL;
+    sysCfg.thermostat1_opmode = THERMOSTAT_HEATING;
     sysCfg.thermostat1_hysteresis_high = 5; // in tenths of a degree, 5 means 0.5 degrees C
     sysCfg.thermostat1_hysteresis_low = 5;
 
     // Build default schedule for the thermostat
     for (int dow = 0; dow < 7; dow++) {
-      sysCfg.thermostat1schedule.weekSched[dow].daySched[0].start = 0;      // 0am
-      sysCfg.thermostat1schedule.weekSched[dow].daySched[0].end = 600;      // 6am, hours are * 100
-      sysCfg.thermostat1schedule.weekSched[dow].daySched[0].setpoint = 100; // 10.0*C
-      sysCfg.thermostat1schedule.weekSched[dow].daySched[0].active = 1;
+      sysCfg.thermostat1_schedule.weekSched[dow].daySched[0].start = 0;      // 0am
+      sysCfg.thermostat1_schedule.weekSched[dow].daySched[0].end = 600;      // 6am, hours are * 100
+      sysCfg.thermostat1_schedule.weekSched[dow].daySched[0].setpoint = 100; // 10.0*C
+      sysCfg.thermostat1_schedule.weekSched[dow].daySched[0].active = 1;
 
-      sysCfg.thermostat1schedule.weekSched[dow].daySched[1].start = 600;
-      sysCfg.thermostat1schedule.weekSched[dow].daySched[1].end = 900;
-      sysCfg.thermostat1schedule.weekSched[dow].daySched[1].setpoint = 180;
-      sysCfg.thermostat1schedule.weekSched[dow].daySched[1].active = 1;
+      sysCfg.thermostat1_schedule.weekSched[dow].daySched[1].start = 600;
+      sysCfg.thermostat1_schedule.weekSched[dow].daySched[1].end = 900;
+      sysCfg.thermostat1_schedule.weekSched[dow].daySched[1].setpoint = 180;
+      sysCfg.thermostat1_schedule.weekSched[dow].daySched[1].active = 1;
 
-      sysCfg.thermostat1schedule.weekSched[dow].daySched[2].start = 900;
-      sysCfg.thermostat1schedule.weekSched[dow].daySched[2].end = 1700;
-      sysCfg.thermostat1schedule.weekSched[dow].daySched[2].setpoint = 160;
-      sysCfg.thermostat1schedule.weekSched[dow].daySched[2].active = 1;
+      sysCfg.thermostat1_schedule.weekSched[dow].daySched[2].start = 900;
+      sysCfg.thermostat1_schedule.weekSched[dow].daySched[2].end = 1700;
+      sysCfg.thermostat1_schedule.weekSched[dow].daySched[2].setpoint = 160;
+      sysCfg.thermostat1_schedule.weekSched[dow].daySched[2].active = 1;
 
-      sysCfg.thermostat1schedule.weekSched[dow].daySched[3].start = 1700;
-      sysCfg.thermostat1schedule.weekSched[dow].daySched[3].end = 2200;
-      sysCfg.thermostat1schedule.weekSched[dow].daySched[3].setpoint = 210;
-      sysCfg.thermostat1schedule.weekSched[dow].daySched[3].active = 1;
+      sysCfg.thermostat1_schedule.weekSched[dow].daySched[3].start = 1700;
+      sysCfg.thermostat1_schedule.weekSched[dow].daySched[3].end = 2200;
+      sysCfg.thermostat1_schedule.weekSched[dow].daySched[3].setpoint = 210;
+      sysCfg.thermostat1_schedule.weekSched[dow].daySched[3].active = 1;
 
-      sysCfg.thermostat1schedule.weekSched[dow].daySched[4].start = 2200;
-      sysCfg.thermostat1schedule.weekSched[dow].daySched[4].end = 2400;
-      sysCfg.thermostat1schedule.weekSched[dow].daySched[4].setpoint = 150;
-      sysCfg.thermostat1schedule.weekSched[dow].daySched[4].active = 1;
+      sysCfg.thermostat1_schedule.weekSched[dow].daySched[4].start = 2200;
+      sysCfg.thermostat1_schedule.weekSched[dow].daySched[4].end = 2400;
+      sysCfg.thermostat1_schedule.weekSched[dow].daySched[4].setpoint = 150;
+      sysCfg.thermostat1_schedule.weekSched[dow].daySched[4].active = 1;
 
-      sysCfg.thermostat1schedule.weekSched[dow].daySched[5].active = 0; // Terminate
+      sysCfg.thermostat1_schedule.weekSched[dow].daySched[5].active = 0; // Terminate
     }
     /*
         sysCfg.thermostat2state = 0;

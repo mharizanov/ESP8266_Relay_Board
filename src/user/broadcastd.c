@@ -138,14 +138,14 @@ static ICACHE_FLASH_ATTR void MQTTbroadcastReading(void *arg) {
     int roomTemp = getRoomTemp();
     os_sprintf(therm_room_temp, "%d.%d", (int)roomTemp / 10, abs(roomTemp - ((int)roomTemp / 10) * 10));
 
-    if (sysCfg.thermostat1mode == 1) {
+    if (sysCfg.thermostat1_schedule_mode == 1) {
       // thermostat in Schedule mode
-      os_sprintf(currentThermSetPoint, "%d.%d", (int)scheduleThermSetPoint / 10,
-                 abs(scheduleThermSetPoint - ((int)scheduleThermSetPoint / 10) * 10));
+      os_sprintf(currentThermSetPoint, "%d.%d", (int)thermostat1ScheduleSetPoint / 10,
+                 abs(thermostat1ScheduleSetPoint - ((int)thermostat1ScheduleSetPoint / 10) * 10));
     } else {
       // thermostat in Manual mode
-      os_sprintf(currentThermSetPoint, "%d.%d", (int)sysCfg.thermostat1manualsetpoint / 10,
-                 abs(sysCfg.thermostat1manualsetpoint - ((int)sysCfg.thermostat1manualsetpoint / 10) * 10));
+      os_sprintf(currentThermSetPoint, "%d.%d", (int)sysCfg.thermostat1_manual_setpoint / 10,
+                 abs(sysCfg.thermostat1_manual_setpoint - ((int)sysCfg.thermostat1_manual_setpoint / 10) * 10));
     }
 
     os_sprintf(payload,
@@ -158,8 +158,8 @@ static ICACHE_FLASH_ATTR void MQTTbroadcastReading(void *arg) {
                "\"roomTemp\":\"%s\",\n\"autoMode\": %d\n"
                "}\n",
                ds_temp, dht_temp, dht_humi, (int)sysCfg.thermostat1_input == 2 ? 1 : 0, relay1State, relay2State,
-               relay3State, (int)sysCfg.thermostat1opmode, (int)sysCfg.thermostat1state, (int)currentThermSetPoint,
-               (char *)therm_room_temp, (int)sysCfg.thermostat1mode);
+               relay3State, (int)sysCfg.thermostat1_opmode, (int)sysCfg.thermostat1_enable, (int)currentThermSetPoint,
+               (char *)therm_room_temp, (int)sysCfg.thermostat1_schedule_mode);
 
     os_sprintf(topic, "%s", sysCfg.mqtt_state_pub_topic);
     os_printf("Broadcastd: Publishing state via MQTT to \"%s\", length %d\n", topic, os_strlen(payload));

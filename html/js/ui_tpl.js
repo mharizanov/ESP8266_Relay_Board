@@ -225,7 +225,11 @@ function therm_update() {
 
   if (thermostat.thermostat_relay_active == 0) {
     $("#thermostat1_on").html("No");
-  } else {
+  } else if (thermostat.thermostat_relay_active == 1) {
     $("#thermostat1_on").html("Yes");
+  } else if (thermostat.thermostat_relay_active == 2) {
+    $("#thermostat1_on").html("Relay Rest Period");
+  } else {
+    $("#thermostat1_on").html("Unknown State");
   }
 }

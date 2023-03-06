@@ -12,8 +12,6 @@ Thermostat Advance button
 	Make this configurable (manual override to next schedule)
 
 
-Display relay rest state
-
 Syslog
 
 Configurable GPIO for relays (via webpage?)

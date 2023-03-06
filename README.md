@@ -1,5 +1,14 @@
 #FOTA Update Version - Requires NONOS-SDK 3.0.6 AND 1MB flash minimum.
 
+--
+To compile, you will need to install the ESP8266 dev toolchain as described here:
+
+https://docs.espressif.com/projects/esp8266-rtos-sdk/en/latest/get-started/index.html#setup-toolchain
+
+Or you can use the precompiled firmware in ./firmware directory which should match the HEAD of this branch.
+
+--
+
 So you want OTA on your 3-CH relay board, huh ?
 Bad news is you need 1Mb flash and to my knowledge, all of the 3-CH boards came with 512Kb.
 

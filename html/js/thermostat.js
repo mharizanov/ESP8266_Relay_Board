@@ -7,6 +7,7 @@ var today = days[now.getDay()];
 // DATA
 //=================================================
 var roomTempTimeout = 0;
+var relayRestPeriod = 0;
 var visibleFlag = 1;
 var setpoint = 21;
 var unit = "&deg;C";
@@ -192,12 +193,21 @@ function update() {
 
   if (thermostat.thermostat_relay_active === 0) {
     $(".zone-setpoint").css("color", "#000000");
+    if (relayRestPeriod) {
+      setStatus("Relay cycle timer cleared.", 2, 0);
+      relayRestPeriod = 0;
+    }
   } else if (thermostat.thermostat_relay_active === 1) {
     $(".zone-setpoint").css("color", "#f00000");
+    if (relayRestPeriod) {
+      setStatus("Thermostat cycle timer cleared.", 2, 0);
+      relayRestPeriod = 0;
+    }
   } else {
     // some sort of issue, turn blue (e.g. relay in rest mode)
     $(".zone-setpoint").css("color", "#6495ED");
-    setStatus("Thermostat resting to avoid cycling", 20, 0);
+    setStatus("Thermostat resting to avoid cycling", 0, 0);
+    relayRestPeriod = 1;
   }
 
   if (thermostat.enable == 1) {

@@ -138,6 +138,8 @@ void ICACHE_FLASH_ATTR thermostatRelayOn() {
     }
 
   } else {
+    // in rest mode to avoid cycling
+    thermostatRelayActive = 2;
     os_printf("Thermostat: Attempt to turn thermostat relay on during rest period, ignored\n");
   }
 }

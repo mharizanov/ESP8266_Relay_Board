@@ -319,26 +319,51 @@ int ICACHE_FLASH_ATTR cgiDS18b20(HttpdConnData *connData) {
 }
 
 int ICACHE_FLASH_ATTR cgiState(HttpdConnData *connData) {
-  char buff[512];
-  char tmp[32];
 
-  char temp[32];
-  char humi[32];
+  char buff[512];
+  char sensor[60];
+  char ds_temp[8];
+  char dht22JSON[128];
+  char dht22temp[8];
+  char dht22humi[8];
 
   httpdStartResponse(connData, 200);
   httpdHeader(connData, "Content-Type", "text/json");
   httpdHeader(connData, "Access-Control-Allow-Origin", "*");
   httpdEndHeaders(connData);
 
-  ds_str(tmp, 0);
+  dht_temp_str(dht22temp);
+  dht_humi_str(dht22humi);
 
-  dht_temp_str(temp);
-  dht_humi_str(humi);
+  if (sysCfg.sensor_ds18b20_enable && numds > 0) {
+    os_sprintf(buff, "{\n\n\"ds18b20\":\n[\n");
+    // publish all sensor ids and readings to ds18b20 MQTT topic
+    for (int i = 0; i < numds; i++) {
+      if (dsreading[i].success) {
+        ds_str(ds_temp, i);
+        os_sprintf(sensor, "\n{\n \"id\":\"%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x\",\n\"temperature\":\"%s\"\n}\n",
+                   addr[i][0], addr[i][1], addr[i][2], addr[i][3], addr[i][4], addr[i][5], addr[i][6], addr[i][7],
+                   ds_temp);
+        strcat(buff, sensor);
+        if (i != numds - 1) {
+          strcat(buff, ",");
+        }
+        os_printf("JSON %s \n", sensor);
+      }
+      strcat(buff, "\n]\n");
+    }
+  } else {
+    os_sprintf(buff, "{\n\"ds18b20\":[]\n");
+  }
 
-  os_sprintf(buff,
-             "{ \n\"relay1\": \"%d\"\n,\n\"relay2\": \"%d\"\n,\n\"relay3\": \"%d\",\n  \n\"DHT22temperature\": "
-             "\"%s\"\n , \n\"DHT22humidity\": \"%s\"\n,\"DS18B20temperature\": \"%s\"\n}\n",
-             relay1State, relay2State, relay3State, temp, humi, tmp);
+  if (sysCfg.sensor_dht22_enable) {
+    os_sprintf(dht22JSON, ",\n\"dht22\":[{\"temperature\":\"%s\",\n \"humidity\":\"%s\"\n}\n]\n", dht22temp, dht22humi);
+  } else {
+    os_sprintf(dht22JSON, ",\n\"dht22\":[]\n");
+  }
+
+  strcat(buff, dht22JSON);
+  strcat(buff, "\n}");
 
   httpdSend(connData, buff, -1);
   return HTTPD_CGI_DONE;

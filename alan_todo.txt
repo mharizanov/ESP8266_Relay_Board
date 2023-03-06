@@ -1,26 +1,9 @@
 ToDo
 
-
-
-Configurable GPIO for relays (via webpage?)
-
 user defined params via serial
 	CSV input into 4 global variable
 	user_params parameter added to main CGI to return them as JSON
 	publish them to MQTT ?
-
-
-Display relay rest state
-
-Fix issue where relay does not turn off in manual setpoint mode, yet thermostat is.
-	Does manual have a timeout ?:wq
-	Not sure this is an issue ? Wierd
-
-UI
-	Display all DS18B20 sensor values (look numDs to find out how many?)
-
-
-
 
 
 Thermostat Advance button
@@ -29,6 +12,11 @@ Thermostat Advance button
 	Make this configurable (manual override to next schedule)
 
 
+Display relay rest state
+
+Syslog
+
+Configurable GPIO for relays (via webpage?)
 
 
 Done
@@ -50,8 +38,6 @@ Publish state to MQTT - thermostat (on/off, mode)+ relays
 Publish all ds18b20 sensors to MQTT by device-id
 
 Choose which relays associate to each thermostat
-	Disable thermostat and turn relays off
-	when they relay state is change via webpage
 
 FOTA upgrade now down via webpage push (about.tpl) - thank you #esp-link project
 
@@ -66,14 +52,20 @@ Disable URLs for flashing firmware if flash_map < 2
 
 Supports DST for Europe and North America (thanks Martin Harizanov for the code template)
 
-Fixed issue in cgithermostat.c where only relay1 is returned as the thermostat run state
-	this should be renamed therm1_relay_on  and logic put in place 
-	to detect which relays are associated to the thermostat and
-	return a logical answer. Logical OR ? 
+Correct relay active for thermostat indicated in MQTT and JSON feeds (instead of relay1 default).
 
+CurrentSetPoint published in state JSONs
 
-Number of relays is now configurable via UI.
-	If relay is not configured, it cannot be actuated via any means.
+Number of relays is now configurable via UI - if relay is not configured, it cannot be actuated via any means.
+	Means code should work on 1-Relay boards and have correct UI and logic
 
-Relays configured as thermostat controlled cannot be actuated via any other means.
-	Inc webpages, IO calls, MQTT(?) and POST requests
+Relays configured as thermostat controlled cannot be actuated via any other means (webpages, IO calls, MQTT)
+
+Main menu updated
+
+UI overview page completed  to show most things and available on main menu (need to do ds18B20 sensors)
+
+Thermostat colour map gradients configurable from web UI
+
+Display all DS18B20 & DHT22 sensor values on new UI overview page
+

@@ -75,17 +75,18 @@ int ICACHE_FLASH_ATTR cgiThermostat(HttpdConnData *connData) {
   len = httpdFindArg(connData->getArgs, "param", buff, sizeof(buff));
   if (len > 0) {
     if (os_strcmp(buff, "state") == 0) {
-      os_sprintf(buff,
-                 "{ \"room_temp\": %d,\n\"humidity\":\"%s\",\n"
-                 "\"humidistat\":%d,\n\"thermostat_relay_active\":%d,\n\"relay1name\":\"%s\",\n\"opmode\":%d,\n\""
-                 "enable\":%d,\n\"manual_setpoint\":%d,\"current_setpoint\":%d,\n\"thermostat1_input\":%d,\n\"schedule_"
-                 "mode\": %d,\n"
-                 "\"mqtthost\": \"%s\",\n \"time\": \"%d\"}\n",
-                 roomTemp, humi, (int)sysCfg.thermostat1_input == 2 ? 1 : 0, thermostatRelayActive,
-                 (char *)sysCfg.relay1_name, (int)sysCfg.thermostat1_opmode, (int)sysCfg.thermostat1_enable,
-                 (int)sysCfg.thermostat1_manual_setpoint, (int)thermostat1CurrentSetPoint,
-                 (int)sysCfg.thermostat1_input, (int)sysCfg.thermostat1_schedule_mode, (char *)sysCfg.mqtt_host,
-                 sntp_get_current_timestamp());
+      os_sprintf(
+          buff,
+          "{ \"room_temp\": %d,\n\"humidity\":\"%s\",\n"
+          "\"humidistat\":%d,\n\"thermostat_relay_active\":%d,\n\"relay1name\":\"%s\",\n\"opmode\":%d,\n\""
+          "enable\":%d,\n\"manual_setpoint\":%d,\n\"current_setpoint\":%d,\n\"thermostat1_input\":%d,\n\"schedule_"
+          "mode\": %d,\n\"therm_high_temp_colour_deg\":%d,\n\"therm_low_temp_colour_deg\":%d,\n"
+          "\"mqtthost\": \"%s\",\n\"time\": \"%d\"}\n",
+          roomTemp, humi, (int)sysCfg.thermostat1_input == 2 ? 1 : 0, thermostatRelayActive, (char *)sysCfg.relay1_name,
+          (int)sysCfg.thermostat1_opmode, (int)sysCfg.thermostat1_enable, (int)sysCfg.thermostat1_manual_setpoint,
+          (int)thermostat1CurrentSetPoint, (int)sysCfg.thermostat1_input, (int)sysCfg.thermostat1_schedule_mode,
+          (int)sysCfg.therm_high_temp_colour_deg, (int)sysCfg.therm_low_temp_colour_deg, (char *)sysCfg.mqtt_host,
+          sntp_get_current_timestamp());
     }
 
     if (os_strcmp(buff, "temperature") == 0) {

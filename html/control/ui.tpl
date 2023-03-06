@@ -41,44 +41,56 @@
          </div>
         
               
-        <div class="content-secondary" Unknown >
+        <div class="content-secondary" %ds18b20-enable% >
           <div class="s-title">DS18B20 Temperature Sensors</div>
           <ul data-role="listview" data-inset="true" >
-            <li>
-                    <b>DS18B20</b>
-                    <span class="inputvalue" name="DS18B20temperature" id="DS18B20temperature">N/A</span>
+            <li id="ds18b20_0" class="ui-li">
+                    <span id="ds18b20_id_0"> N/A</span>
+                    <span class="inputvalue" id="ds18b20_temperature_0"> --.--&#8451;</span>
+            </li>
+            <li id="ds18b20_1" class="ui-li">
+                    <span id="ds18b20_id_1"> N/A</span>
+                    <span class="inputvalue" id="ds18b20_temperature_1" > --.--&#8451;</span>
+            </li>
+            <li id="ds18b20_2" class="ui-li">
+                    <span id="ds18b20_id_2"> N/A</span>
+                    <span class="inputvalue" id="ds18b20_temperature_2" > --.--&#8451;</span>
+            </li>
+            <li id="ds18b20_3" class="ui-li">
+                  <span id="ds18b20_id_3"> N/A</span>
+                    <span class="inputvalue" id="ds18b20_temperature_3" > --.--&#8451;</span>
             </li>
         </div>
      
-        <div class="content-secondary"  hidden >
-          <div class="s-title">DHT22 Sensor<</div>
+        <div class="content-secondary"  %dht22-enable% >
+          <div class="s-title">DHT22 Sensor</div>
           <ul data-role="listview" data-inset="true" >
-            <li>
+            <li class="ui-li">
                     <b>DHT22 Temperature</b>
                     <span class="inputvalue" name="DHT22temperature" id="DHT22temperature">N/A</span>
             </li>
-            <li>
+            <li class="ui-li">
                     <b>DHT22 Humidity</b>
                     <span class="inputvalue" name="DHT22humidity" id="DHT22humidity">N/A</span>
             </li>
         </div>
 
-          <div class="content-secondary">
+          <div class="content-secondary"  %thermostat-enable% >
           <div class="s-title" >Thermostat</div>
           <ul data-role="listview" data-inset="true" >
-            <li>
+            <li class="ui-li">
                     <b>Thermostat</b>
                     <span class="inputvalue" name="thermostat1_enable" id="thermostat_enable">N/A</span>
             </li>
-            <li id="room_temp_li">
+            <li id="room_temp_li" class="ui-li">
                     <b>Thermostat Room Temperature</b>
                     <span class="inputvalue" name="thermostat1_room_temperature" id="thermostat1_room_temperature">N/A</span>
             </li>
-            <li id="set_point_li">
+            <li id="set_point_li" class="ui-li">
                     <b>Thermostat Set Point</b>
                     <span class="inputvalue" name="thermostat1_setpoint" id="thermostat1_setpoint">N/A</span>
             </li>
-             <li id="call_for_heat_li">
+             <li id="call_for_heat_li" class="ui-li">
                     <b>Thermostat call for heat</b>
                     <span class="inputvalue" name="thermostat1_on" id="thermostat1_on">N/A</span>
             </li>
@@ -100,9 +112,12 @@
 $(document).ready(function() {
   relay_get();
   therm_get();
+  sensor_get();
   update();
   setInterval(relay_get, 5000);
   setInterval('therm_get()', 5000);
+  setInterval('sensor_get()', 30000);
+
   checkVisibility();
 });
 </script>

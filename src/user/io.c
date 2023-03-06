@@ -39,10 +39,25 @@ void ICACHE_FLASH_ATTR relayOnOff(int onOff, int relayNumber) {
 
   if (relayNumber == 1 && !sysCfg.relay1_thermostat && sysCfg.relay_total > 0) {
     ioGPIO(onOff, RELAY1GPIO);
+    relay1State = onOff;
+    if (sysCfg.relay_latching_enable) {
+      sysCfg.relay1_state = onOff;
+      CFG_Save();
+    }
   } else if (relayNumber == 2 && !sysCfg.relay2_thermostat && sysCfg.relay_total > 1) {
     ioGPIO(onOff, RELAY2GPIO);
+    relay2State = onOff;
+    if (sysCfg.relay_latching_enable) {
+      sysCfg.relay2_state = onOff;
+      CFG_Save();
+    }
   } else if (relayNumber == 3 && !sysCfg.relay3_thermostat && sysCfg.relay_total > 2) {
     ioGPIO(onOff, RELAY3GPIO);
+    relay3State = onOff;
+    if (sysCfg.relay_latching_enable) {
+      sysCfg.relay3_state = onOff;
+      CFG_Save();
+    }
   } else {
     os_printf(
         "relayOnOff:Invalid relay number %d or relay is controlled by thermostat only (configured for %d relays).\n",

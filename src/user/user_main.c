@@ -311,13 +311,6 @@ void ICACHE_FLASH_ATTR mqttDataCb(uint32_t *args, const char *topic, uint32_t to
         relay3State = atoi(strData);
         relayOnOff(relay3State, 3);
       }
-
-      if (sysCfg.relay_latching_enable) {
-        sysCfg.relay1_state = relay1State;
-        sysCfg.relay2_state = relay2State;
-        sysCfg.relay3_state = relay3State;
-        CFG_Save();
-      }
     }
   }
   os_printf("MQTT topic: %s, data: %s \r\n", strTopic, strData);

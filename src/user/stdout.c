@@ -91,6 +91,7 @@ LOCAL void uart0_rx_intr_handler(void *para) {
 
       if (os_strncmp((const char *)pRxBuff->pRcvMsgBuff, "serialremotetemp=", 17) == 0) {
         serialTreading = atoi((const char *)pRxBuff->pRcvMsgBuff + 17);
+        serialTreadingTS = sntp_get_current_timestamp();
         os_printf("Serial temperature is: %d \r\n", serialTreading);
       }
 
@@ -98,29 +99,8 @@ LOCAL void uart0_rx_intr_handler(void *para) {
         int relayNum = (pRxBuff->pRcvMsgBuff[5] - '0');
         int relayState = (pRxBuff->pRcvMsgBuff[7] - '0');
 
-        os_printf("Relay %d is now: %d \r\n", relayNum, relayState);
-
-        if (relayNum == 1) {
-          relay1State = relayState;
-          ioGPIO(relay1State, RELAY1GPIO);
-        }
-
-        if (relayNum == 2) {
-          relay2State = relayState;
-          ioGPIO(relay2State, RELAY2GPIO);
-        }
-
-        if (relayNum == 3) {
-          relay3State = relayState;
-          ioGPIO(relay3State, RELAY3GPIO);
-        }
-
-        if (sysCfg.relay_latching_enable) {
-          sysCfg.relay1_state = relay1State;
-          sysCfg.relay2_state = relay2State;
-          sysCfg.relay3_state = relay3State;
-          CFG_Save();
-        }
+        relayOnOff(relayState, relayNum);
+        // os_printf("Relay %d is now: %d \r\n", relayNum, relayState);
       }
     }
 

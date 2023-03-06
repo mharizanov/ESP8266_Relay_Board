@@ -74,12 +74,6 @@ int ICACHE_FLASH_ATTR cgiGPIO(HttpdConnData *connData) {
   }
 
   if (gotcmd == 1) {
-    if (sysCfg.relay_latching_enable) {
-      sysCfg.relay1_state = relay1State;
-      sysCfg.relay2_state = relay2State;
-      sysCfg.relay3_state = relay3State;
-      CFG_Save();
-    }
     httpdRedirect(connData, "relay.tpl");
     return HTTPD_CGI_DONE;
   } else { // with no parameters returns JSON with relay state

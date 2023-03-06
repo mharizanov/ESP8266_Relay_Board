@@ -101,6 +101,8 @@ HttpdBuiltInUrl builtInUrls[] = {{"/", cgiRedirect, "/index.tpl"},
                                  {"/control/ds18b20.tpl", cgiEspFsTemplate, tplDS18b20},
                                  {"/control/ds18b20.cgi", cgiDS18b20, NULL},
                                  {"/control/state.cgi", cgiState, NULL},
+                                 {"/control/sensor.cgi", cgiSensor, NULL},
+
                                  {"/control/reset.cgi", cgiReset, NULL},
                                  {"/control/thermostat.tpl", cgiEspFsTemplate, tplThermostat},
                                  {"/control/thermostat.cgi", cgiThermostat, NULL},

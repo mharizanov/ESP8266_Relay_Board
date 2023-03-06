@@ -15,6 +15,7 @@ int cgiDHT22(HttpdConnData *connData);
 void tplDS18b20(HttpdConnData *connData, char *token, void **arg);
 int cgiDS18b20(HttpdConnData *connData);
 int cgiState(HttpdConnData *connData);
+int cgiSensor(HttpdConnData *connData);
 int cgiUI(HttpdConnData *connData);
 void tplUI(HttpdConnData *connData, char *token, void **arg);
 void tplMQTT(HttpdConnData *connData, char *token, void **arg);

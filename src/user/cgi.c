@@ -319,6 +319,32 @@ int ICACHE_FLASH_ATTR cgiDS18b20(HttpdConnData *connData) {
 }
 
 int ICACHE_FLASH_ATTR cgiState(HttpdConnData *connData) {
+  char buff[512];
+  char tmp[32];
+
+  char temp[32];
+  char humi[32];
+
+  httpdStartResponse(connData, 200);
+  httpdHeader(connData, "Content-Type", "text/json");
+  httpdHeader(connData, "Access-Control-Allow-Origin", "*");
+  httpdEndHeaders(connData);
+
+  ds_str(tmp, 0);
+
+  dht_temp_str(temp);
+  dht_humi_str(humi);
+
+  os_sprintf(buff,
+             "{ \n\"relay1\": \"%d\"\n,\n\"relay2\": \"%d\"\n,\n\"relay3\": \"%d\",\n  \n\"DHT22temperature\": "
+             "\"%s\"\n , \n\"DHT22humidity\": \"%s\"\n,\"DS18B20temperature\": \"%s\"\n}\n",
+             relay1State, relay2State, relay3State, temp, humi, tmp);
+
+  httpdSend(connData, buff, -1);
+  return HTTPD_CGI_DONE;
+}
+
+int ICACHE_FLASH_ATTR cgiSensor(HttpdConnData *connData) {
 
   char buff[512];
   char sensor[60];

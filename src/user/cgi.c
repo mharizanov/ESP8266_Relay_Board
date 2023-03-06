@@ -348,7 +348,6 @@ int ICACHE_FLASH_ATTR cgiState(HttpdConnData *connData) {
         if (i != numds - 1) {
           strcat(buff, ",");
         }
-        os_printf("JSON %s \n", sensor);
       }
       strcat(buff, "\n]\n");
     }

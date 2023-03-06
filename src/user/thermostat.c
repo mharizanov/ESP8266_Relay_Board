@@ -86,7 +86,7 @@ int ICACHE_FLASH_ATTR getRoomTemp() {
                 sysCfg.therm_room_temp_timeout_secs / 60);
       mqttTreading = -9999;
     } else {
-      roomTemp = serialTreading * 10;
+      roomTemp = serialTreading;
     }
 
   } else if (sysCfg.thermostat1_input == 5) { // Fixed value 10C

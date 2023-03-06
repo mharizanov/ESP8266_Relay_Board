@@ -39,6 +39,8 @@
 #define THERMOSTAT_HEATING 0
 #define THERMOSTAT_COOLING 1
 
+#define USERJSONMAX 250 // max size of JSON string submitted via serial
+
 typedef struct {
   uint16_t start;
   uint16_t end;

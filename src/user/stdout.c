@@ -19,7 +19,8 @@
 
 // Temperature reading timestamps (used for thermostat if configured)
 int serialTreading = -9999;
-time_t serialTreadingTS; // timestamp for the reading
+time_t serialTreadingTS;    // timestamp for the reading
+char userJSON[USERJSONMAX]; // user defined JSON submitted via serial
 
 typedef struct {
   uint32 RcvBuffSize;
@@ -83,16 +84,55 @@ LOCAL void uart0_rx_intr_handler(void *para) {
     *(pRxBuff->pWritePos) = RcvChar;
 
     // insert here for get one command line from uart
-    if (RcvChar == 'n') {
+    if (RcvChar == '\n') {
       *(pRxBuff->pWritePos) = 0x00;
       pRxBuff->BuffState = WRITE_OVER;
       pRxBuff->pWritePos = pRxBuff->pRcvMsgBuff - 1;
       os_printf("Received: %s\n", (const char *)pRxBuff->pRcvMsgBuff);
 
+      if (os_strncmp((const char *)pRxBuff->pRcvMsgBuff, "?", 1) == 0 ||
+          os_strncmp((const char *)pRxBuff->pRcvMsgBuff, "help", 4) == 0) {
+        os_printf("ESP8266 Relay Board Serial Interface\n");
+        os_printf("Commands:\n");
+        os_printf("serialremotetemp=nn  Set thermostat room temp to nn (tenths of a degree, int only)\n");
+        os_printf("userjson={xxxx}  Submit user defined JSON (max chars %d) which will be output by "
+                  "thermostat.cgi?state & MQTT\n",
+                  USERJSONMAX);
+        os_printf("relayX=Y   Set relay X to on(Y=1) or off(Y=0)\n");
+      }
+
       if (os_strncmp((const char *)pRxBuff->pRcvMsgBuff, "serialremotetemp=", 17) == 0) {
-        serialTreading = atoi((const char *)pRxBuff->pRcvMsgBuff + 17);
-        serialTreadingTS = sntp_get_current_timestamp();
-        os_printf("Serial temperature is: %d \r\n", serialTreading);
+        int len = strlen((const char *)pRxBuff->pRcvMsgBuff + 17);
+        if (len > 4) {
+          os_printf("Invalid temperature, must be < 4 digits\n");
+        } else {
+          serialTreading = atoi((const char *)pRxBuff->pRcvMsgBuff + 17);
+          if (serialTreading > 900) {
+            serialTreading = -9999;
+            os_printf("Invalid temperature, must be < 900 (90 degrees)\n");
+          } else {
+            serialTreadingTS = sntp_get_current_timestamp();
+            os_printf("Serial temperature is: %d \r\n", serialTreading);
+          }
+        }
+      }
+
+      if (os_strncmp((const char *)pRxBuff->pRcvMsgBuff, "userjson=", 9) == 0) {
+        int len = strlen((const char *)pRxBuff->pRcvMsgBuff + 9);
+
+        if (len > USERJSONMAX) {
+          os_printf("JSON string too long (%d chars), max chars is %d.", len, USERJSONMAX);
+        } else {
+
+          if (*(const char *)(pRxBuff->pRcvMsgBuff + 9) != '{') {
+            os_printf("Bad JSON string, missing starting {\n");
+          } else if (*(const char *)(pRxBuff->pRcvMsgBuff + 9 + len - 2) != '}') {
+            os_printf("Bad JSON string, missing ending }\n");
+          } else {
+            strcpy(userJSON, (const char *)pRxBuff->pRcvMsgBuff + 9);
+            os_printf("User defined JSON string: %s \r\n", userJSON);
+          }
+        }
       }
 
       if (os_strncmp((const char *)pRxBuff->pRcvMsgBuff, "relay", 5) == 0) {

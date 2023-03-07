@@ -66,6 +66,26 @@ Various enhancements have been made:
 - Publish all ds18b20 sensors to MQTT by device-id
 - Choose which relays associate to each thermostat
 - FOTA Upgrade via webpage upload (thank you ESP-LINK project for the code)
+- Thermostat timeout for all sources implemented
+- Move all thermostat config to its own page in the Web GUI
+- ESPFS webpage upload now available through the Web GUI
+- Tidy up about.tpl page and only show firmware upgrade options when flash_map > 2 (over 512Kb)
+- Disable URLs for flashing firmware if flash_map < 2 (512Kb board)
+- Supports DST for Europe and North America (thanks Martin Harizanov for the code template)
+- Correct relay active for thermostat indicated in MQTT and JSON feeds (instead of relay1 default).
+- CurrentSetPoint published in state JSONs
+- Number of relays is now configurable via UI - if relay is not configured, it cannot be actuated via any means.
+	This means code should work on 1-Relay boards and have correct UI and logic
+- Relays configured as thermostat controlled cannot be actuated via any other means (webpages, IO calls, MQTT)
+- Main menu updated
+- UI overview page completed  to show most things and available on main menu (need to do ds18B20 sensors)
+- Thermostat colour map gradients configurable from web UI
+- Display all DS18B20 & DHT22 sensor values on new UI overview page
+- Tidy up serial interface - add help and validation of inputs
+- Add serial userjson input - JSON can be submitted via serial, is published to MQTT and thermostat.cgi?state to allow easy customisation of webpages to support random serial devices
+
+
+
 
 .
 

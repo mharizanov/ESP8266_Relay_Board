@@ -6,11 +6,11 @@
 #define ICACHE_RAM_ATTR __attribute__((section(".iram0.text")))
 #define ICACHE_RODATA_ATTR __attribute__((section(".irom.text")))
 
-#define CFG_HOLDER 0x00FF0008
+#define CFG_HOLDER 0x00FF0007
 //#define CFG_LOCATION 0x3C     //Working value on old SDK
 #define CFG_LOCATION 0x70 // NONOS-SDK - circa around position 458K in flash
 // 0x7C on 512K flash is where the internal RF data lives - stay away from there(last 16k)
-#define FWVER "1.3/March 2nd 2023"
+#define FWVER "1.4/March 7th 2023"
 
 /*DEFAULT CONFIGURATIONS*/
 

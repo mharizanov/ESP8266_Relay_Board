@@ -172,7 +172,7 @@ static ICACHE_FLASH_ATTR void MQTTbroadcastReading(void *arg) {
     os_sprintf(payload, "%s", (const char *)userJSON);
 
     MQTT_Publish(&mqttClient, topic, payload, os_strlen(payload), 0, 0);
-    os_printf("Published \"%s\" to topic \"%s\"\n", ds_temp, topic);
+    os_printf("Published \"%s\" to topic \"%s\"\n", payload, topic);
   }
 }
 void ICACHE_FLASH_ATTR broadcastd_init(void) {

@@ -52,7 +52,6 @@ function sensor_get() {
       }
     },
     error : function(xhr, textStatus, errorThrown) {
-      alert(errorThrown);
       if (textStatus == 'timeout') {
         this.tryCount++;
         if (this.tryCount <= this.retryLimit) {

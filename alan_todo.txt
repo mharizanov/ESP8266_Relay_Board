@@ -1,9 +1,5 @@
 ToDo
 
-user defined params via serial
-	CSV input into 4 global variable
-	user_params parameter added to main CGI to return them as JSON
-	publish them to MQTT ?
 
 
 Thermostat Advance button
@@ -67,3 +63,10 @@ Thermostat colour map gradients configurable from web UI
 
 Display all DS18B20 & DHT22 sensor values on new UI overview page
 
+Tidy up serial interface - add help and validation of inputs
+
+Add serial userjson input - JSON can be submitted via serial and is published to MQTT and thermostat.cgi?state to allow easy customisation of webpages to support random serial devices
+
+
+	user_params parameter added to main CGI to return them as JSON
+	publish them to MQTT ?

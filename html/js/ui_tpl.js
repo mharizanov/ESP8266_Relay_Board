@@ -151,6 +151,13 @@ function sensor_update() {
   } else {
     $("#ds18b20_3").hide();
   }
+
+  if ('temperature' in sensors.dht22) {
+    $("#DHT22temperature").html(sensors.dht22.temperature);
+  }
+  if ('humidity' in sensors.dht22) {
+    $("#DHT22humidity").html(sensors.dht22.humidity);
+  }
 }
 
 function therm_update() {

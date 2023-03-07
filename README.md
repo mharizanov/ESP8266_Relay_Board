@@ -58,10 +58,10 @@ Various enhancements have been made:
 ###Enhancements to Martin's code
 - Full support for MQTT thermostat source
 - Enhanced MQTT reporting (state, DS18B20 JSON)
-- A void thermostat cycling 
+- Avoid thermostat cycling 
 - New Config items for MQTT thermostat timeout & thermostat cycling
 - Display of a bad or stale temperature readings highlighted in thermostat UI
-- Fix bug where thermostat off time is update is it is already off
+- Fix bug where thermostat relay off time is updated if it is already off
 - Change thermostat to work in tenths of a degree, not hundredths (direct compatibility with emonTh + emonGLCD)
 - Publish all ds18b20 sensors to MQTT by device-id
 - Choose which relays associate to each thermostat

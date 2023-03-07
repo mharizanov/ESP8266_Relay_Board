@@ -124,6 +124,7 @@ void ICACHE_FLASH_ATTR CFG_Load() {
     os_sprintf((char *)sysCfg.mqtt_dht22_humi_pub_topic, MQTT_DHT22_HUMI_PUB_TOPIC, system_get_chip_id());
     os_sprintf((char *)sysCfg.mqtt_ds18b20_temp_pub_topic, MQTT_DS18B20_TEMP_PUB_TOPIC, system_get_chip_id());
     os_sprintf((char *)sysCfg.mqtt_state_pub_topic, MQTT_STATE_PUB_TOPIC, system_get_chip_id());
+    os_sprintf((char *)sysCfg.mqtt_userJSON_pub_topic, MQTT_USERJSON_PUB_TOPIC, system_get_chip_id());
 
     sysCfg.sensor_ds18b20_enable = SENSOR_DS18B20_ENABLE;
     sysCfg.sensor_dht22_enable = SENSOR_DHT22_ENABLE;

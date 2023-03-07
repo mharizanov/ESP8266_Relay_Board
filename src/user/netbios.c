@@ -36,7 +36,7 @@
 
 //#include "lwip/opt.h"
 
-#if LWIP_UDP /* don't build if not configured for use in lwipopts.h */
+#ifdef LWIP_UDP /* don't build if not configured for use in lwipopts.h */
 
 #include "lwip/netif.h"
 #include "lwip/udp.h"

@@ -107,7 +107,7 @@ typedef struct {
   uint8_t mqtt_ds18b20_temp_pub_topic[64];
 
   uint8_t mqtt_state_pub_topic[64];
-
+  uint8_t mqtt_userJSON_pub_topic[64];
   uint8_t sensor_ds18b20_enable;
   uint8_t sensor_dht22_enable;
   uint16_t mqtt_use_ssl;

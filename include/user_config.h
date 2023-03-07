@@ -6,7 +6,7 @@
 #define ICACHE_RAM_ATTR __attribute__((section(".iram0.text")))
 #define ICACHE_RODATA_ATTR __attribute__((section(".irom.text")))
 
-#define CFG_HOLDER 0x00FF0009
+#define CFG_HOLDER 0x00FF0008
 //#define CFG_LOCATION 0x3C     //Working value on old SDK
 #define CFG_LOCATION 0x70 // NONOS-SDK - circa around position 458K in flash
 // 0x7C on 512K flash is where the internal RF data lives - stay away from there(last 16k)
@@ -52,13 +52,14 @@
 #define MQTT_USER "tasmota"
 #define MQTT_PASS "tasmota"
 #define MQTT_USE_SSL 0
-#define MQTT_RELAY_SUBS_TOPIC "esp_%08X/out/relay/#"
-#define MQTT_TEMP_SUBS_TOPIC "esp_%08X/in/temperature"
+#define MQTT_RELAY_SUBS_TOPIC "esp_%08X/in/relay/#"
+#define MQTT_TEMP_SUBS_TOPIC "esp_%08X/out/temperature"
 #define MQTT_STATE_PUB_TOPIC "esp_%08X/out/state"
+#define MQTT_USERJSON_PUB_TOPIC "esp_%08X/out/userJSON"
 
-#define MQTT_DHT22_TEMP_PUB_TOPIC "esp_%08X/in/dht22/temperature"
-#define MQTT_DHT22_HUMI_PUB_TOPIC "esp_%08X/in/dht22/humidity"
-#define MQTT_DS18B20_TEMP_PUB_TOPIC "esp_%08X/in/ds18b20/temperature"
+#define MQTT_DHT22_TEMP_PUB_TOPIC "esp_%08X/out/dht22/temperature"
+#define MQTT_DHT22_HUMI_PUB_TOPIC "esp_%08X/out/dht22/humidity"
+#define MQTT_DS18B20_TEMP_PUB_TOPIC "esp_%08X/out/ds18b20/temperature"
 
 #define SENSOR_DS18B20_ENABLE 0
 #define SENSOR_DHT22_ENABLE 0

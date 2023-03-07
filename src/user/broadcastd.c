@@ -165,8 +165,16 @@ static ICACHE_FLASH_ATTR void MQTTbroadcastReading(void *arg) {
     os_printf("Broadcastd: Publishing state via MQTT to \"%s\", length %d\n", topic, os_strlen(payload));
     MQTT_Publish(&mqttClient, topic, payload, os_strlen(payload), 0, 0);
   }
-}
 
+  // publish userJSON received on serial interface
+  if (strlen((const char *)userJSON) > 3) {
+    os_sprintf(topic, "%s", sysCfg.mqtt_userJSON_pub_topic);
+    os_sprintf(payload, "%s", (const char *)userJSON);
+
+    MQTT_Publish(&mqttClient, topic, payload, os_strlen(payload), 0, 0);
+    os_printf("Published \"%s\" to topic \"%s\"\n", ds_temp, topic);
+  }
+}
 void ICACHE_FLASH_ATTR broadcastd_init(void) {
 
   if (sysCfg.mqtt_enable == 1) {

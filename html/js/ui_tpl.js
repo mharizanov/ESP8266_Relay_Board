@@ -152,11 +152,9 @@ function sensor_update() {
     $("#ds18b20_3").hide();
   }
 
-  if ('temperature' in sensors.dht22) {
-    $("#DHT22temperature").html(sensors.dht22.temperature);
-  }
-  if ('humidity' in sensors.dht22) {
-    $("#DHT22humidity").html(sensors.dht22.humidity);
+  if (sensors.dht22.length > 0) {
+    $("#DHT22temperature").html(sensors.dht22[0].temperature);
+    $("#DHT22humidity").html(sensors.dht22[0].humidity);
   }
 }
 

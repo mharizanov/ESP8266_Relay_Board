@@ -1,6 +1,7 @@
 ToDo
 
-
+Add timeout for userJSON publication (timestamp the serial input)
+Add thermostat manual/auto mode to ui.tpl
 
 Thermostat Advance button
 	Advance to next schedule

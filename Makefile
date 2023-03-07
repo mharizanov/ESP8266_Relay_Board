@@ -11,6 +11,7 @@
 BUILD_BASE	= build
 FW_BASE		= firmware
 
+
 #SET THIS !
 FLASH_SIZE ?= 1MB
 
@@ -37,8 +38,17 @@ BOOTFILE	?= $(SDK_BASE/bin/boot_v1.7.bin)
 
 APPGEN_TOOL	?= gen_appbin.py
 
+OS 	:= $(shell uname)
 
 ESP_FLASH_MAX       ?= 503808  # max bin file
+
+ifeq ($(OS),Darwin)
+	STATARGS = -f %z	
+	FINDARGS = -E . -type f  -iregex '.*\.(html|css|js)'
+else
+	FINDARGS = . -type f -regex ".*/.*\.\(html\|css\|js\)"
+	STATARGS = -c %z	
+endif
 
 ifeq ("$(FLASH_SIZE)","512KB")
 # Winbond 25Q40 512KB flash, typ for esp-01 thru esp-11
@@ -240,8 +250,9 @@ $(FW_BASE)/user1.bin: $(USER1_OUT) $(FW_BASE)
 	$(Q) COMPILE=gcc PATH=$(XTENSA_TOOLS_ROOT):$(PATH) python $(APPGEN_TOOL) $(USER1_OUT) 2 $(ESP_FLASH_MODE) $(ESP_FLASH_FREQ_DIV) $(ESP_SPI_SIZE) 1 >/dev/null
 	$(Q) rm -f eagle.app.v6.*.bin
 	$(Q) mv eagle.app.flash.bin $@
-	@echo "    user1.bin uses $$(stat -f '%z' $@) bytes of" $(ESP_FLASH_MAX) "available"
-	$(Q) if [ $$(stat -f '%z' $@) -gt $$(( $(ESP_FLASH_MAX) )) ]; then echo "$@ too big!"; false; fi
+	@echo "    user1.bin uses $$(stat $(STATARGS) $@) bytes of" $(ESP_FLASH_MAX) "available"
+#	$(Q) if [ $$(stat -f '%z' $@) -gt $$(( $(ESP_FLASH_MAX) )) ]; then echo "$@ too big!"; false; fi
+	$(Q) if [ $$(stat $(STATARGS) $@ ) -gt $$(( $(ESP_FLASH_MAX) )) ]; then echo "$@ too big!"; false; fi
 
 $(FW_BASE)/user2.bin: $(USER2_OUT) $(FW_BASE)
 	$(Q) $(OBJCP) --only-section .text -O binary $(USER2_OUT) eagle.app.v6.text.bin
@@ -251,7 +262,8 @@ $(FW_BASE)/user2.bin: $(USER2_OUT) $(FW_BASE)
 	$(Q) COMPILE=gcc PATH=$(XTENSA_TOOLS_ROOT):$(PATH) python $(APPGEN_TOOL) $(USER2_OUT) 2 $(ESP_FLASH_MODE) $(ESP_FLASH_FREQ_DIV) $(ESP_SPI_SIZE) 2 >/dev/null
 	$(Q) rm -f eagle.app.v6.*.bin
 	$(Q) mv eagle.app.flash.bin $@
-	$(Q) if [ $$(stat -f '%z' $@) -gt $$(( $(ESP_FLASH_MAX) )) ]; then echo "$@ too big!"; false; fi
+#	$(Q) if [ $$(stat -f '%z' $@) -gt $$(( $(ESP_FLASH_MAX) )) ]; then echo "$@ too big!"; false; fi
+	$(Q) if [ $$(stat $(STATARGS) $@ ) -gt $$(( $(ESP_FLASH_MAX) )) ]; then echo "$@ too big!"; false; fi
 
 $(APP_AR): $(OBJ)
 	$(vecho) "AR $@"
@@ -263,13 +275,15 @@ $(FW_FILE_3): html/ html/config/ html/config/wifi/ html/control/ mkespfsimage/mk
 ifeq ($(GZIP_COMPRESSION),"yes")
 	$(Q) rm -rf html_compressed;
 		$(Q) cp -r html html_compressed;
-		#$(Q) cd html_compressed; find . -type f -regex ".*/.*\.\(html\|css\|js\)" -exec sh -c "gzip -n {}; mv {}.gz {}" \;; cd ..;	
-		$(Q) cd html_compressed; find -E . -type f  -iregex '.*\.(html|css|js)'  -exec sh -c "gzip -n {}; mv {}.gz {}" \;; cd ..;	
+#		$(Q) cd html_compressed; find . -type f -regex ".*/.*\.\(html\|css\|js\)" -exec sh -c "gzip -n {}; mv {}.gz {}" \;; cd ..;	
+#		$(Q) cd html_compressed; find -E . -type f  -iregex '.*\.(html|css|js)'  -exec sh -c "gzip -n {}; mv {}.gz {}" \;; cd ..;	
+		$(Q) cd html_compressed; find $(FINDARGS)  -exec sh -c "gzip -n {}; mv {}.gz {}" \;; cd ..;	
 		$(Q) cd html_compressed; find .  | ../mkespfsimage/mkespfsimage > ../firmware/$(FW_FILE_3); cd ..;
 else
 		$(Q) cd html; find . | ../mkespfsimage/mkespfsimage > ../firmware/$(FW_FILE_3); cd ..
 endif
-		$(Q) if [ $$(stat -f '%z' firmware/$(FW_FILE_3)) -gt $$(( 0x2E000 )) ]; then echo firmware/$(FW_FILE_3)" too big!"; false; fi
+#		$(Q) if [ $$(stat -f '%z' firmware/$(FW_FILE_3)) -gt $$(( 0x2E000 )) ]; then echo firmware/$(FW_FILE_3)" too big!"; false; fi
+		$(Q) if [ $$(stat $(STATARGS) firmware/$(FW_FILE_3)) -gt $$(( 0x2E000 )) ]; then echo firmware/$(FW_FILE_3)" too big!"; false; fi
 
 
 checkdirs: $(BUILD_DIR) $(FW_BASE)

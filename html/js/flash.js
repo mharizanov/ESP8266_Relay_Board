@@ -1,5 +1,7 @@
 //===== FLASH cards
 
+var flashSize = 0;
+
 function flashFirmware(e) {
   e.preventDefault();
   var fw_data = document.getElementById('fw-file').files[0];
@@ -15,7 +17,13 @@ function flashFirmware(e) {
       $("#fw-form").removeAttribute("hidden");
       $("#fw-form").removeAttribute("hidden");
     });
-  }, null, fw_data)
+  }, errCb, fw_data)
+}
+
+function errCb(status, errText) {
+
+  // alert (errText);
+  showWarning("Operation failed:" + errText);
 }
 function flashEspfs(e) {
   e.preventDefault();
@@ -29,7 +37,7 @@ function flashEspfs(e) {
     showNotification("Webpages have been successfully updated!");
     $("#espfs-form").removeAttribute("hidden");
     $("#espfs-form").removeAttribute("hidden");
-  }, null, fw_data)
+  }, errCb, fw_data)
 }
 
 function fetchFlash() {
@@ -40,13 +48,15 @@ function fetchFlash() {
       $("#fw-upgrade").removeAttribute("hidden");
       $("#fw-form").removeAttribute("hidden");
     } else {
-      $("#fw-upgrade").setAttribute("hidden");
-      $("#fw-form").setAttribute("hidden");
+      $("#fw-upgrade").setAttribute("hidden", "");
+      $("#fw-form").setAttribute("hidden", "")
+      flashSize = resp;
     }
-  });
-  ajaxReq("GET", "/flash/next", function(resp) {
-    $("#fw-slot").innerHTML = resp;
-  });
+  }, null, null);
+
+  if (flashSize > 1) {
+    ajaxReq("GET", "/flash/next", function(resp) { $("#fw-slot").innerHTML = resp; }, errCb, null);
+  }
   ajaxReq("GET", "/flash/version", function(resp) {
     var v = $("#current-fw");
     if (v != null) {
@@ -54,5 +64,5 @@ function fetchFlash() {
     } else {
       v.innerHTML = "Unknown";
     }
-  });
+  }, errCb, null);
 }

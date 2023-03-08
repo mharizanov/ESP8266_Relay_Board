@@ -256,40 +256,39 @@ int ICACHE_FLASH_ATTR cgiUploadEspfs(HttpdConnData *connData) {
   }
 
   // assume no error yet...
-  char err[50] = "";
-  int code = 0;
+  char *err = NULL;
+  int code = 400;
 
   // check overall size
   // os_printf("FW: %d (max %d)\n", connData->post->len, FW_MAX_SIZE);
   if (connData->post->len > ESPFS_MAX_SIZE) {
-    os_sprintf(err, "Webpage ESPFS > max size (%d) bytes", ESPFS_MAX_SIZE);
-    code = 400;
+    err = "Webpage ESPFS max size exceeded";
+    // > (% d) bytes ", ESPFS_MAX_SIZE);
+    code = 500;
   }
 
   if (connData->post->buff == NULL || connData->requestType != HTTPD_METHOD_POST || connData->post->len < 1024) {
-    os_sprintf(err, "Invalid request");
+    err = "Invalid request";
     code = 400;
   }
+
   // check that data starts with an appropriate header
-  if (code == 0 && offset == 0) {
-    if (check_espfs_header(connData->post->buff) != NULL) {
-      os_sprintf(err, "ESPFS header fail");
-      code = 400;
-    }
-  }
+  if (err == NULL && offset == 0)
+    err = check_espfs_header(connData->post->buff);
 
   // make sure we're buffering in 1024 byte chunks
-  if (code == 0 && offset % 1024 != 0) {
-    os_sprintf(err, "Buffering problem");
+  if (err == NULL && offset % 1024 != 0) {
+    err = "Buffering problem";
     code = 500;
   }
 
   // return an error if there is one
   if (code != 0) {
-    DBG("Error %d: poo %s\n", code, err);
+    DBG("Error %d: %s\n", code, err);
     httpdStartResponse(connData, code);
     httpdHeader(connData, "Content-Type", "text/plain");
-    // httpdHeader(connData, "Content-Length", strlen(err)+2);
+    // httpdHeader(connData, "Content-Length", "20");
+    //  os_strlen(err) + 2);
     httpdEndHeaders(connData);
     httpdSend(connData, err, -1);
     httpdSend(connData, "\r\n", -1);

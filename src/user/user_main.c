@@ -421,7 +421,6 @@ void ICACHE_FLASH_ATTR user_init(void) {
 //#define SYSTEM_PARTITION_CUSTOMER_PRIV_PARAM_ADDR 0x7c000
 #define SYSTEM_PARTITION_CUSTOMER_PRIV_PARAM SYSTEM_PARTITION_CUSTOMER_BEGIN
 */
-
 static const partition_item_t partition_table[] = {
 
     {SYSTEM_PARTITION_BOOTLOADER, 0x0, 0x1000},
@@ -444,9 +443,14 @@ static const partition_item_t partition_table[] = {
 void ICACHE_FLASH_ATTR user_pre_init(void) {
   if (!system_partition_table_regist(partition_table, sizeof(partition_table) / sizeof(partition_table[0]),
                                      SPI_FLASH_SIZE_MAP)) {
-    os_printf("system_partition_table_regist fail\r\n");
-    while (1)
-      ;
+
+    if (SPI_FLASH_SIZE_MAP != 0) {
+      os_printf("system_partition_table_regist fail\r\n");
+      while (1)
+        ;
+    } else {
+      os_printf("512Kb flash configured, ignoring system_partition_table_regist fail error.");
+    }
   }
 }
 

@@ -47,7 +47,7 @@ ifeq ($(OS),Darwin)
 	FINDARGS = -E . -type f  -iregex '.*\.(html|css|js)'
 else
 	FINDARGS = . -type f -regex ".*/.*\.\(html\|css\|js\)"
-	STATARGS = -c %z	
+	STATARGS = -c %s	
 endif
 
 ifeq ("$(FLASH_SIZE)","512KB")

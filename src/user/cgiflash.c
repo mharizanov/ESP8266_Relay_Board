@@ -257,7 +257,7 @@ int ICACHE_FLASH_ATTR cgiUploadEspfs(HttpdConnData *connData) {
 
   // assume no error yet...
   char *err = NULL;
-  int code = 400;
+  int code = 0;
 
   // check overall size
   // os_printf("FW: %d (max %d)\n", connData->post->len, FW_MAX_SIZE);

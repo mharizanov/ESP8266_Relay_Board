@@ -14,6 +14,7 @@ var unit = "&deg;C";
 var statusMsg = false;
 var connected = false;
 var doingsave = false;
+var tid;
 
 var thermostat = {
   room_temp : -9999,
@@ -219,13 +220,20 @@ function update() {
   }
 
   if (thermostat.schedule_mode == 0) {
+    // manual
     $(".thermostatmode").css("background-color", "#555");
     $("#manual_thermostat").css("background-color", "#ff9600");
     $("#scheduled_thermostat").css("background-color", "#555");
-  } else {
+  } else if (thermostat.schedule_mode == 1) {
+    // auto
     $(".thermostatmode").css("background-color", "#555");
     $("#manual_thermostat").css("background-color", "#555");
     $("#scheduled_thermostat").css("background-color", "#ff9600");
+  } else {
+    // override
+    $(".thermostatmode").css("background-color", "#555");
+    $("#manual_thermostat").css("background-color", "#555");
+    $("#scheduled_thermostat").css("background-color", "#af9600");
   }
 
   if (thermostat.opmode == 0) {
@@ -257,29 +265,44 @@ $("#toggle").click(function() {
 });
 
 $("#zone-setpoint-dec").click(function() {
-  $(".thermostatmode").css("background-color", "#555");
-  $("#manual_thermostat").css("background-color", "#ff9600");
-  thermostat.schedule_mode = 0;
+  clearTimeout(tid);
+  if (thermostat.schedule_mode == 1) {
+    alert(thermostat.schedule_mode);
+    // only go into override mode if in automode
+    thermostat.schedule_mode = 2;
+    $(".thermostatmode").css("background-color", "#555");
+    $("#manual_thermostat").css("background-color", "#555");
+  }
+
+  //$(".thermostatmode").css("background-color", "#555");
+  //$("#manual_thermostat").css("background-color", "#555");
   thermostat.manual_setpoint -= 0.5;
   setpoint = thermostat.manual_setpoint;
   $(".zone-setpoint").html(setpoint.toFixed(1) + unit);
-
-  // save("tx/heating",thermostat.enable+","+parseInt(setpoint*100));
-  save("thermostat_schedule_mode", thermostat.schedule_mode.toString());
-  save("thermostat_manual_setpoint", ((thermostat.manual_setpoint.toFixed(1)) * 10).toString());
+  tid = setTimeout(function() {
+    save("thermostat_schedule_mode", (thermostat.schedule_mode).toString());
+    save("thermostat_manual_setpoint", ((thermostat.manual_setpoint.toFixed(1)) * 10).toString());
+  }, 1000);
 });
 
 $("#zone-setpoint-inc").click(function() {
-  $(".thermostatmode").css("background-color", "#555");
-  $("#manual_thermostat").css("background-color", "#ff9600");
-  thermostat.schedule_mode = 0;
+  clearTimeout(tid);
+  if (thermostat.schedule_mode == 1) {
+    // only go into override mode if in automode
+    thermostat.schedule_mode = 2;
+    $(".thermostatmode").css("background-color", "#555");
+    $("#manual_thermostat").css("background-color", "#555");
+  }
+  // $(".thermostatmode").css("background-color", "#555");
+  // $("#manual_thermostat").css("background-color", "#555");
   thermostat.manual_setpoint += 0.5;
   setpoint = thermostat.manual_setpoint;
   $(".zone-setpoint").html(setpoint.toFixed(1) + unit);
 
-  // save("tx/heating",thermostat.enable+","+parseInt(setpoint*100));
-  save("thermostat_schedule_mode", (thermostat.schedule_mode).toString());
-  save("thermostat_manual_setpoint", ((thermostat.manual_setpoint.toFixed(1)) * 10).toString());
+  tid = setTimeout(function() {
+    save("thermostat_schedule_mode", (thermostat.schedule_mode).toString());
+    save("thermostat_manual_setpoint", ((thermostat.manual_setpoint.toFixed(1)) * 10).toString());
+  }, 1000);
 });
 
 // ============================================
@@ -613,6 +636,9 @@ function checkVisibility() {
 }
 
 function save(param, payload) {
+  //  if( doingsave ) {
+  //    return;
+  //}
   doingsave = true;
   $.ajax({
     type : 'POST',

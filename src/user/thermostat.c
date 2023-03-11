@@ -21,6 +21,7 @@ time_t thermostatRelayOffTime = 0;
 int thermostat1ScheduleSetPoint = -9999;
 int thermostat1CurrentSetPoint = -9999;
 int thermostatRelayActive = 0;
+static int thermostat1CurrentSched = 0;
 
 static int ICACHE_FLASH_ATTR wd(int year, int month, int day) {
   size_t JND = day + ((153 * (month + 12 * ((14 - month) / 12) - 3) + 2) / 5) +
@@ -38,7 +39,7 @@ int ICACHE_FLASH_ATTR getRoomTemp() {
   // is assigned to thermostat
   if (sysCfg.sensor_dht22_enable && (sysCfg.thermostat1_input == 1 || sysCfg.thermostat1_input == 2)) {
     struct sensor_reading *result = readDHT();
-    if (result->success && (sntp_get_current_timestamp() - result->readingTS > sysCfg.therm_room_temp_timeout_secs)) {
+    if (result->success && (sntp_get_current_timestamp() - result->readingTS < sysCfg.therm_room_temp_timeout_secs)) {
 
       if (sysCfg.thermostat1_input == 2) { // Humidistat
         roomTemp = result->humidity * 100;
@@ -50,7 +51,7 @@ int ICACHE_FLASH_ATTR getRoomTemp() {
     }
   } else if (sysCfg.sensor_ds18b20_enable && sysCfg.thermostat1_input == 0) {
     struct sensor_reading *result = read_ds18b20();
-    if (result->success && (sntp_get_current_timestamp() - result->readingTS > sysCfg.therm_room_temp_timeout_secs)) {
+    if (result->success && (sntp_get_current_timestamp() - result->readingTS < sysCfg.therm_room_temp_timeout_secs)) {
       int SignBit, Whole, Fract;
       roomTemp = result->temperature;
 
@@ -96,6 +97,31 @@ int ICACHE_FLASH_ATTR getRoomTemp() {
   return roomTemp;
 }
 
+int ICACHE_FLASH_ATTR getCurrentSchedule() {
+
+  int currentSched = 0;
+  unsigned long epoch = sntp_get_current_timestamp();
+  int year = get_year(&epoch);
+  int month = get_month(&epoch, year);
+  int day = day = 1 + (epoch / 86400);
+  int dow = wd(year, month, day);
+  epoch = epoch % 86400;
+  unsigned int hour = epoch / 3600;
+  epoch %= 3600;
+  unsigned int min = epoch / 60;
+  int minadj = (min * 100 / 60);
+  int currtime = hour * 100 + minadj;
+
+  for (int sched = 0; sched < 8 && sysCfg.thermostat1_schedule.weekSched[dow].daySched[sched].active == 1; sched++) {
+    if (currtime >= sysCfg.thermostat1_schedule.weekSched[dow].daySched[sched].start &&
+        currtime < sysCfg.thermostat1_schedule.weekSched[dow].daySched[sched].end) {
+      currentSched = sched;
+      os_printf("Thermostat: Current schedule number (%d)\n", currentSched);
+    }
+  }
+
+  return (currentSched);
+}
 void ICACHE_FLASH_ATTR thermostat(int current_t, int setpoint) {
 
   if (current_t < setpoint - sysCfg.thermostat1_hysteresis_low) {
@@ -173,35 +199,26 @@ static void ICACHE_FLASH_ATTR pollThermostatCb(void *arg) {
   int month = get_month(&epoch, year);
   int day = day = 1 + (epoch / 86400);
   int dow = wd(year, month, day);
-  epoch = epoch % 86400;
-  unsigned int hour = epoch / 3600;
-  epoch %= 3600;
-  unsigned int min = epoch / 60;
-  int minadj = (min * 100 / 60);
-  int currtime = hour * 100 + minadj;
 
-  if (sysCfg.thermostat1_enable == 0) {
-    os_printf("Thermostat: Not enabled.\n");
-    // turn relays associated with the thermostat off
-    thermostatRelayOff();
-    thermostat1ScheduleSetPoint = -9999;
-    thermostat1CurrentSetPoint = -9999;
-    return;
-  }
+  static int thermostat1SchedEndOverRide = 0;
 
   int Treading = getRoomTemp();
+
+  thermostat1CurrentSched = getCurrentSchedule();
 
   // Update the thermostat setpoint if in AUTO mode as it is reported via MQTT
   // Failing to do this here means it defaults to -9999 in auto mode if Treading is invalid.
   if (sysCfg.thermostat1_schedule_mode == THERMOSTAT_AUTO) {
-    for (int sched = 0; sched < 8 && sysCfg.thermostat1_schedule.weekSched[dow].daySched[sched].active == 1; sched++) {
-      if (currtime >= sysCfg.thermostat1_schedule.weekSched[dow].daySched[sched].start &&
-          currtime < sysCfg.thermostat1_schedule.weekSched[dow].daySched[sched].end) {
 
-        thermostat1ScheduleSetPoint = sysCfg.thermostat1_schedule.weekSched[dow].daySched[sched].setpoint;
-        os_printf("Thermostat: Current schedule (%d) setpoint is: %d\n", sched,
-                  sysCfg.thermostat1_schedule.weekSched[dow].daySched[sched].setpoint);
-      }
+    thermostat1SchedEndOverRide = thermostat1CurrentSched + 1;
+    thermostat1ScheduleSetPoint = sysCfg.thermostat1_schedule.weekSched[dow].daySched[thermostat1CurrentSched].setpoint;
+    os_printf("Thermostat: Current schedule (%d) setpoint is: %d\n", thermostat1CurrentSched,
+              sysCfg.thermostat1_schedule.weekSched[dow].daySched[thermostat1CurrentSched].setpoint);
+
+  } else if (sysCfg.thermostat1_schedule_mode == THERMOSTAT_OVERRIDE) {
+    // Manual override, reset to automode in next schedule period
+    if (thermostat1SchedEndOverRide == thermostat1CurrentSched) {
+      sysCfg.thermostat1_schedule_mode = THERMOSTAT_AUTO;
     }
   }
 
@@ -214,7 +231,8 @@ static void ICACHE_FLASH_ATTR pollThermostatCb(void *arg) {
     return;
   }
 
-  if (sysCfg.thermostat1_schedule_mode == THERMOSTAT_MANUAL) {
+  if (sysCfg.thermostat1_schedule_mode == THERMOSTAT_MANUAL ||
+      sysCfg.thermostat1_schedule_mode == THERMOSTAT_OVERRIDE) {
     thermostat(Treading, (int)sysCfg.thermostat1_manual_setpoint);
     thermostat1CurrentSetPoint = (int)sysCfg.thermostat1_manual_setpoint;
     return;

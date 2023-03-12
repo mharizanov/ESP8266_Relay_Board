@@ -54,12 +54,8 @@ int ICACHE_FLASH_ATTR cgiThermostat(HttpdConnData *connData) {
   char humi[32];
   // char therm_room_temp[8];
 
+  int err = 0;
   int len = 0;
-
-  httpdStartResponse(connData, 200);
-  httpdHeader(connData, "Content-Type", "application/json");
-  httpdHeader(connData, "Access-Control-Allow-Origin", "*");
-  httpdEndHeaders(connData);
 
   if (connData->conn == NULL) {
     // Connection aborted. Clean up.
@@ -175,23 +171,23 @@ int ICACHE_FLASH_ATTR cgiThermostat(HttpdConnData *connData) {
       char *days[7] = {"mon", "tue", "wed", "thu", "fri", "sat", "sun"};
       if (connData->post->len > 0) {
         os_printf("Handle thermostat schedule save\n");
+        // os_printf("%s, %d\n", connData->post->buff, connData->post->len);
 
         int r;
         jsmn_parser p;
-        jsmntok_t t[64]; /* We expect no more than 64 tokens per day*/
-
+        jsmntok_t t[64]; // We expect no more than 64 tokens per day
         jsmn_init(&p);
         r = jsmn_parse(&p, connData->post->buff, strlen(connData->post->buff), t, sizeof(t) / sizeof(t[0]));
 
         if (r < 0) {
           os_printf("Failed to parse JSON: %d\n", r);
-          return HTTPD_CGI_DONE;
+          err = 1;
         }
 
-        /* Assume the top-level element is an object */
+        // Assume the top-level element is an object
         if (r < 1 || t[0].type != JSMN_OBJECT) {
           os_printf("Object expected\n");
-          return HTTPD_CGI_DONE;
+          err = 1;
         }
 
         buff[0] = 0x0;
@@ -204,42 +200,43 @@ int ICACHE_FLASH_ATTR cgiThermostat(HttpdConnData *connData) {
 
         if (found < 0) {
           os_printf("Could not find day schedule in JSON\n");
-          return HTTPD_CGI_DONE;
+          err = 1;
         }
+        if (!err) {
+          os_printf("Schedule for %s found\n", days[found]);
 
-        os_printf("Schedule for %s found\n", days[found]);
+          int sched = 0;
+          for (int i = 3; i < r && sched < 8; i += 7) { // skip the day and day array strings
 
-        int sched = 0;
-        for (int i = 3; i < r && sched < 8; i += 7) { // skip the day and day array strings
+            // Number of tokens will be 1 for the day+1 for the day data + (number of schedules * 7 tokens in aschedule
+            // element (one for the schedule itself then 6 tokens for start:val,end:val,setpoint:val)
 
-          // Number of tokens will be 1 for the day+1 for the day data + (number of schedules * 7 tokens in a schedule
-          // element (one for the schedule itself then 6 tokens for start:val,end:val,setpoint:val)
+            os_memcpy(temp, connData->post->buff + t[i + 2].start, t[i + 2].end - t[i + 2].start);
+            temp[t[i + 2].end - t[i + 2].start] = 0x0;
+            os_sprintf(buff + strlen(buff), "Start = %s\n", temp);
+            sysCfg.thermostat1_schedule.weekSched[found].daySched[sched].start = atoi(temp);
 
-          os_memcpy(temp, connData->post->buff + t[i + 2].start, t[i + 2].end - t[i + 2].start);
-          temp[t[i + 2].end - t[i + 2].start] = 0x0;
-          os_sprintf(buff + strlen(buff), "Start = %s\n", temp);
-          sysCfg.thermostat1_schedule.weekSched[found].daySched[sched].start = atoi(temp);
+            os_memcpy(temp, connData->post->buff + t[i + 4].start, t[i + 4].end - t[i + 4].start);
+            temp[t[i + 4].end - t[i + 4].start] = 0x0;
+            os_sprintf(buff + strlen(buff), "End = %s\n", temp);
+            sysCfg.thermostat1_schedule.weekSched[found].daySched[sched].end = atoi(temp);
 
-          os_memcpy(temp, connData->post->buff + t[i + 4].start, t[i + 4].end - t[i + 4].start);
-          temp[t[i + 4].end - t[i + 4].start] = 0x0;
-          os_sprintf(buff + strlen(buff), "End = %s\n", temp);
-          sysCfg.thermostat1_schedule.weekSched[found].daySched[sched].end = atoi(temp);
+            os_memcpy(temp, connData->post->buff + t[i + 6].start, t[i + 6].end - t[i + 6].start);
+            temp[t[i + 6].end - t[i + 6].start] = 0x0;
+            os_sprintf(buff + strlen(buff), "Setpoint = %s\n", temp);
+            sysCfg.thermostat1_schedule.weekSched[found].daySched[sched].setpoint = atoi(temp);
 
-          os_memcpy(temp, connData->post->buff + t[i + 6].start, t[i + 6].end - t[i + 6].start);
-          temp[t[i + 6].end - t[i + 6].start] = 0x0;
-          os_sprintf(buff + strlen(buff), "Setpoint = %s\n", temp);
-          sysCfg.thermostat1_schedule.weekSched[found].daySched[sched].setpoint = atoi(temp);
+            sysCfg.thermostat1_schedule.weekSched[found].daySched[sched].active = 1;
 
-          sysCfg.thermostat1_schedule.weekSched[found].daySched[sched].active = 1;
+            sched++;
+          }
+          if (sched < 8)
+            sysCfg.thermostat1_schedule.weekSched[found].daySched[sched].active =
+                0; // mark the next schedule as inactive
 
-          sched++;
+          os_printf(buff);
+          CFG_Save();
         }
-        if (sched < 8)
-          sysCfg.thermostat1_schedule.weekSched[found].daySched[sched].active = 0; // mark the next schedule as inactive
-
-        os_printf(buff);
-        CFG_Save();
-
       } else {
         // Build schedule JSON from the config structure. Keeping the JSON string in memory is quite heavy on the
         // RAM/heap, so we re-construct it
@@ -262,6 +259,21 @@ int ICACHE_FLASH_ATTR cgiThermostat(HttpdConnData *connData) {
     }
   }
 
-  httpdSend(connData, buff, -1);
+  if (err) {
+    httpdStartResponse(connData, 400);
+    httpdHeader(connData, "Content-Type", "text/plain");
+    httpdEndHeaders(connData);
+    httpdSend(connData, "Schedule Upload Failed", -1);
+    httpdSend(connData, "\r\n", -1);
+    connData->cgiPrivData = (void *)1;
+
+  } else {
+    httpdStartResponse(connData, 200);
+    httpdHeader(connData, "Content-Type", "application/json");
+    httpdHeader(connData, "Access-Control-Allow-Origin", "*");
+    httpdEndHeaders(connData);
+    httpdSend(connData, buff, -1);
+  }
+
   return HTTPD_CGI_DONE;
 }

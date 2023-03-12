@@ -91,6 +91,7 @@ update();
 updateclock();
 setInterval(server_get, 5000);
 setInterval(updateclock, 1000);
+$("#upload_sched").click(uploadSchedule);
 
 function updateclock() {
 
@@ -753,4 +754,38 @@ function server_get2(param) {
     });
   }
   return output;
+}
+
+function uploadSchedule() {
+
+  var sched_data = document.getElementById('sched_file').files[0];
+
+  $.ajax({
+    type : "POST",
+    url : "../control/thermostat.cgi?param=thermostat_schedule",
+    data : sched_data,
+    processData : false, // tell jQuery not to process the data
+    dataType : "text",
+    contentType : "application/x-www-form-urlencoded",
+    success : function() {
+      setTimeout(function() { window.location.reload() }, 2000);
+      setStatus("Schedule has been successfully uploaded.", 2, 0);
+    },
+    error : function(xhr, textStatus, errorThrown) {
+      setStatus("Schedule not uploaded - Upload one day at a time.", 0, 1);
+      if (textStatus == 'timeout') {
+        this.tryCount++;
+        if (this.tryCount <= this.retryLimit) {
+          // try again
+          $.ajax(this);
+          return;
+        }
+        return;
+      }
+      if (connected)
+        setStatus("No connection to server!", 0, 1);
+      connected = false;
+    }
+
+  });
 }

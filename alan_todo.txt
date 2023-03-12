@@ -69,5 +69,6 @@ Added schedule override mode
 
 Added syslog server
 
+Made thermostat name configurable and page title to be thermostat name
 
-Make thermostat name configurable and page title to be thermostat name
+Made thermostat schedule downloadable

@@ -68,8 +68,16 @@
             <button id="mode-move" class="btn-small btn-right editmode">Move</button>
         </div>
         <p style="display:none">Average schedule temperature: <span id="average_temperature"></span>&deg;C</p>
-        <p style="display:none">Schedule JSON: <span class="schedule_json"></span>
+        <p>
+            <span class="schedule_json">
+           <form method="post" action="../control/thermostat.cgi?param=thermostat_schedule">
+            Schedule
 
+            <a href="../control/thermostat.cgi?param=thermostat_schedule" download="schedule.json"><input type="button" value="Download"></a><input id="upload_sched" type="button" value="Upload"/>
+             <input type="file" id="sched_file" value="upload"/>
+                </form>
+            
+            </span>
         </p>
 
     </div>

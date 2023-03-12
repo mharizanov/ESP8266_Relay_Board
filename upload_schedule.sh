@@ -1,4 +1,4 @@
-curl 'http://heating.pearson.uk/control/thermostat.cgi?param=thermostat_schedule' \
+curl 'http://192.168.10.239/control/thermostat.cgi?param=thermostat_schedule' \
 	-X 'POST' \
 	-H 'Accept: text/plain, */*; q=0.01' \
 	-H 'Origin: http://heating.pearson.uk' \

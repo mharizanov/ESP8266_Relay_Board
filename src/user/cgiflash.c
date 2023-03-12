@@ -300,7 +300,7 @@ int ICACHE_FLASH_ATTR cgiUploadEspfs(HttpdConnData *connData) {
 
   // erase next flash block if necessary
   if (address % SPI_FLASH_SEC_SIZE == 0) {
-    DBG("Flashing 0x%05x\n", address);
+    // DBG("Flashing 0x%05x\n", address);
     spi_flash_erase_sector(address / SPI_FLASH_SEC_SIZE);
   }
 

@@ -45,18 +45,16 @@ function fetchFlash() {
   // i.e. Flash size > 512Kb
   ajaxReq("GET", "/flash/flash-size", function(resp) {
     if (resp > 1) {
+      ajaxReq("GET", "/flash/next", function(resp) { $("#fw-slot").innerHTML = resp; }, errCb, null);
       $("#fw-upgrade").removeAttribute("hidden");
       $("#fw-form").removeAttribute("hidden");
+
     } else {
       $("#fw-upgrade").setAttribute("hidden", "");
       $("#fw-form").setAttribute("hidden", "")
-      flashSize = resp;
     }
   }, null, null);
 
-  if (flashSize > 1) {
-    ajaxReq("GET", "/flash/next", function(resp) { $("#fw-slot").innerHTML = resp; }, errCb, null);
-  }
   ajaxReq("GET", "/flash/version", function(resp) {
     var v = $("#current-fw");
     if (v != null) {

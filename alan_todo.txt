@@ -3,7 +3,7 @@ ToDo
 Add timeout for userJSON publication (timestamp the serial input)
 Add thermostat manual/auto mode to ui.tpl
 
-Syslog
+Syslog - make IP configurable
 
 Configurable GPIO for relays (via webpage?)
 

@@ -41,7 +41,7 @@
 #include "upgrade.h"
 
 #include "cgiflash.h"
-
+#include "syslog.h"
 //#include "netbios.h"
 //#include "pwm.h"
 //#include "cgipwm.h"

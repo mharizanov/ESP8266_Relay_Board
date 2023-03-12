@@ -14,9 +14,9 @@
 #include "ets_sys.h"
 #include "io.h"
 #include "osapi.h"
+#include "syslog.h"
 #include "uart_hw.h"
 #include <time.h>
-
 // Temperature reading timestamps (used for thermostat if configured)
 int serialTreading = -9999;
 time_t serialTreadingTS;    // timestamp for the reading

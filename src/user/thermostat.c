@@ -1,4 +1,5 @@
 
+#include "thermostat.h"
 #include "config.h"
 #include "dht22.h"
 #include "ds18b20.h"
@@ -11,9 +12,8 @@
 #include "os_type.h"
 #include "osapi.h"
 #include "stdout.h"
+#include "syslog.h"
 #include "time_utils.h"
-
-#include "thermostat.h"
 
 #include <stdlib.h>
 
@@ -22,6 +22,7 @@ int thermostat1ScheduleSetPoint = -9999;
 int thermostat1CurrentSetPoint = -9999;
 int thermostatRelayActive = 0;
 static int thermostat1CurrentSched = 0;
+static int thermostat1OverRideSchedStart = 255;
 
 static int ICACHE_FLASH_ATTR wd(int year, int month, int day) {
   size_t JND = day + ((153 * (month + 12 * ((14 - month) / 12) - 3) + 2) / 5) +
@@ -74,8 +75,8 @@ int ICACHE_FLASH_ATTR getRoomTemp() {
   else if (sysCfg.thermostat1_input == 3) { // Mqtt reading should be degC *10
     if (sntp_get_current_timestamp() - mqttTreadingTS > sysCfg.therm_room_temp_timeout_secs) {
       // mqttTreading too old, invalidate it by setting to -9999
-      os_printf("Thermostat: MQTT temperature reading stale (older than %d minutes)\n",
-                sysCfg.therm_room_temp_timeout_secs / 60);
+      DBG("Thermostat: MQTT temperature reading stale (older than %d minutes)\n",
+          sysCfg.therm_room_temp_timeout_secs / 60);
       mqttTreading = -9999;
     } else {
       roomTemp = mqttTreading; // Treading is tenth of a degree, eg 24.5 = 245
@@ -83,8 +84,8 @@ int ICACHE_FLASH_ATTR getRoomTemp() {
   } else if (sysCfg.thermostat1_input == 4) { // Serial reading should be degC *10
     if (sntp_get_current_timestamp() - serialTreadingTS > sysCfg.therm_room_temp_timeout_secs) {
       // mqttTreading too old, invalidate it by setting to -9999
-      os_printf("Thermostat:  Serial temperature reading stale (older than %d minutes)\n",
-                sysCfg.therm_room_temp_timeout_secs / 60);
+      DBG("Thermostat:  Serial temperature reading stale (older than %d minutes)\n",
+          sysCfg.therm_room_temp_timeout_secs / 60);
       mqttTreading = -9999;
     } else {
       roomTemp = serialTreading;
@@ -116,7 +117,7 @@ int ICACHE_FLASH_ATTR getCurrentSchedule() {
     if (currtime >= sysCfg.thermostat1_schedule.weekSched[dow].daySched[sched].start &&
         currtime < sysCfg.thermostat1_schedule.weekSched[dow].daySched[sched].end) {
       currentSched = sched;
-      os_printf("Thermostat: Current schedule number (%d)\n", currentSched);
+      DBG("Thermostat: Current schedule number (%d)\n", currentSched);
     }
   }
 
@@ -125,13 +126,13 @@ int ICACHE_FLASH_ATTR getCurrentSchedule() {
 void ICACHE_FLASH_ATTR thermostat(int current_t, int setpoint) {
 
   if (current_t < setpoint - sysCfg.thermostat1_hysteresis_low) {
-    os_printf("Thermostat: Current temperature (%d) is below setpoint.\n", current_t);
+    DBG("Thermostat: Current temperature (%d) is below setpoint.\n", current_t);
     if (sysCfg.thermostat1_opmode == THERMOSTAT_HEATING)
       thermostatRelayOn();
     else
       thermostatRelayOff();
   } else if (current_t > setpoint + sysCfg.thermostat1_hysteresis_high) {
-    os_printf("Thermostat: Current temperature (%d) is above setpoint.\n", current_t);
+    DBG("Thermostat: Current temperature (%d) is above setpoint.\n", current_t);
     if (sysCfg.thermostat1_opmode == THERMOSTAT_HEATING)
       thermostatRelayOff();
     else
@@ -162,11 +163,11 @@ void ICACHE_FLASH_ATTR thermostatRelayOn() {
     if (relay1State || relay2State || relay3State) {
       thermostatRelayActive = 1;
     }
-
+    DBG("Thermostat Relays On.\n");
   } else {
     // in rest mode to avoid cycling
     thermostatRelayActive = 2;
-    os_printf("Thermostat: Attempt to turn thermostat relay on during rest period, ignored\n");
+    DBG("Thermostat: Attempt to turn thermostat relay on during rest period, ignored\n");
   }
 }
 
@@ -191,6 +192,7 @@ void ICACHE_FLASH_ATTR thermostatRelayOff() {
   if (!relay1State && !relay2State && !relay3State) {
     thermostatRelayActive = 0;
   }
+  DBG("Thermostat Relays Off.\n");
 }
 
 static void ICACHE_FLASH_ATTR pollThermostatCb(void *arg) {
@@ -200,32 +202,39 @@ static void ICACHE_FLASH_ATTR pollThermostatCb(void *arg) {
   int day = day = 1 + (epoch / 86400);
   int dow = wd(year, month, day);
 
-  static int thermostat1SchedEndOverRide = 0;
-
   int Treading = getRoomTemp();
-
   thermostat1CurrentSched = getCurrentSchedule();
+
+  // Deal with initialisation of thermostat in override mode
+  // Set the schedule number it will return to auto mode
+  if ((thermostat1OverRideSchedStart > 8 && sysCfg.thermostat1_schedule_mode == THERMOSTAT_OVERRIDE) ||
+      sysCfg.thermostat1_schedule_mode == THERMOSTAT_AUTO) {
+    thermostat1OverRideSchedStart = thermostat1CurrentSched;
+  }
 
   // Update the thermostat setpoint if in AUTO mode as it is reported via MQTT
   // Failing to do this here means it defaults to -9999 in auto mode if Treading is invalid.
   if (sysCfg.thermostat1_schedule_mode == THERMOSTAT_AUTO) {
-
-    thermostat1SchedEndOverRide = thermostat1CurrentSched + 1;
     thermostat1ScheduleSetPoint = sysCfg.thermostat1_schedule.weekSched[dow].daySched[thermostat1CurrentSched].setpoint;
-    os_printf("Thermostat: Current schedule (%d) setpoint is: %d\n", thermostat1CurrentSched,
-              sysCfg.thermostat1_schedule.weekSched[dow].daySched[thermostat1CurrentSched].setpoint);
+    DBG("Thermostat: Current schedule (%d) setpoint is: %d\n", thermostat1CurrentSched,
+        sysCfg.thermostat1_schedule.weekSched[dow].daySched[thermostat1CurrentSched].setpoint);
 
   } else if (sysCfg.thermostat1_schedule_mode == THERMOSTAT_OVERRIDE) {
-    // Manual override, reset to automode in next schedule period
-    if (thermostat1SchedEndOverRide == thermostat1CurrentSched) {
+    // Manual override, reset to automode when schedule period changes from
+    // where override was triggered
+    if (thermostat1OverRideSchedStart != thermostat1CurrentSched) {
       sysCfg.thermostat1_schedule_mode = THERMOSTAT_AUTO;
+      DBG("Thermostat Override: Returning to schedule mode.");
     }
+
+    DBG("Thermostat Override: Current Schedule (%d), Start schedule (%d)\n", thermostat1CurrentSched,
+        thermostat1OverRideSchedStart);
   }
 
   if (Treading == -9999 || Treading > 400 || Treading < -200) { // Check for valid reading
     // if reading is > 40C, or < -3C or -9999 (invalid read) treat as invalid
-    os_printf("Thermostat: Invalid temperature reading (%d is not in range -20C to +40C) turning off relay.\n",
-              (int)Treading);
+    DBG("Thermostat: Invalid temperature reading (%d is not in range -20C to +40C) turning off relay.\n",
+        (int)Treading);
     // turn off - do not act on bad data !
     thermostatRelayOff();
     return;
@@ -239,21 +248,27 @@ static void ICACHE_FLASH_ATTR pollThermostatCb(void *arg) {
   } else if (sysCfg.thermostat1_schedule_mode == THERMOSTAT_AUTO) {
     if (year < 2022) {
       // Something is wrong with the NTP time, maybe not enabled?
-      os_printf("Thermostat: NTP time seems incorrect - year is < 2022. \n");
+      DBG("Thermostat: NTP time seems incorrect - year is < 2022. \n");
       return;
     } else {
       thermostat(Treading, (int)thermostat1ScheduleSetPoint);
       thermostat1CurrentSetPoint = (int)thermostat1ScheduleSetPoint;
     }
   } else {
-    os_printf("Thermostat: Unknown Thermostat mode. No action.");
+    DBG("Thermostat: Unknown Thermostat mode. No action.");
     return;
   }
 }
 
 void ICACHE_FLASH_ATTR thermostat_init(uint32_t polltime) {
 
-  os_printf("Thermostat: init; poll interval of %d sec\n", (int)polltime / 1000);
+  DBG("Thermostat: init; poll interval of %d sec\n", (int)polltime / 1000);
+
+  // If we were in override mode and we restarted, clear it and goto auto mode
+  if (sysCfg.thermostat1_schedule_mode == THERMOSTAT_OVERRIDE) {
+    sysCfg.thermostat1_schedule_mode = THERMOSTAT_AUTO;
+    CFG_Save();
+  }
 
   static ETSTimer thermostatTimer;
   os_timer_setfn(&thermostatTimer, pollThermostatCb, NULL);

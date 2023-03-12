@@ -96,7 +96,7 @@ ET_BLANK            ?= 0x3FE000 # where to flash blank.bin to erase wireless set
 endif
 
 
-DEFINES += -DSPI_FLASH_SIZE_MAP=$(ESP_SPI_SIZE) -DCGIFLASH_DBG
+DEFINES += -DSPI_FLASH_SIZE_MAP=$(ESP_SPI_SIZE) -DCGIFLASH_DBG -DSYSLOGDBG
 
 
 # name for the target project
@@ -127,9 +127,9 @@ LIBS		= c gcc phy pp net80211 wpa main lwip crypto airkiss at driver espnow json
 GZIP_COMPRESSION = "yes"
 
 # compiler flags using during compilation of source files
-#	-nostdlib -mlongcalls -mtext-section-literals  -D__ets__ -DICACHE_FLASH 
+		  #-Wno-implicit-function-declaration -nostdlib  -ffunction-sections -fdata-sections -fno-builtin-printf \  
 CFLAGS		= -Os -ggdb -std=c99  -Wpointer-arith -Wundef -Wall -Wl,-EL -fno-inline-functions \
-		  -Wno-implicit-function-declaration -nostdlib  -ffunction-sections -fdata-sections -fno-builtin-printf \
+		  -Wno-implicit-function-declaration -ffunction-sections -fdata-sections -fno-builtin-printf \
 		-mlongcalls -mtext-section-literals  -D__ets__ -DICACHE_FLASH \
 		-Wno-address -Wno-unused-function -Wno-unused-but-set-variable \
 		-DPLATFORMIO=60106 -DESP8266 -DARDUINO_ARCH_ESP8266 -DARDUINO_ESP8266_ESP01 \
@@ -140,7 +140,8 @@ CFLAGS		= -Os -ggdb -std=c99  -Wpointer-arith -Wundef -Wall -Wl,-EL -fno-inline-
 
 
 # linker flags used to generate the main object file
-LDFLAGS		= -nostdlib -Wl,--no-check-sections -u call_user_start -Wl,-static -L$(SDK_EXTRA_LIBS)
+#LDFLAGS		= -nostdlib -Wl,--no-check-sections -u call_user_start -Wl,-static -L$(SDK_EXTRA_LIBS)
+LDFLAGS		=  -Wl,--no-check-sections -u call_user_start -Wl,-static -L$(SDK_EXTRA_LIBS)
 
 # linker script used for the above linkier step
 #LD_SCRIPT	= eagle.app.v6.ld

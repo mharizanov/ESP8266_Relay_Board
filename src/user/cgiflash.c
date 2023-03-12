@@ -35,7 +35,7 @@ static char *ICACHE_FLASH_ATTR check_espfs_header(void *buf) {
   uint32_t *buf32 = buf;
 
 #ifdef CGIFLASH_DBG
-  os_printf("%p: %08X %08X %08X %08X\n", buf, buf32[0], buf32[1], buf32[2], buf32[3]);
+  DBG("%p: %08X %08X %08X %08X\n", buf, buf32[0], buf32[1], buf32[2], buf32[3]);
 #endif
   if (buf32[0] != 0x73665345)
     return "Bad ESPFS header - first bytes are not 0x73665345";

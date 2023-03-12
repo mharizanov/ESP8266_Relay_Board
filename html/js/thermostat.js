@@ -267,7 +267,6 @@ $("#toggle").click(function() {
 $("#zone-setpoint-dec").click(function() {
   clearTimeout(tid);
   if (thermostat.schedule_mode == 1) {
-    alert(thermostat.schedule_mode);
     // only go into override mode if in automode
     thermostat.schedule_mode = 2;
     $(".thermostatmode").css("background-color", "#555");

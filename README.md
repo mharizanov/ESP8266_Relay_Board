@@ -49,8 +49,11 @@ Huge thanks to the https://github.com/jeelabs/esp-link project without whom, I w
 
 The Three Channel WiFi Relay/Thermostat Board is a WiFi connected multi-purpose relay board based on the [ESP8266 SoC], original designed by Martin Harizanov and sold by Open Energy Monitor Store in the UK
 
-This fork of the code is actively maintained (2023), builds cleanly in Platfrom IO and has been rebased against NON-RTOS-SDK 2.2.1.
-You will need the platformIO NON-RTOS-SDK 8266 build framework installed to build. https://docs.platformio.org/en/latest/frameworks/esp8266-nonos-sdk.html
+This fork of the code is actively maintained (2023), builds cleanly and has been rebased against NONOS-SDK 3.0.6.
+Note, this does NOT build in platformIO (PIO does not create user1.bin/user2.bin, and the NONOS-SDK and xtensa frameworks are very outdated).
+You can still use visual studio code, and tell it's build configurations to use native make - this allows build & FOTA from within Visual Code at the press of a button (apple shift B on my mac -chose the build option and watch it build as you would with PIO)
+See the file .vscode/tasks.json for how to do this.
+You will need the NONOS-SDK 8266 build framework installed to build and xtensa as described above under installing the build toolchains.
 
 
 Various enhancements have been made:
@@ -85,7 +88,7 @@ Various enhancements have been made:
 - Add serial userJSON input - JSON can be submitted via serial, is published to MQTT and thermostat.cgi?state to allow easy customisation of webpages to support random serial devices
 - Add manual override mode to thermostat, if setpoint is adjusted while in scheduled mode, go into override mode; setpoint will reset to the next schedule temperature when it comes around
 - Add syslog logging feature for thermostat events
-- Termostat Zone name configurable and thermostat.html page title reflects zone name (useful for multiple thermostats)
+- Thermostat Zone name configurable and thermostat.html page title reflects zone name (useful for multiple thermostats)
 - Able to download full week thermostat schedule in JSON format, upload one day at a time
 
 

@@ -158,6 +158,8 @@ function setStatus(msg, dur, pri) { // show msg on status bar
   }
   $("#statusView").show();
   $("#statusView").html(msg);
+  window.scrollTo(0, 0);
+
   dur = dur * 1000;
   if (dur > 0) {
     statusTimeout = setTimeout(function() {

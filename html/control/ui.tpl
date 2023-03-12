@@ -82,6 +82,10 @@
                     <b>Thermostat</b>
                     <span class="inputvalue" name="thermostat1_enable" id="thermostat_enable">N/A</span>
             </li>
+             <li id="schedule_mode" class="ui-li">
+                    <b>Thermostat Mode</b>
+                    <span class="inputvalue" name="thermostat1_schedule_mode" id="thermostat1_schedule_mode">N/A</span>
+            </li>
             <li id="room_temp_li" class="ui-li">
                     <b>Thermostat Room Temperature</b>
                     <span class="inputvalue" name="thermostat1_room_temperature" id="thermostat1_room_temperature">N/A</span>

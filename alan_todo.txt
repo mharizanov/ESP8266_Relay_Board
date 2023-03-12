@@ -1,7 +1,6 @@
 ToDo
 
 Add timeout for userJSON publication (timestamp the serial input)
-Add thermostat manual/auto mode to ui.tpl
 
 
 Configurable GPIO for relays (via webpage?)
@@ -72,3 +71,5 @@ Added syslog server
 Made thermostat name configurable and page title to be thermostat name
 
 Made thermostat schedule downloadable
+
+Added thermostat manual/auto mode to ui.tpl

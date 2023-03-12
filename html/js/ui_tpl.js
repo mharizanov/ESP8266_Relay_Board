@@ -163,12 +163,14 @@ function therm_update() {
   if (thermostat.enable == 0) {
     var therm_state = "Off";
     $("#thermostat_enable").html("Disabled");
+    $("#schedule_mode").hide();
     $("#room_temp_li").hide();
     $("#set_point_li").hide();
     $("#call_for_heat_li").hide();
 
   } else if (thermostat.enable == 1) {
     $("#thermostat_enable").html("Enabled");
+    $("#schedule_mode").show();
     $("#room_temp_li").show();
     $("#set_point_li").show();
     $("#call_for_heat_li").show();
@@ -193,5 +195,15 @@ function therm_update() {
     $("#thermostat1_on").html("Relay Rest Period");
   } else {
     $("#thermostat1_on").html("Unknown State");
+  }
+
+  if (thermostat.schedule_mode == 0) {
+    $("#thermostat1_schedule_mode").html("Manual");
+  } else if (thermostat.schedule_mode == 1) {
+    $("#thermostat1_schedule_mode").html("Schedule");
+  } else if (thermostat.schedule_mode == 2) {
+    $("#thermostat1_schedule_mode").html("Schedule Override");
+  } else {
+    $("#thermostat1_schedule_mode").html("Unknown Mode");
   }
 }

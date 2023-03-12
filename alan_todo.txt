@@ -1,7 +1,5 @@
 ToDo
 
-Add timeout for userJSON publication (timestamp the serial input)
-
 
 Configurable GPIO for relays (via webpage?)
 
@@ -73,3 +71,5 @@ Made thermostat name configurable and page title to be thermostat name
 Made thermostat schedule downloadable
 
 Added thermostat manual/auto mode to ui.tpl
+
+Add timeout for userJSON MQTT publication (timestamp the serial input)

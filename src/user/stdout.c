@@ -21,6 +21,7 @@
 int serialTreading = -9999;
 time_t serialTreadingTS;    // timestamp for the reading
 char userJSON[USERJSONMAX]; // user defined JSON submitted via serial
+time_t userJSONreadingTS;   // timestamp for JSON
 
 typedef struct {
   uint32 RcvBuffSize;
@@ -95,7 +96,7 @@ LOCAL void uart0_rx_intr_handler(void *para) {
         os_printf("ESP8266 Relay Board Serial Interface\n");
         os_printf("Commands:\n");
         os_printf("serialremotetemp=nn  Set thermostat room temp to nn (tenths of a degree, int only)\n");
-        os_printf("userjson={xxxx}  Submit user defined JSON (max chars %d) which will be output by "
+        os_printf("userJSON={xxxx}  Submit user defined JSON (max chars %d) which will be output by "
                   "thermostat.cgi?state & MQTT\n",
                   USERJSONMAX);
         os_printf("relayX=Y   Set relay X to on(Y=1) or off(Y=0)\n");
@@ -117,7 +118,7 @@ LOCAL void uart0_rx_intr_handler(void *para) {
         }
       }
 
-      if (os_strncmp((const char *)pRxBuff->pRcvMsgBuff, "userjson=", 9) == 0) {
+      if (os_strncmp((const char *)pRxBuff->pRcvMsgBuff, "userJSON=", 9) == 0) {
         int len = strlen((const char *)pRxBuff->pRcvMsgBuff + 9);
 
         if (len > USERJSONMAX) {
@@ -130,6 +131,7 @@ LOCAL void uart0_rx_intr_handler(void *para) {
             os_printf("Bad JSON string, missing ending }\n");
           } else {
             strcpy(userJSON, (const char *)pRxBuff->pRcvMsgBuff + 9);
+            userJSONreadingTS = sntp_get_current_timestamp();
             os_printf("User defined JSON string: %s \r\n", userJSON);
           }
         }

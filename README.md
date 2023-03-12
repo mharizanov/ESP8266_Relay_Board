@@ -82,13 +82,11 @@ Various enhancements have been made:
 - Thermostat colour map gradients configurable from web UI
 - Display all DS18B20 & DHT22 sensor values on new UI overview page
 - Tidy up serial interface - add help and validation of inputs
-- Add serial userjson input - JSON can be submitted via serial, is published to MQTT and thermostat.cgi?state to allow easy customisation of webpages to support random serial devices
+- Add serial userJSON input - JSON can be submitted via serial, is published to MQTT and thermostat.cgi?state to allow easy customisation of webpages to support random serial devices
 - Add manual override mode to thermostat, if setpoint is adjusted while in scheduled mode, go into override mode; setpoint will reset to the next schedule temperature when it comes around
 - Add syslog logging feature for thermostat events
 - Termostat Zone name configurable and thermostat.html page title reflects zone name (useful for multiple thermostats)
-- Able to download thermostat schedule in JSON format, and upload one day at a time
-
-
+- Able to download full week thermostat schedule in JSON format, upload one day at a time
 
 
 

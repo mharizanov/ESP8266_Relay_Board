@@ -167,7 +167,8 @@ static ICACHE_FLASH_ATTR void MQTTbroadcastReading(void *arg) {
   }
 
   // publish userJSON received on serial interface
-  if (strlen((const char *)userJSON) > 3) {
+  if (strlen((const char *)userJSON) > 3 &&
+      (sntp_get_current_timestamp() - userJSONreadingTS < sysCfg.mqtt_keepalive)) {
     os_sprintf(topic, "%s", sysCfg.mqtt_userJSON_pub_topic);
     os_sprintf(payload, "%s", (const char *)userJSON);
 

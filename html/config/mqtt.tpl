@@ -67,7 +67,7 @@ If thermostat is configured to use MQTT as temperature source use this topic.
 <tr><td>State pub topic:</td><td><input type="text" name="mqtt-state-pub-topic" id="mqtt-state-pub-topic" value="%mqtt-state-pub-topic%">     </td>
 <td>System state published to MQTT topic</tr>
 <tr><td>Serial userJSON pub topic:</td><td><input type="text" name="mqtt-userJSON-pub-topic" id="mqtt-userJSON-pub-topic" value="%mqtt-userJSON-pub-topic%">     </td>
-<td>JSON string received via serial interface published to MQTT topic</tr>
+<td>JSON string received via serial interface published to MQTT topic. Must be refreshed more frequently than Keepalive secs above.</tr>
 <tr><td><button type="button" onClick="parent.location='/'">Back</button><input type="submit" name="save" value="Save"></td></tr>
 </table>
 </form>

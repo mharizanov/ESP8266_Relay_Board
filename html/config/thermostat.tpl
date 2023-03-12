@@ -33,8 +33,17 @@
 <tr><td>High temperature colour degrees </td><td><input type="text" name="therm-high-temp-colour-deg" id="therm-high-temp-colour-deg" value="%therm-high-temp-colour-deg%">     </td>
 <td>Thermostat schedule display lowest temp starting point for colour gradient</td></tr>
 
-<td>Thermostat Relay Rest Minutes:</td><td><input type="text" name="therm-relay-rest-min" id="therm-relay-rest-min" value="%therm-relay-rest-min%"/></td>
-<td>To avoid relay cycling, this the minimum OFF period - only applicable to relays configured for thermostat operation.</td>
+<tr><td>Thermostat Relay Rest Minutes:</td><td><input type="text" name="therm-relay-rest-min" id="therm-relay-rest-min" value="%therm-relay-rest-min%"/></td>
+<td>To avoid relay cycling, this the minimum OFF period - only applicable to relays configured for thermostat operation.</td></tr>
+
+<tr><td>Syslog Enable:</td><td><input type="checkbox" name="syslog-enable" id="syslog-enable" %syslog-enable% /></td>
+<td>Enable syslog for thermostat events?</td></tr>
+
+<tr><td>Syslog Host IP:</td><td><input type="text" name="syslog-host" id="syslog-host" value="%syslog-host%"/></td>
+<td>Syslog server IP address for thermostat events.</td></tr>
+
+
+
 </table>
 <br/>
 <button type="button" onClick="parent.location='/'">Back</button>

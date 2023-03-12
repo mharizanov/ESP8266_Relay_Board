@@ -928,6 +928,14 @@ int ICACHE_FLASH_ATTR cgiThermostatSettings(HttpdConnData *connData) {
     sysCfg.therm_relay_rest_min = atoi(buff);
   }
 
+  len = httpdFindArg(connData->post->buff, "syslog-enable", buff, sizeof(buff));
+  sysCfg.syslog_enable = (len > 0) ? 1 : 0;
+
+  len = httpdFindArg(connData->post->buff, "syslog-host", buff, sizeof(buff));
+  if (len > 0) {
+    os_sprintf((char *)sysCfg.syslog_host, buff);
+  }
+
   CFG_Save();
   httpdRedirect(connData, "/");
   return HTTPD_CGI_DONE;
@@ -987,6 +995,14 @@ void ICACHE_FLASH_ATTR tplThermostatSettings(HttpdConnData *connData, char *toke
 
   if (os_strcmp(token, "therm-relay-rest-min") == 0) {
     os_sprintf(buff, "%d", sysCfg.therm_relay_rest_min);
+  }
+
+  if (os_strcmp(token, "syslog-enable") == 0) {
+    os_strcpy(buff, sysCfg.syslog_enable == 1 ? "checked" : "");
+  }
+
+  if (os_strcmp(token, "syslog-host") == 0) {
+    os_sprintf(buff, "%s", sysCfg.syslog_host);
   }
 
   httpdSend(connData, buff, -1);

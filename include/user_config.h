@@ -6,7 +6,7 @@
 #define ICACHE_RAM_ATTR __attribute__((section(".iram0.text")))
 #define ICACHE_RODATA_ATTR __attribute__((section(".irom.text")))
 
-#define CFG_HOLDER 0x00FF0007
+#define CFG_HOLDER 0x00FF0005
 //#define CFG_LOCATION 0x3C     //Working value on old SDK
 #define CFG_LOCATION 0x70 // NONOS-SDK - circa around position 458K in flash
 // 0x7C on 512K flash is where the internal RF data lives - stay away from there(last 16k)
@@ -41,6 +41,8 @@
 #define BROADCASTD_THINGSPEAK_CHANNEL 0
 #define BROADCASTD_RO_APIKEY "**ROAPI**"
 
+#define SYSLOG_ENABLE 0
+#define SYSLOG_HOST "192.168.10.7"
 #define NTP_ENABLE 1
 #define NTP_TZ 1
 

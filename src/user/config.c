@@ -154,6 +154,9 @@ void ICACHE_FLASH_ATTR CFG_Load() {
     sysCfg.broadcastd_thingspeak_channel = BROADCASTD_THINGSPEAK_CHANNEL;
     os_sprintf((char *)sysCfg.broadcastd_ro_apikey, "%s", BROADCASTD_RO_APIKEY);
 
+    sysCfg.syslog_enable = SYSLOG_ENABLE;
+    os_sprintf((char *)sysCfg.syslog_host, "%s", SYSLOG_HOST);
+
     sysCfg.therm_room_temp_timeout_secs = 300; // 5 min timeout to receive temperature via MQTT (if used)
     sysCfg.therm_high_temp_colour_deg = 24;
     sysCfg.therm_low_temp_colour_deg = 10;

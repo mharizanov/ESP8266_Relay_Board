@@ -81,16 +81,21 @@ typedef struct {
 
   uint32_t httpd_port;
   uint32_t httpd_auth;
-  uint32_t broadcastd_enable;
+
+  uint8_t broadcastd_enable;
+  uint8_t syslog_enable;
+
   uint32_t broadcastd_port;
 
   uint8_t broadcastd_host[32];
   uint8_t broadcastd_url[256];
+  uint8_t syslog_host[32];
   uint8_t DST;
+
   uint8_t ntp_enable;
+  int8_t ntp_tz;
 
   uint32_t broadcastd_thingspeak_channel;
-  int32_t ntp_tz;
 
   uint32_t mqtt_enable;
   uint8_t mqtt_host[64];
@@ -111,25 +116,26 @@ typedef struct {
   uint8_t mqtt_userJSON_pub_topic[64];
   uint8_t sensor_ds18b20_enable;
   uint8_t sensor_dht22_enable;
-  uint16_t mqtt_use_ssl;
 
+  uint16_t mqtt_use_ssl;
   uint8_t relay_total;
   uint8_t relay_latching_enable;
+
   uint8_t relay1_state;
   uint8_t relay2_state;
-
   uint8_t relay3_state;
   uint8_t relay1_thermostat;
+
   uint8_t relay2_thermostat;
   uint8_t relay3_thermostat;
-
   uint8_t relay1_name[24];
   uint8_t relay2_name[24];
-  uint8_t relay3_name[24];
 
+  uint8_t relay3_name[24];
   uint8_t relay1_gpio;
   uint8_t relay2_gpio;
   uint8_t relay3_gpio;
+
   uint8_t therm_relay_rest_min;
 
   uint16_t therm_low_temp_colour_deg;

@@ -898,6 +898,11 @@ int ICACHE_FLASH_ATTR cgiThermostatSettings(HttpdConnData *connData) {
     sysCfg.thermostat1_input = atoi(buff);
   }
 
+  len = httpdFindArg(connData->post->buff, "therm1-zone-name", buff, sizeof(buff));
+  if (len > 0) {
+    os_sprintf((char *)sysCfg.thermostat1_zone_name, buff);
+  }
+
   len = httpdFindArg(connData->post->buff, "therm1-hysteresis-high", buff, sizeof(buff));
   if (len > 0) {
     sysCfg.thermostat1_hysteresis_high = atoi(buff);
@@ -971,6 +976,10 @@ void ICACHE_FLASH_ATTR tplThermostatSettings(HttpdConnData *connData, char *toke
 
   if (os_strcmp(token, "selected-fixed") == 0) {
     os_strcpy(buff, sysCfg.thermostat1_input == 5 ? "selected" : "");
+  }
+
+  if (os_strcmp(token, "therm1-zone-name") == 0) {
+    os_sprintf(buff, "%s", sysCfg.thermostat1_zone_name);
   }
 
   if (os_strcmp(token, "therm1-hysteresis-high") == 0) {

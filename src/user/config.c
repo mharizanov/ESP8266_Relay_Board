@@ -157,6 +157,8 @@ void ICACHE_FLASH_ATTR CFG_Load() {
     sysCfg.syslog_enable = SYSLOG_ENABLE;
     os_sprintf((char *)sysCfg.syslog_host, "%s", SYSLOG_HOST);
 
+    os_sprintf((char *)sysCfg.thermostat1_zone_name, "%s", THERM1_ZONE_NAME);
+
     sysCfg.therm_room_temp_timeout_secs = 300; // 5 min timeout to receive temperature via MQTT (if used)
     sysCfg.therm_high_temp_colour_deg = 24;
     sysCfg.therm_low_temp_colour_deg = 10;

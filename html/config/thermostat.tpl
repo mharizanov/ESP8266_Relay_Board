@@ -20,7 +20,11 @@
   <option value="3" %selected-mqtt% >MQTT</option>
   <option value="4" %selected-serial% >Serial input</option>  
   <option value="5" %selected-fixed% >Fixed value (10)</option>    
-</select><td> </td>
+</select><td> </td></tr>
+
+<tr><td>Zone Name:</td><td><input type="text" name="therm1-zone-name" id="therm1-zone-name" value="%therm1-zone-name%"/></td>
+<td>Thermostat Zone name for display purposes.</td></tr>
+
 <tr><td>Thermostat hysteresis high:</td><td><input type="text" name="therm1-hysteresis-high" id="therm1-hysteresis-high" value="%therm1-hysteresis-high%" /> </td><td>(in tenths of a degree, 5 means 0.5 degrees)</td></tr>
 <tr><td>Thermostat hysteresis low:</td><td><input type="text" name="therm1-hysteresis-low" id="therm1-hysteresis-low" value="%therm1-hysteresis-low%" /> </td><td>(in tenths of a degree, 5 means 0.5 degrees)</td></tr>
 

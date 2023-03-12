@@ -3,7 +3,6 @@ ToDo
 Add timeout for userJSON publication (timestamp the serial input)
 Add thermostat manual/auto mode to ui.tpl
 
-Syslog - make IP configurable
 
 Configurable GPIO for relays (via webpage?)
 
@@ -66,3 +65,9 @@ Added schedule override mode
 
 	user_params parameter added to main CGI to return them as JSON
 	publish them to MQTT ?
+
+
+Added syslog server
+
+
+Make thermostat name configurable and page title to be thermostat name

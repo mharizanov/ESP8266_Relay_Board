@@ -21,7 +21,7 @@ var thermostat = {
   humidity : "50",
   humidistat : 0,
   thermostat_relay_active : 0,
-  relay1name : "Zone Name",
+  zone_name : "Zone Name",
   opmode : 0,
   enable : 0,
   manual_setpoint : 21,
@@ -169,7 +169,7 @@ function setStatus(msg, dur, pri) { // show msg on status bar
 
 function update() {
 
-  $(".zone-title").html(thermostat.relay1name);
+  $(".zone-title").html(thermostat.zone_name);
 
   if (!isNaN((Number(thermostat.humidity)).toFixed(1)))
     $('.humidity').show();
@@ -245,6 +245,7 @@ function update() {
     $("#heating_thermostat").css("background-color", "#555");
     $("#cooling_thermostat").css("background-color", "#0000c0");
   }
+  document.title = thermostat.zone_name;
 }
 
 $("#toggle").click(function() {

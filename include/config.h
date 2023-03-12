@@ -136,9 +136,10 @@ typedef struct {
   uint8_t relay2_gpio;
   uint8_t relay3_gpio;
 
+  uint8_t thermostat1_zone_name[24];
   uint8_t therm_relay_rest_min;
-
   uint16_t therm_low_temp_colour_deg;
+
   uint16_t therm_high_temp_colour_deg;
 
   uint32_t therm_room_temp_timeout_secs;

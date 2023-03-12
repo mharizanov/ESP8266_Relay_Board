@@ -6,11 +6,11 @@
 #define ICACHE_RAM_ATTR __attribute__((section(".iram0.text")))
 #define ICACHE_RODATA_ATTR __attribute__((section(".irom.text")))
 
-#define CFG_HOLDER 0x00FF0005
+#define CFG_HOLDER 0x00FF0006
 //#define CFG_LOCATION 0x3C     //Working value on old SDK
 #define CFG_LOCATION 0x70 // NONOS-SDK - circa around position 458K in flash
 // 0x7C on 512K flash is where the internal RF data lives - stay away from there(last 16k)
-#define FWVER "1.4/March 7th 2023"
+#define FWVER "1.4b/March 12th 2023"
 
 /*DEFAULT CONFIGURATIONS*/
 
@@ -79,5 +79,7 @@
 #define MQTT_BUF_SIZE 255
 #define MQTT_RECONNECT_TIMEOUT 5 /*second*/
 #define MQTT_CONNTECT_TIMER 5    /**/
+
+#define THERM1_ZONE_NAME "Zone 1"
 
 #endif

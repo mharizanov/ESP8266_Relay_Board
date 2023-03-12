@@ -78,15 +78,15 @@ int ICACHE_FLASH_ATTR cgiThermostat(HttpdConnData *connData) {
       os_sprintf(
           buff,
           "{ \"room_temp\": %d,\n\"humidity\":\"%s\",\n"
-          "\"humidistat\":%d,\n\"thermostat_relay_active\":%d,\n\"relay1name\":\"%s\",\n\"opmode\":%d,\n\""
+          "\"humidistat\":%d,\n\"thermostat_relay_active\":%d,\n\"zone_name\":\"%s\",\n\"opmode\":%d,\n\""
           "enable\":%d,\n\"manual_setpoint\":%d,\n\"current_setpoint\":%d,\n\"thermostat1_input\":%d,\n\"schedule_"
           "mode\": %d,\n\"therm_high_temp_colour_deg\":%d,\n\"therm_low_temp_colour_deg\":%d,\n"
           "\"mqtthost\": \"%s\",\n\"time\": \"%d\"",
-          roomTemp, humi, (int)sysCfg.thermostat1_input == 2 ? 1 : 0, thermostatRelayActive, (char *)sysCfg.relay1_name,
-          (int)sysCfg.thermostat1_opmode, (int)sysCfg.thermostat1_enable, (int)sysCfg.thermostat1_manual_setpoint,
-          (int)thermostat1CurrentSetPoint, (int)sysCfg.thermostat1_input, (int)sysCfg.thermostat1_schedule_mode,
-          (int)sysCfg.therm_high_temp_colour_deg, (int)sysCfg.therm_low_temp_colour_deg, (char *)sysCfg.mqtt_host,
-          sntp_get_current_timestamp());
+          roomTemp, humi, (int)sysCfg.thermostat1_input == 2 ? 1 : 0, thermostatRelayActive,
+          (char *)sysCfg.thermostat1_zone_name, (int)sysCfg.thermostat1_opmode, (int)sysCfg.thermostat1_enable,
+          (int)sysCfg.thermostat1_manual_setpoint, (int)thermostat1CurrentSetPoint, (int)sysCfg.thermostat1_input,
+          (int)sysCfg.thermostat1_schedule_mode, (int)sysCfg.therm_high_temp_colour_deg,
+          (int)sysCfg.therm_low_temp_colour_deg, (char *)sysCfg.mqtt_host, sntp_get_current_timestamp());
 
       if (strlen((const char *)userJSON) > 3) {
         strcat(buff, ",\n");

@@ -110,25 +110,27 @@ int ICACHE_FLASH_ATTR getCurrentSchedule() {
     if (currtime >= sysCfg.thermostat1_schedule.weekSched[dow].daySched[sched].start &&
         currtime < sysCfg.thermostat1_schedule.weekSched[dow].daySched[sched].end) {
       currentSched = sched;
-      DBG("Thermostat: Current schedule number (%d)\n", currentSched);
+      // DBG("Thermostat: Current schedule number (%d)\n", currentSched);
     }
   }
-
   return (currentSched);
 }
+
 void ICACHE_FLASH_ATTR thermostat(int current_t, int setpoint) {
 
   if (current_t < setpoint - sysCfg.thermostat1_hysteresis_low) {
-    DBG("Thermostat: Current temperature (%d) is below setpoint.\n", current_t);
-    if (sysCfg.thermostat1_opmode == THERMOSTAT_HEATING)
+    DBG("Thermostat: Room temperature (%d) < setpoint (%d), relayState(%d).\n", current_t, setpoint,
+        thermostatRelayActive);
+    if (sysCfg.thermostat1_opmode == THERMOSTAT_HEATING && !thermostatRelayActive)
       thermostatRelayOn();
-    else
+    else if (sysCfg.thermostat1_opmode != THERMOSTAT_HEATING && thermostatRelayActive)
       thermostatRelayOff();
   } else if (current_t > setpoint + sysCfg.thermostat1_hysteresis_high) {
-    DBG("Thermostat: Current temperature (%d) is above setpoint.\n", current_t);
-    if (sysCfg.thermostat1_opmode == THERMOSTAT_HEATING)
+    DBG("Thermostat: Room temperature (%d) > setpoint (%d), relayState (%d).\n", current_t, setpoint,
+        thermostatRelayActive);
+    if (sysCfg.thermostat1_opmode == THERMOSTAT_HEATING && thermostatRelayActive)
       thermostatRelayOff();
-    else
+    else if (sysCfg.thermostat1_opmode != THERMOSTAT_HEATING && !thermostatRelayActive)
       thermostatRelayOn();
   }
 }
@@ -138,7 +140,9 @@ void ICACHE_FLASH_ATTR thermostatRelayOn() {
   // after it has been off for sysConfig.therm_relay_rest_min
   // do not use relayOnOff as it is protected against relay activations
   // for thermostat relays that are not thermostat initiatiated
-  if (sntp_get_current_timestamp() > thermostatRelayOffTime + (sysCfg.therm_relay_rest_min * 60)) {
+  unsigned long restTimeEnd = thermostatRelayOffTime + (sysCfg.therm_relay_rest_min * 60);
+
+  if (sntp_get_current_timestamp() > restTimeEnd) {
 
     if (sysCfg.relay1_thermostat == 1) {
       relay1State = 1;
@@ -155,12 +159,12 @@ void ICACHE_FLASH_ATTR thermostatRelayOn() {
 
     if (relay1State || relay2State || relay3State) {
       thermostatRelayActive = 1;
+      DBG("Thermostat Relays On.\n");
     }
-    DBG("Thermostat Relays On.\n");
   } else {
     // in rest mode to avoid cycling
     thermostatRelayActive = 2;
-    DBG("Thermostat: Attempt to turn thermostat relay on during rest period, ignored\n");
+    DBG("Thermostat: Attempt to turn relays on during rest period, ignored (ends:%s).\n", epoch_to_str(restTimeEnd));
   }
 }
 
@@ -184,8 +188,8 @@ void ICACHE_FLASH_ATTR thermostatRelayOff() {
 
   if (!relay1State && !relay2State && !relay3State) {
     thermostatRelayActive = 0;
+    DBG("Thermostat Relays Off.\n");
   }
-  DBG("Thermostat Relays Off.\n");
 }
 
 static void ICACHE_FLASH_ATTR pollThermostatCb(void *arg) {
@@ -209,8 +213,8 @@ static void ICACHE_FLASH_ATTR pollThermostatCb(void *arg) {
   // Failing to do this here means it defaults to -9999 in auto mode if Treading is invalid.
   if (sysCfg.thermostat1_schedule_mode == THERMOSTAT_AUTO) {
     thermostat1ScheduleSetPoint = sysCfg.thermostat1_schedule.weekSched[dow].daySched[thermostat1CurrentSched].setpoint;
-    DBG("Thermostat: Current schedule (%d) setpoint is: %d\n", thermostat1CurrentSched,
-        sysCfg.thermostat1_schedule.weekSched[dow].daySched[thermostat1CurrentSched].setpoint);
+    // DBG("Thermostat: Current schedule (%d) setpoint is: %d\n", thermostat1CurrentSched,
+    //     sysCfg.thermostat1_schedule.weekSched[dow].daySched[thermostat1CurrentSched].setpoint);
 
   } else if (sysCfg.thermostat1_schedule_mode == THERMOSTAT_OVERRIDE) {
     // Manual override, reset to automode when schedule period changes from
@@ -226,7 +230,7 @@ static void ICACHE_FLASH_ATTR pollThermostatCb(void *arg) {
 
   if (Treading == -9999 || Treading > 400 || Treading < -200) { // Check for valid reading
     // if reading is > 40C, or < -3C or -9999 (invalid read) treat as invalid
-    DBG("Thermostat: Invalid temperature reading (%d is not in range -20C to +40C) turning off relay.\n",
+    DBG("Thermostat: Invalid temperature reading (%d is not in range -20C to +40C) turning off relays.\n",
         (int)Treading);
     // turn off - do not act on bad data !
     thermostatRelayOff();

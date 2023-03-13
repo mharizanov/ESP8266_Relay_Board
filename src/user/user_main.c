@@ -336,12 +336,6 @@ void ICACHE_FLASH_ATTR user_init(void) {
   if (sysCfg.ntp_enable == 1) {
     sntp_setservername(0, "pool.ntp.org");
     sntp_set_timezone(sysCfg.ntp_tz);
-    /*
-        if (sysCfg.DST == 1 || sysCfg.DST == 2) {
-          // If we are configured for DST, check every 30 seconds.
-          dst_check_init(30000);
-        }
-    */
     sntp_init();
   }
 

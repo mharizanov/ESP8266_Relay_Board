@@ -121,7 +121,6 @@ uint64 get_current_timestamp_dst() {
     if (IsDST_EU(day, month, dow)) {
       return (sntp_get_current_timestamp() + 3600);
     } else {
-      os_printf("Not in DST\n");
       return (sntp_get_current_timestamp());
     }
   } else if (sysCfg.DST == 2) {

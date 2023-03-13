@@ -71,7 +71,7 @@ static ICACHE_FLASH_ATTR void MQTTbroadcastReading(void *arg) {
   char therm_room_temp[8];
   char topic[64];
   char currentThermSetPoint[8] = "-9999";
-  char payload[240];
+  char payload[300];
 
   if (sysCfg.mqtt_enable == 1) {
     // os_printf("Sending MQTT\n");
@@ -159,7 +159,7 @@ static ICACHE_FLASH_ATTR void MQTTbroadcastReading(void *arg) {
                "\"roomTemp\":\"%s\",\n\"autoMode\": %d\n"
                "}\n",
                ds_temp, dht_temp, dht_humi, (int)sysCfg.thermostat1_input == 2 ? 1 : 0, relay1State, relay2State,
-               relay3State, thermostatRelayActive, (int)sysCfg.thermostat1_opmode, (int)sysCfg.thermostat1_enable,
+               relay3State, (int)thermostatRelayActive, (int)sysCfg.thermostat1_opmode, (int)sysCfg.thermostat1_enable,
                (int)currentThermSetPoint, (char *)therm_room_temp, (int)sysCfg.thermostat1_schedule_mode);
 
     os_sprintf(topic, "%s", sysCfg.mqtt_state_pub_topic);

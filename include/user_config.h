@@ -76,7 +76,7 @@
 #define RELAY2GPIO 13
 #define RELAY3GPIO 15
 
-#define MQTT_BUF_SIZE 255
+#define MQTT_BUF_SIZE 300
 #define MQTT_RECONNECT_TIMEOUT 5 /*second*/
 #define MQTT_CONNTECT_TIMER 5    /**/
 

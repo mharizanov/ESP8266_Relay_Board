@@ -684,7 +684,7 @@ void ICACHE_FLASH_ATTR tplNTP(HttpdConnData *connData, char *token, void **arg) 
 
   if (os_strcmp(token, "NTP") == 0) {
     // os_sprintf(buff, "Time: %s GMT%s%02d\n", epoch_to_str(sntp_time), sntp_tz > 0 ? "+" : "", sntp_tz);
-    os_sprintf(buff, "Time: %s \n", epoch_to_str(sntp_get_current_timestamp()));
+    os_sprintf(buff, "Time: %s \n", epoch_to_str(get_current_timestamp_dst()));
   }
 
   httpdSend(connData, buff, -1);

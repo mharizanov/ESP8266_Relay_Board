@@ -2,6 +2,7 @@
 #include "c_types.h"
 #include "config.h"
 #include "espmissingincludes.h"
+#include "lwip/sntp.h"
 #include "osapi.h"
 
 #define IS_LEAP(year) (year % 4 == 0)
@@ -23,6 +24,13 @@ int ICACHE_FLASH_ATTR get_year(unsigned long *t) {
     year++;
   }
   return year;
+}
+
+int ICACHE_FLASH_ATTR wd(int year, int month, int day) {
+  size_t JND = day + ((153 * (month + 12 * ((14 - month) / 12) - 3) + 2) / 5) +
+               (365 * (year + 4800 - ((14 - month) / 12))) + ((year + 4800 - ((14 - month) / 12)) / 4) -
+               ((year + 4800 - ((14 - month) / 12)) / 100) + ((year + 4800 - ((14 - month) / 12)) / 400) - 32045;
+  return (int)JND % 7;
 }
 
 int ICACHE_FLASH_ATTR get_month(unsigned long *t, int year) {
@@ -94,30 +102,35 @@ bool IsDST_NA(int day, int month, int dow) {
   return previousSunday <= 1;
 }
 
-static void ICACHE_FLASH_ATTR dst_set(void *arg) {
+uint64 get_current_timestamp_dst() {
+  // Return timestamp with DST adjustment
+
+  unsigned long epoch = sntp_get_current_timestamp();
+
+  // both get_year and get_month appear to manipulate epoch,
+  // so don't use the epoch variable after they have been called.
+  int year = get_year(&epoch);
+  int month = get_month(&epoch, year);
+  int day = day = 1 + (epoch / 86400);
+  int dow = wd(year, month, day);
+
+  // os_printf("sntp : %d, %s \n", epoch, sntp_get_real_time(epoch));
 
   if (sysCfg.DST == 1) {
     // Europe DST
-    if (IsDST_EU) {
-      sntp_set_timezone(sysCfg.ntp_tz + 1);
+    if (IsDST_EU(day, month, dow)) {
+      return (sntp_get_current_timestamp() + 3600);
     } else {
-      sntp_set_timezone(sysCfg.ntp_tz);
+      os_printf("Not in DST\n");
+      return (sntp_get_current_timestamp());
     }
   } else if (sysCfg.DST == 2) {
     // US DST
-    if (IsDST_NA) {
-      sntp_set_timezone(sysCfg.ntp_tz + 1);
+    if (IsDST_NA(day, month, dow)) {
+      return (sntp_get_current_timestamp() + 3600);
     } else {
-      sntp_set_timezone(sysCfg.ntp_tz);
+      return (sntp_get_current_timestamp());
     }
   }
-}
-
-void ICACHE_FLASH_ATTR dst_check_init(uint32_t polltime) {
-
-  os_printf("dst_check_init: poll interval of %d sec\n", (int)polltime / 1000);
-
-  static ETSTimer dstCheckTimer;
-  os_timer_setfn(&dstCheckTimer, dst_set, NULL);
-  os_timer_arm(&dstCheckTimer, polltime, 1);
+  return (sntp_get_current_timestamp());
 }

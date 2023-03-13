@@ -24,13 +24,6 @@ int thermostatRelayActive = 0;
 static int thermostat1CurrentSched = 0;
 static int thermostat1OverRideSchedStart = 255;
 
-static int ICACHE_FLASH_ATTR wd(int year, int month, int day) {
-  size_t JND = day + ((153 * (month + 12 * ((14 - month) / 12) - 3) + 2) / 5) +
-               (365 * (year + 4800 - ((14 - month) / 12))) + ((year + 4800 - ((14 - month) / 12)) / 4) -
-               ((year + 4800 - ((14 - month) / 12)) / 100) + ((year + 4800 - ((14 - month) / 12)) / 400) - 32045;
-  return (int)JND % 7;
-}
-
 int ICACHE_FLASH_ATTR getRoomTemp() {
   // return the roomTemp for the configured thermostat sensor
 
@@ -101,7 +94,7 @@ int ICACHE_FLASH_ATTR getRoomTemp() {
 int ICACHE_FLASH_ATTR getCurrentSchedule() {
 
   int currentSched = 0;
-  unsigned long epoch = sntp_get_current_timestamp();
+  unsigned long epoch = get_current_timestamp_dst();
   int year = get_year(&epoch);
   int month = get_month(&epoch, year);
   int day = day = 1 + (epoch / 86400);

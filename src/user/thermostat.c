@@ -91,9 +91,19 @@ int ICACHE_FLASH_ATTR getRoomTemp() {
   return roomTemp;
 }
 
+// Figure out when schedule number we are in.
+// For some odd reason minutes in the schedule appear
+// to not be minutes, but instead percentages of an hour;
+// eg time 14:15  would be represented as 1425, 14:30 as 1450
+// and 14:45 as 1475.  Confirmed by exporting schedule into
+// JSON from thermostat.html webpage. BLOWS MY MIND. WHY??
 int ICACHE_FLASH_ATTR getCurrentSchedule() {
 
   int currentSched = 0;
+
+  // all this crazy to get current hh,mm and dayofweek:
+  // note that get_year and get_month screw with &epoch
+  // somehow.. I guess esp8266 doesn't have any date functions.
   unsigned long epoch = get_current_timestamp_dst();
   int year = get_year(&epoch);
   int month = get_month(&epoch, year);
@@ -103,6 +113,9 @@ int ICACHE_FLASH_ATTR getCurrentSchedule() {
   unsigned int hour = epoch / 3600;
   epoch %= 3600;
   unsigned int min = epoch / 60;
+  // crazy date stuff finishes
+
+  // freaky minutes to percentage of hour conversion follows...
   int minadj = (min * 100 / 60);
   int currtime = hour * 100 + minadj;
 
@@ -192,6 +205,8 @@ void ICACHE_FLASH_ATTR thermostatRelayOff() {
   }
 }
 
+// Do some checks and then figure out which mode we are in,
+// call thermostat function with roomtemp and manual or scheduled setpoint
 static void ICACHE_FLASH_ATTR pollThermostatCb(void *arg) {
   unsigned long epoch = sntp_get_current_timestamp();
   int year = get_year(&epoch);

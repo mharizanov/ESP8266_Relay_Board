@@ -68,8 +68,16 @@
             <button id="mode-move" class="btn-small btn-right editmode">Move</button>
         </div>
         <p style="display:none">Average schedule temperature: <span id="average_temperature"></span>&deg;C</p>
-        <p>
-            <span class="schedule_json">
+        <p><input type="button" id="schedule_export" value="Export"/>
+
+        <div id="schedule_json" style="display:none">
+            <hr/>
+            A full weeks schedule can be downloaded as JSON, however uploads support only one day at a time.
+            You should edit the JSON and leave a single day schedule (don't forget open and close '{}' and remove trailing ',').
+            Note, if manually editing the JSON the minute component of the time is NOT real minutes,
+            but a percentage of the hour. Example 14:15 should be 1425, 14:30 = 1450 etc.
+            I beleive this is because of lack of date libraries on the ESP device.
+            <hr/>
            <form method="post" action="../control/thermostat.cgi?param=thermostat_schedule">
             Schedule
 
@@ -77,7 +85,7 @@
              <input type="file" id="sched_file" value="upload"/>
                 </form>
             
-            </span>
+            </div>
         </p>
 
     </div>

@@ -92,6 +92,8 @@ updateclock();
 setInterval(server_get, 5000);
 setInterval(updateclock, 1000);
 $("#upload_sched").click(uploadSchedule);
+$("#schedule_json").hide();
+$("#schedule_export").click(function() { $("#schedule_json").toggle(); });
 
 function updateclock() {
 

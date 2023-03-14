@@ -17,6 +17,11 @@ unsigned char calendar_leap[] = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
 
 unsigned char *get_calendar(int year) { return IS_LEAP(year) ? calendar_leap : calendar; }
 
+// take epoch, cycle through it, subtracting one years worth of
+// seconds at a time, and count the years as you
+// go, until you have less seconds left in epoch
+// than in year. Congrats you iterator is the current year,
+// but epoch is now somewhere in 1970...
 int ICACHE_FLASH_ATTR get_year(unsigned long *t) {
   int year = 1970;
   while (*t > SEC_IN_YEAR(year)) {
@@ -26,6 +31,8 @@ int ICACHE_FLASH_ATTR get_year(unsigned long *t) {
   return year;
 }
 
+// work out day of week. Crazy date math
+// https://cs.uwaterloo.ca/~alopez-o/math-faq/node73.html
 int ICACHE_FLASH_ATTR wd(int year, int month, int day) {
   size_t JND = day + ((153 * (month + 12 * ((14 - month) / 12) - 3) + 2) / 5) +
                (365 * (year + 4800 - ((14 - month) / 12))) + ((year + 4800 - ((14 - month) / 12)) / 4) -
@@ -33,6 +40,9 @@ int ICACHE_FLASH_ATTR wd(int year, int month, int day) {
   return (int)JND % 7;
 }
 
+// see get_year expaination below.
+// Same principle here, except we subtract seconds in a month
+// taking care of leapyears. Iterator is your month
 int ICACHE_FLASH_ATTR get_month(unsigned long *t, int year) {
   unsigned char *cal = get_calendar(year);
   int i = 0;

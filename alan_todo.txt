@@ -1,0 +1,75 @@
+ToDo
+
+
+Configurable GPIO for relays (via webpage?)
+
+
+Done
+Avoid thermostat cycling - timestamp relay activations and set limit 
+	(possibly make dedicated function for relay on/off with TS and check on the ON.. should always be able to turn it off)
+
+Config items for MQTT timeout & thermostat cycling
+
+Display of a bad or stale temperature should update on thermostat.html page  and not keep last reading
+
+Fix bug where thermostat off time is update is it is already off
+
+Change thermostat to work in tenths of a degree, not hundredths
+
+Remove used references to thermostat2 & thermostat3 (commented as may use in future version)
+
+Publish state to MQTT - thermostat (on/off, mode)+ relays 
+
+Publish all ds18b20 sensors to MQTT by device-id
+
+Choose which relays associate to each thermostat
+
+FOTA upgrade now down via webpage push (about.tpl) - thank you #esp-link project
+
+Thermostat timeout for all sources implemented
+
+Move all thermostat config to its own page in the Web GUI
+
+ESPFS webpage upload now available through the Web GUI
+
+Tidy up about.tpl page and only show firmware upgrade options when flash_map > 2 (over 512Kb)
+Disable URLs for flashing firmware if flash_map < 2
+
+Supports DST for Europe and North America (thanks Martin Harizanov for the code template)
+
+Correct relay active for thermostat indicated in MQTT and JSON feeds (instead of relay1 default).
+
+CurrentSetPoint published in state JSONs
+
+Number of relays is now configurable via UI - if relay is not configured, it cannot be actuated via any means.
+	Means code should work on 1-Relay boards and have correct UI and logic
+
+Relays configured as thermostat controlled cannot be actuated via any other means (webpages, IO calls, MQTT)
+
+Main menu updated
+
+UI overview page completed  to show most things and available on main menu (need to do ds18B20 sensors)
+
+Thermostat colour map gradients configurable from web UI
+
+Display all DS18B20 & DHT22 sensor values on new UI overview page
+
+Tidy up serial interface - add help and validation of inputs
+
+Add serial userjson input - JSON can be submitted via serial and is published to MQTT and thermostat.cgi?state to allow easy customisation of webpages to support random serial devices
+
+Added schedule override mode
+
+	user_params parameter added to main CGI to return them as JSON
+	publish them to MQTT ?
+
+
+Added syslog server
+
+Made thermostat name configurable and page title to be thermostat name
+
+Made thermostat schedule downloadable
+
+Added thermostat manual/auto mode to ui.tpl
+
+Add timeout for userJSON MQTT publication (timestamp the serial input)

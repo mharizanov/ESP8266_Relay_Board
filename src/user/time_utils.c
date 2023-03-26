@@ -85,10 +85,10 @@ bool IsDST_EU(int day, int month, int dow) {
   if (month > 3 && month < 10)
     return true;
 
-  int previousSunday = day - dow;
+  int previousSunday = day - (dow+1);
 
   if (month == 3) {
-    return previousSunday <= 25;
+    return previousSunday >= 18;
   }
   if (month == 10)
     return previousSunday < 25;

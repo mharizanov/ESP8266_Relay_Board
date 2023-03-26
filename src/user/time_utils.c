@@ -33,6 +33,7 @@ int ICACHE_FLASH_ATTR get_year(unsigned long *t) {
 
 // work out day of week. Crazy date math
 // https://cs.uwaterloo.ca/~alopez-o/math-faq/node73.html
+// Monday is 0.
 int ICACHE_FLASH_ATTR wd(int year, int month, int day) {
   size_t JND = day + ((153 * (month + 12 * ((14 - month) / 12) - 3) + 2) / 5) +
                (365 * (year + 4800 - ((14 - month) / 12))) + ((year + 4800 - ((14 - month) / 12)) / 4) -
@@ -62,8 +63,9 @@ char *ICACHE_FLASH_ATTR epoch_to_str(unsigned long epoch) {
   epoch %= 3600;
   unsigned char min = epoch / 60;
   unsigned char sec = epoch % 60;
-
+ 
   os_sprintf(buf, "%02d:%02d:%02d %02d/%02d/%02d", hour, min, sec, day, month, year);
+
   return buf;
 }
 
@@ -85,8 +87,9 @@ bool IsDST_EU(int day, int month, int dow) {
 
   int previousSunday = day - dow;
 
-  if (month == 3)
-    return previousSunday >= 25;
+  if (month == 3) {
+    return previousSunday <= 25;
+  }
   if (month == 10)
     return previousSunday < 25;
 

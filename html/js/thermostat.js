@@ -106,8 +106,11 @@ function updateclock() {
     now = new Date(0);
     servertime = 0;
   }
-  timenow = now.getHours() + (now.getMinutes() / 60);
-  today = days[now.getDay()];
+  //Use UTC methods to avoid DST conversions
+  //as thermostat time display needs to use same time,timezone and DST
+  //as server
+  timenow = now.getUTCHours() + (now.getUTCMinutes() / 60);
+  today = days[now.getUTCDay()];
 
   checkVisibility();
 

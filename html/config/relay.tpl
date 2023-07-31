@@ -26,18 +26,18 @@
 <tr id="relay1tr" hidden>
 <td>Relay 1 name:</td><td><input type="text" name="relay1-name" id="relay1-name" value="%relay1-name%"/></td>
 <td>Thermostat controlled ? <input type="checkbox" name="relay1-thermostat" id="relay1-thermostat" %relay1-thermostat%></input></td>
-<td>GPIO: <input type="text" size=3 value="%relay1-gpio%" id="relay1-gpio" name="relay1-gpio"></td>
+<!--<td>GPIO: <input type="text" size=3 value="%relay1-gpio%" id="relay1-gpio" name="relay1-gpio"></td>-->
 </tr>
 <tr id="relay2tr" hidden>
 <td>Relay 2 name:</td><td><input type="text" name="relay2-name" id="relay2-name" value="%relay2-name%"/></td>
 <td>Thermostat controlled ? <input type="checkbox" name="relay2-thermostat" id="relay2-thermostat" %relay2-thermostat%></input></td>
-<td>GPIO: <input type="text" size=3 value="%relay2-gpio%" id="relay2-gpio" name="relay2-gpio"></td>
+<!--<td>GPIO: <input type="text" size=3 value="%relay2-gpio%" id="relay2-gpio" name="relay2-gpio"></td>-->
 
 </tr>
 <tr id="relay3tr" hidden>
 <td>Relay 3 name:</td><td><input type="text" name="relay3-name" id="relay3-name" value="%relay3-name%"/></td>
 <td>Thermostat controlled ? <input type="checkbox" name="relay3-thermostat" id="relay3-thermostat" %relay3-thermostat%></input></td>
-<td>GPIO: <input type="text" size=3 value="%relay3-gpio%" id="relay3-gpio" name="relay3-gpio"></td>
+<!--<td>GPIO: <input type="text" size=3 value="%relay3-gpio%" id="relay3-gpio" name="relay3-gpio"></td>-->
 
 </tr>
 <tr>

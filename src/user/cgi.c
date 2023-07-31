@@ -54,22 +54,19 @@ int ICACHE_FLASH_ATTR cgiGPIO(HttpdConnData *connData) {
 
   len = httpdFindArg(connData->getArgs, "relay1", buff, sizeof(buff));
   if (len > 0) {
-    relay1State = atoi(buff);
-    relayOnOff(relay1State, 1);
+    relayOnOff(atoi(buff), 1);
     gotcmd = 1;
   }
 
   len = httpdFindArg(connData->getArgs, "relay2", buff, sizeof(buff));
   if (len > 0) {
-    relay2State = atoi(buff);
-    relayOnOff(relay2State, 2);
+    relayOnOff(atoi(buff), 2);
     gotcmd = 1;
   }
 
   len = httpdFindArg(connData->getArgs, "relay3", buff, sizeof(buff));
   if (len > 0) {
-    relay3State = atoi(buff);
-    relayOnOff(relay3State, 3);
+    relayOnOff(atoi(buff), 3);
     gotcmd = 1;
   }
 

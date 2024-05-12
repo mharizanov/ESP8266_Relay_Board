@@ -155,12 +155,12 @@ static ICACHE_FLASH_ATTR void MQTTbroadcastReading(void *arg) {
                "\"relay2\":%d,\n"
                "\"relay3\":%d,\n"
                "\"thermostatRelayActive\":%d,\n"
-               "\"opMode\":%d,\n\"thermostatEnabled\":%d,\n\"thermostatSetPoint\":\"%d\",\n"
+               "\"opMode\":%d,\n\"thermostatEnabled\":%d,\n\"thermostatSetPoint\":\"%s\",\n"
                "\"roomTemp\":\"%s\",\n\"autoMode\": %d\n"
                "}\n",
                ds_temp, dht_temp, dht_humi, (int)sysCfg.thermostat1_input == 2 ? 1 : 0, relay1State, relay2State,
                relay3State, (int)thermostatRelayActive, (int)sysCfg.thermostat1_opmode, (int)sysCfg.thermostat1_enable,
-               (int)currentThermSetPoint, (char *)therm_room_temp, (int)sysCfg.thermostat1_schedule_mode);
+               (char *)currentThermSetPoint, (char *)therm_room_temp, (int)sysCfg.thermostat1_schedule_mode);
 
     os_sprintf(topic, "%s", sysCfg.mqtt_state_pub_topic);
     os_printf("Broadcastd: Publishing state via MQTT to \"%s\", length %d\n", topic, os_strlen(payload));

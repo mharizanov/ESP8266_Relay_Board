@@ -10,7 +10,7 @@
 //#define CFG_LOCATION 0x3C     //Working value on old SDK
 #define CFG_LOCATION 0x70 // NONOS-SDK - circa around position 458K in flash
 // 0x7C on 512K flash is where the internal RF data lives - stay away from there(last 16k)
-#define FWVER "1.4c/March 13th 2023"
+#define FWVER "1.4f/May 12th 2024"
 
 /*DEFAULT CONFIGURATIONS*/
 
